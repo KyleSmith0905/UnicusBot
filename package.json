@@ -1,0 +1,16 @@
+{
+  "name": "americabot",
+  "version": "0.0.0",
+  "description": "Bot for the American discord",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "FiNS Flexin",
+  "license": "ISC",
+  "dependencies": {
+    "quick.db": "^7.1.1",
+    "sequelize": "^5.21.7",
+    "sqlite3": "^4.2.0"
+  }
+}
