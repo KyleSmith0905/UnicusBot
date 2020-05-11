@@ -1,21 +1,29 @@
 {
-  "name": "americabot",
-  "version": "0.0.0",
-  "description": "Bot for the American discord",
+  "name": "americanbot",
+  "version": "1.0.0",
   "main": "index.js",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "integer": "^4.0.0",
+    "quick.db": "^7.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  },
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
-  "engines" : {
-    "node" : "12.16.2"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FiNSFlexin/AmeBot1782590.git"
   },
-  "author": "FiNS Flexin",
+  "author": "",
   "license": "ISC",
-  "dependencies": {
-    "better-sqlite3": "^7.0.1",
-    "discord.js": "^12.2.0",
-    "quick.db": "^7.1.1",
-    "sequelize": "^5.21.7",
-    "sqlite3": "^4.2.0"
-  }
+  "bugs": {
+    "url": "https://github.com/FiNSFlexin/AmeBot1782590/issues"
+  },
+  "homepage": "https://github.com/FiNSFlexin/AmeBot1782590#readme",
+  "keywords": [],
+  "description": ""
 }
