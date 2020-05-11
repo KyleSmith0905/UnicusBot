@@ -112,32 +112,28 @@ module.exports = {
 				});
 			}
 			else {
-				console.log ('waypoint 1');
 				let additional = '' // Additional information for footer
 				if (args[4]) {
 					additional = message.content.substring(message.content.indexOf(args[4])); // Everything after agument 2
 					additional = `\nReason for transaction: ${additional}`;
 				}
-				console.log ('waypoint 2');
 				let mention = message.mentions.members.first(); // Gets the mentioned user
-				console.log ('waypoint 2.5');
 				return message.reply (`Are you sure you want to add **$${args[3]}** to ${mention}'s balance?${additional}`).then (sentMessage => { // Confirmation message
 					sentMessage.react ('👍'); // React
 					const filter = (reaction, user) => { // Creates the filter for the collector
-						reaction.emoji.name === '👍' && user.id === message.author.id; // Author mentions thumbs up
+						reaction.emoji.name == '👍' && user.id == message.author.id; // Author mentions thumbs up
 					};
-					console.log ('waypoint 3');
-					const confirmcollector = sentMessage.createReactionCollector(filter,{time: config.autodelete.collector}); // Collector
-					confirmcollector.on ('collect', () => { // Collected despite filter
-						console.log ('waypoint 4');
+					const collector = sentMessage.createReactionCollector (filter, {time: config.autodelete.collector}); // Collector
+					collector.on ('collect', (reaction, user) => { // Collected despite filter
+						console.log ('working')
 						sentMessage.delete (); // Delete
-						confirmcollector.stop ('transaction done'); // Reason so it won't activate an event
-						db.add (`member.${message.author.id}.money`)
+						collector.stop ('transaction done'); // Reason so it won't activate an event
+						db.add (`member.${message.author.id}.money`, args[3])
 						message.reply (`You have added ${args[3]} to **$${mention}**'s balance!${additional}`).then (sentMessage2 => { // Completed transaction message
 							sentMessage2.delete ({timeout: config.autodelete.sentlong});
 						});
 					});
-					confirmcollector.on ('end', (collected, reason) => { // When it ends
+					collector.on ('end', (collected, reason) => { // When it ends
 						if (reason !== 'transaction done'){ // Only ends through nonresponsiveness
 							message.reply (`The transaction of **$${args[3]}** to ${mention} was cancelled!`).then (sentMessage2 => { // Cancelled message
 								sentMessage2.delete ({timeout: config.autodelete.sentlong});
