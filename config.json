@@ -1,10 +1,10 @@
 {
-    "token": "NzA3MDQzMzY1NTIyNTA1ODAw.XrMW7A.IVlzs7cmL9ODay4O-ORzNc3MqDA",
     "prefix": "-",
     "owner": "311258277365284866",
+    "token": "NzA3MDQzMzY1NTIyNTA1ODAw.XriBag.Et5NmgcAv0CIIPhhwqJ5kieEQ0E",
     "autodelete": {
-        "received": 7500,
-        "sent": 7000,
+        "received": 8500,
+        "sent": 8000,
         "receivedlong": 12500,
         "sentlong": 12000,
         "help": 60000,
@@ -108,10 +108,8 @@
         }
     },
     "money": {
-        "deletedatabase": ["delete"],
-        "listdatabase": ["list", "tables", "table"],
-        "updatedatabase": ["update"],
         "balance": ["balance", "bal", "money"],
-        "pay": ["pay", "donate", "paid", "give", "share"]
+        "pay": ["pay", "donate", "paid", "give", "share"],
+        "add": ["add"]
     }
 }

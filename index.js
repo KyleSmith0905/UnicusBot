@@ -5,11 +5,12 @@ Money system
 Roles system
 Use reply instead of send
 Change "return" to before the delay
+Move all messages to 'let reply' and later 'message.send (reply)'
 */
 
 // Declaring constants
 const fs = require ('fs'); // File
-var db = require('quick.db')
+const db = require('quick.db')
 const discord = require ('discord.js'); // Javascript npm of Discord
 const config = require ('./config.json'); // Config file where everything is organized
 const client = new discord.Client (); // The client
@@ -57,4 +58,4 @@ client.on ('message', message => {
 })
 
 // Confirming the bots token
-client.login(process.env.BOT_TOKEN);
+client.login(config.token);

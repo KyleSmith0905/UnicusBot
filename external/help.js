@@ -9,7 +9,7 @@ module.exports = {
 // TRAVEL ----------------------------------------------------------------------------------------------------------------------------------------------------------------
             if (config.help.travel.standard.includes (args[1])) { // If first argument was travel
                 if (!args[2]) {
-                    const embed = new Discord.MessageEmbed() // Creating embed because everything works
+                    const embed = new discord.MessageEmbed() // Creating embed because everything works
                     .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                     .setColor (`0x${color}`)
                     .setTitle ('Help Command - Travel')
@@ -24,7 +24,7 @@ module.exports = {
                     return message.delete ();
                 }
                 else if (config.help.travel.location.includes (args[2]) && !args[3]) { // For places argument only (lists all states)
-                    const embed = new Discord.MessageEmbed() // Creating embed because everything works
+                    const embed = new discord.MessageEmbed() // Creating embed because everything works
                     .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                     .setColor (`0x${color}`)
                     .setTitle ('Help Command - Travel - Location')
@@ -40,7 +40,7 @@ module.exports = {
                     return message.delete ();
                 }
                 else if (config.help.travel.method.includes (args[2]) && !args[3]) {
-                    const embed = new Discord.MessageEmbed() // Creating embed because everything works
+                    const embed = new discord.MessageEmbed() // Creating embed because everything works
                     .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                     .setColor (`0x${color}`)
                     .setTitle ('Help Command - Travel - Method')
@@ -62,7 +62,7 @@ module.exports = {
             }
 // HELP ------------------------------------------------------------------------------------------------------------------------------------------------------------------
             else if (!args[2] && (config.help.help.includes (args[1]) || !args[1])) {
-                const embed = new Discord.MessageEmbed() // Creating embed because everything works
+                const embed = new discord.MessageEmbed() // Creating embed because everything works
                 .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                 .setColor (`0x${color}`)
                 .setTitle ('Help Command - Help')
