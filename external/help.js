@@ -2,6 +2,7 @@ module.exports = {
     name: 'help', // Name referred to execute
     description: 'For help', // Description of file
     summoner: ['help', '?', 'helps', 'helped'], // Things that activate this
+    cooldown: 5,
     execute (message, args) {
         try {
             let colors = ['d4002c', '004dc9', 'fefefe']; // American colors

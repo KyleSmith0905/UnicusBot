@@ -2,43 +2,50 @@ module.exports = {
     name: 'travel', // Name referred to execute
     description: 'The transportation commands', // Description of file
     summoner: ['drv', 'fly', 'rde', 'sal', 'drive', 'car', 'automobile', 'plane', 'airplane', 'pilot', 'ride', 'train', 'railway', 'cruise', 'sail', 'boat'], // Things that activate this
+    cooldown: 1,
     execute (message, args) {
         try {
             let method = config.transport[args[0]]; // Gets mode of transportation
-            let location1 = config.places[args[1]]; // Gets primary location
-            let location2 = config.places[args[2]]; // Gets secondary location
+            let locationdb = db.get (`member.${message.member.id}.state`); // Get database... will say "fl"
+            if (locationdb == null) { // If not in the database
+                db.set (`member.${message.member.id}.state`, 'ny'); // Sets database state
+                locationdb = db.get (`member.${message.member.id}.state`); // Gets state of database again
+            }
+            let location1 = config.places[locationdb] // Gets primary location
+            let location2 = config.places[args[1]]; // Gets secondary location
             if (location2 == 'Random') { // If going to random location
                 const places = Object.values(config.places) // turns list into array
                 if (method == 'Drive') {
-                    nplaces = places.filter(pl => !config.rdrv.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
+                    let nplaces = places.filter(pl => !config.rdrv.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
                     location2 = nplaces[parseInt(Math.random() * nplaces.length)] // Random place
                 }
                 else if (method == 'Fly') {
-                    nplaces = places.filter(pl => !config.rfly.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
+                    let nplaces = places.filter(pl => !config.rfly.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
                     location2 = nplaces[parseInt(Math.random() * nplaces.length)] // Random place
                 }
                 else if (method == 'Ride') {
-                    nplaces = places.filter(pl => !config.rrde.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
+                    let nplaces = places.filter(pl => !config.rrde.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
                     location2 = nplaces[parseInt(Math.random() * nplaces.length)] // Random place
                 }
                 else if (method == 'Cruise') {
                     if (config.ocrsw.includes (location1)) {
-                        nplaces = places.filter(pl => config.ocrsw.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
+                        let nplaces = places.filter(pl => config.ocrsw.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
                         location2 = nplaces[parseInt(Math.random() * nplaces.length)] // Random place
                     }
                     else if (config.ocrse.includes (location1)) {
-                        nplaces = places.filter(pl => config.ocrse.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
+                        let nplaces = places.filter(pl => config.ocrse.includes(pl) && pl !== location1); // Random is not restricted and isn't starting location
                         location2 = nplaces[parseInt(Math.random() * nplaces.length)] // Random place
                     }
                     else { // If starting state is not by an ocean
                         let chlocation1 = location1.replace(/\s+/g, '-').toLowerCase(); // Starting state into discord name
                         let flocation1 = message.guild.channels.cache.find (channel => channel.name === chlocation1); // Discord name into discord channel
-                        return message.channel.send (`${message.author} There is not a path connecting ${flocation1} to anywhere else`).then (sentMessage => { // If can't travel anywhere
+                        return message.reply (`There is not a path connecting ${flocation1} to anywhere else`).then (sentMessage => { // If can't travel anywhere
                             sentMessage.delete({timeout: config.autodelete.sent});
                             message.delete ({timeout: config.autodelete.received})
                         });
                     }
                 }
+                args[1] = Object.keys(config.places).find(key => config.places[key] === location2); // Get the ket of this... "Florida" to "fl"
             }
             let chlocation1 = location1.replace(/\s+/g, '-').toLowerCase(); // Starting state into discord name
             let chlocation2 = location2.replace(/\s+/g, '-').toLowerCase(); // Starting state into discord name
@@ -47,23 +54,27 @@ module.exports = {
             let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
             let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
             if (flocation1 == flocation2) { // Primary and secondary location are the same
-                return message.channel.send (`${message.author} You can't travel to somewhere you are already at!`).then (sentMessage => {
+                return message.reply ('You can\'t travel to somewhere you are already at!').then (sentMessage => {
                     sentMessage.delete({timeout: config.autodelete.sent});
                     message.delete ({timeout: config.autodelete.receive})
                 });
+            }
+            let additional = '' // Additional information for footer
+            if (args[2]) {
+                additional = message.content.substring(message.content.indexOf(args[2])); // Everything after agument 2
             }
 // DRIVE -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             if (method == 'Drive' && flocation1 && flocation2) {
                 const tchannel = message.guild.channels.cache.get (config.channels.drive);
                 if (config.rdrv.includes(location1) || config.rdrv.includes(location2)) { // Checks for invalid travel
                     if (message.channel == tchannel) { // Right channel
-                        return message.channel.send (`${message.author} There are no roads connecting ${flocation1} to ${flocation2}!`).then (sentMessage => { // If can't travel anywhere
+                        return message.reply (`There are no roads connecting ${flocation1} to ${flocation2}!`).then (sentMessage => { // If can't travel anywhere
                             sentMessage.delete({timeout: config.autodelete.sent});
                             message.delete ({timeout: config.autodelete.receive})
                         });
                     }
                     else { // Not right channel
-                        return message.channel.send (`${message.author} There are no roads connecting ${flocation1} to ${flocation2}!\nIn addition, you should use ${tchannel} to drive!`).then (sentMessage => { // If can't travel anywhere
+                        return message.reply (`There are no roads connecting ${flocation1} to ${flocation2}!\nIn addition, you should use ${tchannel} to drive!`).then (sentMessage => { // If can't travel anywhere
                             sentMessage.delete({timeout: config.autodelete.sent});
                             message.delete ({timeout: config.autodelete.receive})
                         });
@@ -79,10 +90,11 @@ module.exports = {
                     let sound = sounds [Math.floor(Math.random() * sounds.length)]; // Randomizer
                     let coming = comings [Math.floor(Math.random() * comings.length)]; // Randomizer
                     let leaving = leavings [Math.floor(Math.random() * leavings.length)]; // Randomizer
-                    let additional = '' // Additional information for footer
-                    if (args[3]) {
-                        additional = message.content.substring(message.content.indexOf(args[3])); // Everything after agument 2
-                    }
+                    let location1role = message.guild.roles.cache.find (role => role.name == location1); // Find the role of location1
+                    let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
+                    message.member.roles.remove (location1role); // Remove location1 role
+                    message.member.roles.add (location2role); // Add location2 role
+                    db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
                     const embed = new discord.MessageEmbed() // Creating embed because everything works
                     .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                     .setColor (`0x${color}`)
@@ -93,55 +105,48 @@ module.exports = {
                         tchannel.send ({embed}); // Sends the embed message
                     }
                     else { // Not right channel
-                        tchannel.send (`${message.author} Use this channel to drive!`, {embed}) ; // Sends the embed message
+                        tchannel.send (`${message.author}, Use this channel to drive!`, {embed}) ; // Sends the embed message
                     }
                     return message.delete ();
                 }
             }
 // FLY -------------------------------------------------------------------------------------------------------------------------------------------------------------------
             else if (method == 'Fly') {
-                if (method !== 'Fly') {
-                    const tchannel = message.guild.channels.cache.get (config.channels.fly);
-                    const planes1 = [':airplane:', ':airplane_departure:', ':seat:']; // Gets arrival emojis
-                    const planes2 = [':airplane:', ':airplane_arriving:', ':seat:']; // Gets leaving emojis
-                    const sounds = ['nyeeeerrmm', 'whoooosssh', 'pweeeeeew']; // Gets plane noises
-                    const comings = ['deplaning in', 'landing at', 'docking at']; // Arrival phrasing
-                    const leavings = ['is departuring from', 'is taking off from', 'is fleeing']; // Leaving phrasing
-                    let plane1 = planes1 [Math.floor(Math.random() * planes1.length)]; // Randomizer
-                    let plane2 = planes2 [Math.floor(Math.random() * planes2.length)]; // Randomizer
-                    let sound = sounds [Math.floor(Math.random() * sounds.length)]; // Randomizer
-                    let coming = comings [Math.floor(Math.random() * comings.length)]; // Randomizer
-                    let leaving = leavings [Math.floor(Math.random() * leavings.length)]; // Randomizer
-                    let additional = '' // Additional information for footer
-                    if (args[3]) {
-                        additional = message.content.substring(message.content.indexOf(args[3])); // Everything after agument 2
-                    }
-                    const embed = new discord.MessageEmbed() // Creating embed because everything works
-                    .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
-                    .setColor (`0x${color}`)
-                    .setDescription (`${message.author} ${leaving} ${flocation1} ${plane1} *${sound}*, ${coming} ${flocation2} ${plane2}`)
-                    .setTimestamp ()
-                    .setFooter (additional)
-                    if (message.channel == tchannel) { // Right channel
-                        tchannel.send ({embed}); // Sends the embed message
-                    }
-                    else { // Not right channel
-                        tchannel.send (`${message.author} Use this channel to ride on an airplane!`, {embed}); // Sends the embed message
-                    };
-                    return message.delete ();
+                const tchannel = message.guild.channels.cache.get (config.channels.fly);
+                const planes1 = [':airplane:', ':airplane_departure:', ':seat:']; // Gets arrival emojis
+                const planes2 = [':airplane:', ':airplane_arriving:', ':seat:']; // Gets leaving emojis
+                const sounds = ['nyeeeerrmm', 'whoooosssh', 'pweeeeeew']; // Gets plane noises
+                const comings = ['deplaning in', 'landing at', 'docking at']; // Arrival phrasing
+                const leavings = ['is departuring from', 'is taking off from', 'is fleeing']; // Leaving phrasing
+                let plane1 = planes1 [Math.floor(Math.random() * planes1.length)]; // Randomizer
+                let plane2 = planes2 [Math.floor(Math.random() * planes2.length)]; // Randomizer
+                let sound = sounds [Math.floor(Math.random() * sounds.length)]; // Randomizer
+                let coming = comings [Math.floor(Math.random() * comings.length)]; // Randomizer
+                let leaving = leavings [Math.floor(Math.random() * leavings.length)]; // Randomizer
+                let location1role = message.guild.roles.cache.find (role => role.name == location1); // Find the role of location1
+                let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
+                message.member.roles.remove (location1role); // Remove location1 role
+                message.member.roles.add (location2role); // Add location2 role
+                db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
+                const embed = new discord.MessageEmbed() // Creating embed because everything works
+                .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
+                .setColor (`0x${color}`)
+                .setDescription (`${message.author} ${leaving} ${flocation1} ${plane1} *${sound}*, ${coming} ${flocation2} ${plane2}`)
+                .setTimestamp ()
+                .setFooter (additional)
+                if (message.channel == tchannel) { // Right channel
+                    tchannel.send ({embed}); // Sends the embed message
                 }
-                else {
-                    message.send (`${message.author} Airports are closed for now!`).then (sentMessage => { // If airports are closed
-                        sentMessage.delete({timeout: config.autodelete.sent});
-                        message.delete ({timeout: config.autodelete.receive})
-                    });
+                else { // Not right channel
+                    tchannel.send (`${message.author}, Use this channel to ride on an airplane!`, {embed}); // Sends the embed message
                 };
+                return message.delete ();
             }
 // RIDE ------------------------------------------------------------------------------------------------------------------------------------------------------------------
             else if (method == 'Ride') {
                 const tchannel = message.guild.channels.cache.get (config.channels.ride);
                 if (config.rrde.includes(location1) || config.rrde.includes(location2)){ // Checks for invalid travel
-                    return message.channel.send (`${message.author} There are no rails connecting ${flocation1} to ${flocation2}!`).then (sentMessage => { // If can't travel anywhere
+                    return message.reply (`There are no rails connecting ${flocation1} to ${flocation2}!`).then (sentMessage => { // If can't travel anywhere
                         sentMessage.delete({timeout: config.autodelete.sent});
                         message.delete ({timeout: config.autodelete.receive})
                     });
@@ -156,10 +161,11 @@ module.exports = {
                 let sound = sounds [Math.floor(Math.random() * sounds.length)]; // Randomizer
                 let coming = comings [Math.floor(Math.random() * comings.length)]; // Randomizer
                 let leaving = leavings [Math.floor(Math.random() * leavings.length)]; // Randomizer
-                let additional = '' // Additional information for footer
-                if (args[3]) {
-                    additional = message.content.substring(message.content.indexOf(args[3])); // Everything after agument 2
-                }
+                let location1role = message.guild.roles.cache.find (role => role.name == location1); // Find the role of location1
+                let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
+                message.member.roles.remove (location1role); // Remove location1 role
+                message.member.roles.add (location2role); // Add location2 role
+                db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
                 const embed = new discord.MessageEmbed() // Creating embed because everything works
                 .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                 .setColor (`0x${color}`)
@@ -170,7 +176,7 @@ module.exports = {
                     tchannel.send ({embed}); // Sends the embed message
                 }
                 else { // Not right channel
-                    tchannel.send (`${message.author} Use this channel to take the train!`, {embed}); // Sends the embed message
+                    tchannel.send (`${message.author}, Use this channel to take the train!`, {embed}); // Sends the embed message
                 }
                 return message.delete ();
                 }
@@ -189,10 +195,11 @@ module.exports = {
                     let sound = sounds [Math.floor(Math.random() * sounds.length)]; // Randomizer
                     let coming = comings [Math.floor(Math.random() * comings.length)]; // Randomizer
                     let leaving = leavings [Math.floor(Math.random() * leavings.length)]; // Randomizer
-                    let additional = '' // Additional information for footer
-                    if (args[3]) {
-                        additional = message.content.substring(message.content.indexOf(args[3])); // Everything after agument 2
-                    }
+                    let location1role = message.guild.roles.cache.find (role => role.name == location1); // Find the role of location1
+                    let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
+                    message.member.roles.remove (location1role); // Remove location1 role
+                    message.member.roles.add (location2role); // Add location2 role
+                    db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
                     const embed = new discord.MessageEmbed() // Creating embed because everything works
                     .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                     .setColor (`0x${color}`)
@@ -203,12 +210,12 @@ module.exports = {
                         tchannel.send ({embed}); // Sends the embed message
                     }
                     else { // Not right channel
-                        tchannel.send (`${message.author} Use this channel to sail on a boat!`, {embed}); // Sends the embed message
+                        tchannel.send (`${message.author}, Use this channel to sail on a boat!`, {embed}); // Sends the embed message
                     }
                     return message.delete ();     
                 }
                 else { // If can't travel
-                    return message.channel.send (`${message.author} There is not a path connecting ${flocation1} to ${flocation2}!`).then (sentMessage => { // If can't travel anywhere
+                    return message.reply (`There is not a path connecting ${flocation1} to ${flocation2}!`).then (sentMessage => { // If can't travel anywhere
                         sentMessage.delete({timeout: config.autodelete.sent});
                         message.delete ({timeout: config.autodelete.receive})
                     }); 
@@ -216,7 +223,7 @@ module.exports = {
             }
         }
         catch { // Wrong syntax usage
-            message.channel.send (`${message.author} There was an error using the transport command, say \`-help travel\` for help!`).then (sentMessage => { // If can't travel anywhere
+            message.reply ('There was an error using the transport command, the correct syntax usage is `-<method> <location> [additional]`!\nYou could also type `-help travel`').then (sentMessage => { // If can't travel anywhere
                 sentMessage.delete({timeout: config.autodelete.sent});
                 message.delete ({timeout: config.autodelete.receive})
             });

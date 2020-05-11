@@ -2,7 +2,8 @@ module.exports = {
     name: 'money', // Name referred to execute
     description: 'Changing and adjusting currency values', // Description of file
 	summoner: ['money', 'currency', 'economy', '$', 'cash'], // Things that activate this
-    execute (message, args) {
+	cooldown: 1,
+	execute (message, args) {
 // USERS -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 		let balance = db.get (`member.${message.author.id}.money`); // Get their money
 		if (balance == null) { // If not already have money, get it

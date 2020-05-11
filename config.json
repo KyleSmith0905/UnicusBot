@@ -10,6 +10,7 @@
         "help": 60000,
         "collector": 20000
     },
+    "guild": "702179393006469120",
     "channels": {
         "drive": "707574823194329188",
         "fly": "707575287789125664",
@@ -68,10 +69,6 @@
         "wv": "West Virginia",
         "wi": "Wisconsin",
         "wy": "Wyoming",
-        "dc": "District of Columbia",
-        "pr": "Puerto Rico",
-        "mx": "Mexico",
-        "cn": "Canada",
         "rn": "Random"
     },
     "transport": {
@@ -93,11 +90,11 @@
         "sail": "Sail",
         "boat": "Sail"
     },
-    "rdrv": ["Hawaii", "Puerto Rico", "Random"],
-    "rfly": ["Random"],
-    "rrde": ["Delaware", "Idaho", "Kansas", "Kentucky", "Mississippi", "Montana", "New Hampshire", "New Jersey", "North Dakota", "South Carolina", "South Dakota", "West Virginia", "Wyoming", "Random"],
-    "osalw": ["Alaska", "California", "Hawaii", "Oregon", "Washington", "Canada", "Mexico"],
-    "osale": ["Alabama", "Connecticut", "Delaware", "Florida", "Georgia", "Louisiana", "Maine", "Maryland", "Massachusetts", "Mississippi", "New Hampshire", "New Jersey", "New York", "North Carolina", "Rhode Island", "South Carolina", "Texas", "Virginia", "Puerto Rico", "Mexico", "Canada", "Random"],
+    "rdrv": ["Hawaii"],
+    "rfly": [],
+    "rrde": ["Delaware", "Hawaii", "Idaho", "Kansas", "Kentucky", "Mississippi", "Montana", "New Hampshire", "New Jersey", "North Dakota", "South Carolina", "South Dakota", "West Virginia", "Wyoming"],
+    "osalw": ["Alaska", "California", "Hawaii", "Oregon", "Washington"],
+    "osale": ["Alabama", "Connecticut", "Delaware", "Florida", "Georgia", "Louisiana", "Maine", "Maryland", "Massachusetts", "Mississippi", "New Hampshire", "New Jersey", "New York", "North Carolina", "Rhode Island", "South Carolina", "Texas", "Virginia"],
 
     "help": {
         "help": ["help", "helps", "?", "how"],
