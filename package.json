@@ -14,6 +14,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
+  "engine": {
+    "node": "12.16.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FiNSFlexin/AmeBot1782590.git"
