@@ -11,12 +11,19 @@
         "collector": 20000
     },
     "guild": "702179393006469120",
+    "categorys": {
+        "states": "707572265415344228"
+    },
     "channels": {
         "drive": "707574823194329188",
         "fly": "707575287789125664",
         "ride": "707583534948286474",
         "sail": "707583858467405937",
         "log": "707666424092557402"
+    },
+    "webhooks": {
+        "statesid": "709538524277506099",
+        "statestoken": "Tio-OoMGGSrsh1A2XQEfRsz8zBYnRRS47MjQuzAKm9eYrzGJsi0POAcI4p6YB0ub9Nkf"
     },
     "places": {
         "al": "Alabama",
