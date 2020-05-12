@@ -38,7 +38,7 @@ client.on ('ready', () => {
     let guild = client.guilds.cache.get (config.guild) // Defines the guild
     let logchannel = guild.channels.cache.get (config.channels.log) // Defines the log channel
     let bump = new CronJob('0 0 */2 * * *', function() { // Defines the "bump"
-        logchannel.send ('!d bump'); // Bump!
+        logchannel.send ('Reminder to say `!d bump`'); // Bump!
     })
     bump.start() // Start
 })
@@ -51,6 +51,11 @@ client.on ('guildMemberAdd', member => {
         let role2 = member.guild.roles.cache.get (role); // Cache roles
         member.roles.add (role2); // Add roles independently
     })
+    let balance = db.get (`member.${message.author.id}.money`); // Get their money
+    if (balance == null) { // If not already have money, get it
+        db.set (`member.${message.author.id}.money`, 0); // Set money
+        balance = db.get (`member.${message.author.id}.money`); // Get money again
+    }
 })
 
 // Commands
@@ -83,7 +88,12 @@ client.on ('message', message => {
         }
 	}
 	timestamps.set(message.author.id, now); // Record the time
-	setTimeout(() => timestamps.delete(message.author.id), cooldownAmount); // Deletes the timestamp when it should be over
+    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount); // Deletes the timestamp when it should be over
+    let balance = db.get (`member.${message.author.id}.money`); // Get their money
+    if (balance == null) { // If not already have money, get it
+        db.set (`member.${message.author.id}.money`, 0); // Set money
+        balance = db.get (`member.${message.author.id}.money`); // Get money again
+    }
     try {
         externalex.execute (message, args) // Execute to external file
     }
@@ -97,24 +107,31 @@ client.on ('message', message => {
 
 // Channel based
 client.on ('message', message => {
-    if (message.channel.parent.id == config.categorys.states) {
-        const stateswebhook = new discord.WebhookClient(config.webhooks.statesid, config.webhooks.statestoken);
-        let channelm = message.channel.name
-        channelm = channelm.replace(/-/g, ' ');
-        channelm = channelm.replace(/(^\w|\s\w)/g, m => m.toUpperCase());
-        let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
-        let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
-        let onehourmessages = message.createdTimestamp - 3600000;
-        let messages100 = message.channel.messages.fetch ({limit: 100}).then ((messages) => (messages = messages.filter(msg => msg.created >= onehourmessages)));
+    if (message.channel.parent.id !== config.categorys.states || !message.channel.type == 'text' || message.author.bot || message.content.startsWith(config.prefix)) return; /// If the messages was sent in category "USA"
+    let secretvalue = db.get (`channel.${message.channel.id}.secret`);
+    if (secretvalue == true) return;
+    if (secretvalue == null) {
+        db.set (`channel.${message.channel.id}.secret`, false);
+        secretvalue = db.get (`channel.${message.channel.id}.secret`);
+    }
+    const stateswebhook = new discord.WebhookClient(config.webhooks.statesid, config.webhooks.statestoken); // The webhook specifically designed for this
+    let channelm = message.channel.name // The name of the #All-states channel
+    channelm = channelm.replace(/-/g, ' '); // Changes state names to no spaces
+    channelm = channelm.replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Uppercase the first letter
+    let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
+    let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
+    let onehourmessages = message.createdTimestamp - 3600000; // One hour since the message was sent
+    message.channel.messages.fetch ().then (fetchedmessages => { // Fetch messages
+        let fetchedmessages2 = fetchedmessages.filter(msg => msg.createdTimestamp >= onehourmessages); // Filters only messages from the past hour
         const embed = new discord.MessageEmbed() // Creating embed that mimics people
-        .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
-        .setColor (`0x${color}`)
-        .setTitle (`In ${channelm}`)
-        .setDescription (message.content)
-        .setTimestamp ()
-        .setFooter (`${messages100.count} messages sent within the last hour.`)
-        stateswebhook.send (embed);
-    };
+        .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true})) // The picture and name of the messenger
+        .setColor (`0x${color}`) // Sets the color
+        .setTitle (`In ${channelm}`) // Says the channel
+        .setDescription (message.content) // Says what the message was said
+        .setTimestamp () // Time
+        .setFooter (`${fetchedmessages2.size} messages sent there since the past hour.`) // Messages since the past hour
+        stateswebhook.send (embed); // Message sent
+    })
 })
 
 // Confirming the bots token

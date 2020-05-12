@@ -6,10 +6,6 @@ module.exports = {
 	execute (message, args) {
 // USERS -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 		let balance = db.get (`member.${message.author.id}.money`); // Get their money
-		if (balance == null) { // If not already have money, get it
-			db.set (`member.${message.author.id}.money`, 0); // Set money
-			balance = db.get (`member.${message.author.id}.money`); // Get money again
-		}
 		// BALANCE -------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (config.money.balance.includes(args[1])) { // Asking for balance
 			if (args[2] && (!args[2].match(/^<@!?(\d+)>$/) || args[3])) { // Checks if syntax was correct
