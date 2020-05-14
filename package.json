@@ -1,19 +1,9 @@
 {
-  "name": "americanbot",
+  "name": "amebot1782590",
   "version": "1.0.0",
   "main": "index.js",
-  "dependencies": {
-    "cron": "1.8.2",
-    "discord.js": "^12.2.0",
-    "integer": "^4.0.0",
-    "quick.db": "^7.1.1"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
-  },
-  "engines": {
-    "node": "12.16.2"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -25,6 +15,10 @@
     "url": "https://github.com/FiNSFlexin/AmeBot1782590/issues"
   },
   "homepage": "https://github.com/FiNSFlexin/AmeBot1782590#readme",
-  "keywords": [],
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "node-cron": "^2.0.3",
+    "quick.db": "^7.1.1"
+  }
 }
