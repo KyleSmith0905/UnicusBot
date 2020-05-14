@@ -20,5 +20,8 @@
     "discord.js": "^12.2.0",
     "node-cron": "^2.0.3",
     "quick.db": "^7.1.1"
+  },
+  "engines": {
+    "node": "12.16.2"
   }
 }
