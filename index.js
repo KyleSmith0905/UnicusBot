@@ -8,12 +8,14 @@ Change "return" to before the delay
 Move all messages to 'let reply' and later 'message.send (reply)'
 */
 
+// heroku ps:scale worker=1
+
 // Declaring constants
 const fs = require ('fs'); // Declares file system management thing
 const db = require('quick.db') // Declares db (Database)
 const discord = require ('discord.js'); // Javascript npm of Discord
 const config = require ('./config.json'); // Config file where everything is organized
-let CronJob = require('cron').CronJob; // Declares cron (automated timing)
+const CronJob = require('cron').CronJob; // Declares cron (automated timing)
 const client = new discord.Client (); // The client
 client.external = new discord.Collection (); // The client and external files
 const cooldowns = new discord.Collection();
@@ -34,10 +36,9 @@ for (const file of externalFiles) {
 client.on ('ready', () => {
     console.log ('active'); // To test if active
     client.user.setActivity ('for -help', {type: "WATCHING"}); // Sets activity... "Watching for -help"
-    let CronJob = require('cron').CronJob; // Creates a cron for bumping
     let guild = client.guilds.cache.get (config.guild) // Defines the guild
     let logchannel = guild.channels.cache.get (config.channels.log) // Defines the log channel
-    let bump = new CronJob('0 0 */2 * * *', function() { // Defines the "bump"
+    let bump = new CronJob('0 0,30 * * * *', function() { // Defines the "bump"
         logchannel.send ('Reminder to say `!d bump`'); // Bump!
     })
     bump.start() // Start
@@ -51,7 +52,7 @@ client.on ('guildMemberAdd', member => {
         let role2 = member.guild.roles.cache.get (role); // Cache roles
         member.roles.add (role2); // Add roles independently
     })
-    let balance = db.get (`member.${message.author.id}.money`); // Get their money
+    let balance = db.get (`member.${member.author.id}.money`); // Get their money
     if (balance == null) { // If not already have money, get it
         db.set (`member.${message.author.id}.money`, 0); // Set money
         balance = db.get (`member.${message.author.id}.money`); // Get money again
