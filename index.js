@@ -24,7 +24,9 @@ const cooldowns = new discord.Collection();
 // Declaring global variables
 global.config = config;
 global.discord = discord;
+global.client = client;
 global.db = db;
+global.fs = fs;
 
 // Get external files
 const externalFiles = fs.readdirSync ('./external').filter (file => file.endsWith('.js')); // Gets all Javascript files under /external/
@@ -37,10 +39,8 @@ for (const file of externalFiles) {
 client.on ('ready', () => {
     console.log ('active'); // To test if active
     client.user.setActivity ('for -help', {type: "WATCHING"}); // Sets activity... "Watching for -help"
-    let guild = client.guilds.cache.get (config.guild) // Defines the guild
-    let logchannel = guild.channels.cache.get (config.channels.log) // Defines the log channel
-    cron.schedule('0 0,30 * * * *', () => { // Defines the "bump"
-        logchannel.send ('Reminder to say `!d bump`'); // Bump!
+    cron.schedule('0 0,30 * * * *', () => { // Starts cron-node
+        console.log ('still on'); // Wakes up heroku
     })
 })
 
@@ -57,6 +57,9 @@ client.on ('guildMemberAdd', member => {
         db.set (`member.${message.author.id}.money`, 0); // Set money
         balance = db.get (`member.${message.author.id}.money`); // Get money again
     }
+    let welcomechannel = member.guild.channels.cache.get (config.channels.welcome);
+    let infochannel = member.guild.channels.cache.get (config.channels.info);
+    welcomechannel.send (`${member}, Welcome to the USA Discord!\nRead ${infochannel} for server information!\nType \`${config.prefix}\` for bot information!`)
 })
 
 // Commands
