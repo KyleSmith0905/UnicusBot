@@ -45,7 +45,7 @@ module.exports = {
                         });
                     }
                 }
-                args[1] = Object.keys(config.places).find(key => config.places[key] === location2); // Get the ket of this... "Florida" to "fl"
+                args[1] = Object.keys(config.places).find(key => config.places[key] === location2); // Get the key of this... "Florida" to "fl"
             }
             let chlocation1 = location1.replace(/\s+/g, '-').toLowerCase(); // Starting state into discord name
             let chlocation2 = location2.replace(/\s+/g, '-').toLowerCase(); // Starting state into discord name

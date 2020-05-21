@@ -116,8 +116,8 @@
     "money": {
         "balance": ["balance", "bal", "money"],
         "pay": ["pay", "donate", "paid", "give", "share"],
-        "add": ["add"],
-        "remove": ["remove", "rmv"],
-        "set": ["set"]
+        "add": ["add", "remove"],
+        "remove": ["rmv", "remove"],
+        "set": ["set", "setting"]
     }
 }

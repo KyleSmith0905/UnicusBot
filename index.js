@@ -52,7 +52,7 @@ client.on ('guildMemberAdd', member => {
         let role2 = member.guild.roles.cache.get (role); // Cache roles
         member.roles.add (role2); // Add roles independently
     })
-    let balance = db.get (`member.${member.author.id}.money`); // Get their money
+    let balance = db.get (`member.${message.author.id}.money`); // Get their money
     if (balance == null) { // If not already have money, get it
         db.set (`member.${message.author.id}.money`, 0); // Set money
         balance = db.get (`member.${message.author.id}.money`); // Get money again
