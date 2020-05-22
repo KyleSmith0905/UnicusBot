@@ -111,7 +111,7 @@ client.on ('message', message => {
 
 // Channel based
 client.on ('message', message => {
-    if (message.channel.parent.id !== config.categorys.states || !message.channel.type == 'text' || message.author.bot || message.content.startsWith(config.prefix)) return; /// If the messages was sent in category "USA"
+    if (message.channel.type == 'dm' || message.channel.parent.id !== config.categorys.states || message.channel.type !== 'text' || message.author.bot || message.content.startsWith(config.prefix)) return; /// If the messages was sent in category "USA"
     let secretvalue = db.get (`channel.${message.channel.id}.secret`);
     if (secretvalue == true) return;
     if (secretvalue == null) {
