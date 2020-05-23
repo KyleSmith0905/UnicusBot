@@ -3,8 +3,8 @@
     "owner": "311258277365284866",
     "token": "NzA3MDQzMzY1NTIyNTA1ODAw.XriBag.Et5NmgcAv0CIIPhhwqJ5kieEQ0E",
     "autodelete": {
-        "received": 8500,
-        "sent": 8000,
+        "received": 9500,
+        "sent": 9000,
         "receivedlong": 12500,
         "sentlong": 12000,
         "help": 60000,
@@ -12,6 +12,7 @@
     },
     "guild": "702179393006469120",
     "categorys": {
+        "transport": "707574680781062205",
         "states": "707572265415344228"
     },
     "channels": {

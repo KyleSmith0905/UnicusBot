@@ -111,31 +111,45 @@ client.on ('message', message => {
 
 // Channel based
 client.on ('message', message => {
-    if (message.channel.type == 'dm' || message.channel.parent.id !== config.categorys.states || message.channel.type !== 'text' || message.author.bot || message.content.startsWith(config.prefix)) return; /// If the messages was sent in category "USA"
-    let secretvalue = db.get (`channel.${message.channel.id}.secret`);
-    if (secretvalue == true) return;
-    if (secretvalue == null) {
-        db.set (`channel.${message.channel.id}.secret`, false);
-        secretvalue = db.get (`channel.${message.channel.id}.secret`);
+    if (message.channel.type == 'dm' || message.channel.type !== 'text' || message.author.bot) return; /// If the messages was sent in category "USA"
+    if (message.channel.parent.id == config.categorys.states && !message.content.startsWith(config.prefix)) {
+        let secretvalue = db.get (`channel.${message.channel.id}.secret`);
+        if (secretvalue == true) return;
+        if (secretvalue == null) {
+            db.set (`channel.${message.channel.id}.secret`, false);
+            secretvalue = db.get (`channel.${message.channel.id}.secret`);
+        }
+        const stateswebhook = new discord.WebhookClient(config.webhooks.statesid, config.webhooks.statestoken); // The webhook specifically designed for this
+        let channelm = message.channel.name // The name of the #All-states channel
+        channelm = channelm.replace(/-/g, ' '); // Changes state names to no spaces
+        channelm = channelm.replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Uppercase the first letter
+        let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
+        let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
+        let onehourmessages = message.createdTimestamp - 3600000; // One hour since the message was sent
+        message.channel.messages.fetch ().then (fetchedmessages => { // Fetch messages
+            let fetchedmessages2 = fetchedmessages.filter(msg => msg.createdTimestamp >= onehourmessages); // Filters only messages from the past hour
+            const embed = new discord.MessageEmbed() // Creating embed that mimics people
+            .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true})) // The picture and name of the messenger
+            .setColor (`0x${color}`) // Sets the color
+            .setTitle (`In ${channelm}`) // Says the channel
+            .setDescription (message.content) // Says what the message was said
+            .setTimestamp () // Time
+            .setFooter (`${fetchedmessages2.size} messages sent there since the past hour.`) // Messages since the past hour
+            stateswebhook.send (embed); // Message sent
+        })
     }
-    const stateswebhook = new discord.WebhookClient(config.webhooks.statesid, config.webhooks.statestoken); // The webhook specifically designed for this
-    let channelm = message.channel.name // The name of the #All-states channel
-    channelm = channelm.replace(/-/g, ' '); // Changes state names to no spaces
-    channelm = channelm.replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Uppercase the first letter
-    let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
-    let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
-    let onehourmessages = message.createdTimestamp - 3600000; // One hour since the message was sent
-    message.channel.messages.fetch ().then (fetchedmessages => { // Fetch messages
-        let fetchedmessages2 = fetchedmessages.filter(msg => msg.createdTimestamp >= onehourmessages); // Filters only messages from the past hour
-        const embed = new discord.MessageEmbed() // Creating embed that mimics people
-        .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true})) // The picture and name of the messenger
-        .setColor (`0x${color}`) // Sets the color
-        .setTitle (`In ${channelm}`) // Says the channel
-        .setDescription (message.content) // Says what the message was said
-        .setTimestamp () // Time
-        .setFooter (`${fetchedmessages2.size} messages sent there since the past hour.`) // Messages since the past hour
-        stateswebhook.send (embed); // Message sent
-    })
+    else if (message.channel.parent.id == config.categorys.transport) {
+        if (message.content.startsWith (config.prefix)) {
+            let lowermessage = message.content.toLowerCase ();
+            let args = lowermessage.slice (config.prefix.length).split(/ +/);
+            if (!Object.keys(config.transport).includes (args[0])) {
+                message.delete ();
+            }
+        }
+        else {
+            message.delete ();
+        }
+    }
 })
 
 // Confirming the bots token
