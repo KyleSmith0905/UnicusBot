@@ -4,17 +4,17 @@ module.exports = {
     summoner: ['emp', 'hack'], // Things that activate this
     cooldown: 1,
     execute (message, args) {
-        let combineargs = `secret${args[2]}`; // Makes 'secret1' from '-use secret 1'
+        let combineargs = `emp${args[2]}`; // Makes 'secret1' from '-use secret 1'
         const secretinventory2 = db.get (`member.${message.author.id}.abilities`); // All secrets in abilities
-        const secretinventory = db.get (`member.${message.author.id}.abilities.${combineargs}`); // Specific secret in abilities
+        const secretinventory = db.get (`member.${message.author.id}.abilities.emp.${combineargs}`); // Specific secret in abilities
         if (secretinventory2 == null){ // No secret abilities at all
-            return message.reply ('You don\'t have any secret abilities to use, try the `-shop`').then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
+            return message.reply ('You don\'t have any secret abilities to use, try typing `-shop emp <minutes> [hours] [options]`!').then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
         }
         if (secretinventory == null){ // No secret abilities with that name
-            return message.reply (`You don\'t have a secret ability by the name of ${combineargs}, but you have: ${secretinventory2}.`).then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
+            return message.reply (`You don\'t have a secret ability by the name of ${combineargs}!`).then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
         }
         if (message.channel.parent.id !== config.categorys.states) { // Needs to be in a state channel
-            return message.reply ('This command can only be done in the state\'s channels!').then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
+            return message.reply ('This command can only be done in the state channels!').then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
         }
         let secretvalue = db.get(`channel.${message.channel.id}.secret`); // Get if channel is secret
         if (secretvalue == null) { // If channel doesn't have that value
@@ -22,7 +22,7 @@ module.exports = {
             secretvalue = db.get(`channel.${message.channel.id}.secret`); // Re-sets it
         }
         if (secretvalue == true) { // Channel is already secreted
-            return message.reply ('This channel has already been made secret!').then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
+            return message.reply ('This channel has already been EMPed!').then (sentMessage => replymessage (sentMessage)); // Calls to replymessage function
         }
         else if (secretvalue == false) { // If channel isnt already secret!
             return message.reply (`Are you sure you want to make ${message.channel} secret?`).then (sentMessage => { // Confirmation message

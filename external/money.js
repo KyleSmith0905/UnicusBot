@@ -17,7 +17,7 @@ module.exports = {
 				db.set (`member.${mention.id}.money`, 0); // Set money
 				balance = db.get (`member.${mention.id}.money`); // Get money again
 			}
-			balance.toLocaleString()
+			balance = balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 			let balancemessage = ''; // Defines this
 			if (mention.id == message.author.id) { // If balance was requested by author
 				balancemessage = `You have **$${balance}** on you right now!`; // Says balance

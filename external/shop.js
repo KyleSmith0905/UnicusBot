@@ -13,13 +13,10 @@ module.exports = {
                 client.shop = new discord.Collection (); // The client and external files
                 const shopFiles = fs.readdirSync ('./external/shop').filter (file => file.endsWith('.js')); // Gets all Javascript files under /external/
                 for (const file of shopFiles) {
-                    console.log ('waypoint 1');
                     const shopf = require (`./shop/${file}`); // Gets the file itself
-                    console.log ('waypoint 2');
                     client.shop.set (shopf.name, shopf); // Sets the file name
                 }
                 const shopex = client.shop.find (shp => shp.summoner && shp.summoner.includes (args[1])) // Gets 'summoner' from other files (ways it can be identified)
-                console.log ('waypoint 3');
                 return shopex.execute (message, args) // Execute to external file
             }
             catch(err) { // If syntax was used wrongly

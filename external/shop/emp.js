@@ -4,7 +4,6 @@ module.exports = {
     summoner: ['emp', 'hack'], // Things that activate this
     cooldown: 1,
     execute (message, args) {
-        console.log ('here 1');
         if (isNaN(args[2]) || !args[2] || (isNaN(args[3]) && args[3])) { // Wrong syntax
             return message.reply ('The command is `-shop emp <minutes> [hours] [optional]`').then (sentMessage => replymessage(sentMessage)); // Activate delete function
         }
@@ -25,17 +24,15 @@ module.exports = {
             minstext = "0" + minstext; 
         }
         let displaytime = `${hourtext}:${minstext}:00` // Calculates time displayed
-        let cost = Math.round(((balance) ** 0.6) + ((totaltime * 200) ** 0.5) + ((totaltime / 150) ** 3) + 50); // Calculates cost
+        let cost = Math.round(((balance / 5) ** 0.5) * ((totaltime * 100) ** 0.3) + ((totaltime / 150) ** 3) + 50); // Calculates cost
         let costdisplay = cost.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-        if (totaltime <= 5) { // Less than 5 minutes or less
-            return message.reply ('You can\'t buy an EMP ability that lasts for five minutes or less').then (sentMessage => replymessage(sentMessage)); // Activate delete function
+        if (totaltime <= 4) { // Less than 5 minutes or less
+            return message.reply ('You can\'t buy an EMP ability that lasts for four minutes or less').then (sentMessage => replymessage(sentMessage)); // Activate delete function
         }
         if (balance <= cost) { // Can't buy it
             return message.reply (`This costs **$${costdisplay}** to buy, you don't have enough money to buy it!`).then (sentMessage => replymessage(sentMessage)); // Activate delete function
         }
-        const empinventory = db.get (`member.${message.author.id}.abilities.emp`); // All EMP in abilities
-        console.log (empinventory)
+        const empinventory = db.get (`member.${message.author.id}.abilities.emp.total`); // All EMP in abilities
         return message.reply (`Are you sure you want to buy an EMP for **$${costdisplay}**? It has a duration of ${displaytime}!`).then (sentMessage => { // Confirmation message
             sentMessage.react ('👍'); // React
             const filter = (reaction, user) => { // Creates the filter for the collector
@@ -50,13 +47,11 @@ module.exports = {
                 smallempinv.sort(); // Sorts the array from small to high
                 for (let num in smallempinv) if (smallempinv[num] > -1 && smallempinv[num] == smallempnum) smallempnum++; // Find lowest value 1 and above
                 db.subtract (`member.${message.author.id}.money`, cost); // Removes the money from balance
-                db.set (`member.${message.author.id}.abilities.emp.${'emp' + smallempnum.toString()}.time`, totaltime); // Adds the time to it
-                db.set (`member.${message.author.id}.abilities.emp.${'emp' + smallempnum.toString()}.number`, smallempnum); // Adds the time to it
-                let afteramountemp = 1;
-                if (Array.isArray(empinventory)) afteramountemp = empinventory.length + 1
+                db.push (`member.${message.author.id}.abilities.emp.total`, smallempnum)
+                db.set (`member.${message.author.id}.abilities.emp.${'emp' + smallempnum}.time`, totaltime)
                 let textemp = ''; 
-                if (afteramountemp == 1) textemp = 'an EMP';
-                else textemp = afteramountemp.length + ' EMPs';
+                if (empinventory == null) textemp = 'an EMP';
+                else textemp = (empinventory.length + 1) + ' EMPs';
                 sentMessage.edit (`${message.author}, You have successfully bought an EMP for **$${costdisplay}**! You now have ${textemp}!\nTo activate the EMP, type \`-use emp ${smallempnum}\``)
                 .then (sentMessage => replymessagelong(sentMessage));
                 return sentMessage.reactions.removeAll(). then(sentMessage.react ('✅'));
@@ -76,6 +71,5 @@ module.exports = {
 			sentMessage.delete ({timeout: config.autodelete.sentlong});
 			message.delete ({timeout: config.autodelete.receivedlong})
         }
-        function converttonumber ()
     }
 }
