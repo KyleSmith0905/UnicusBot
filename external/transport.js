@@ -5,11 +5,58 @@ module.exports = {
     cooldown: 1,
     execute (message, args) {
         try {
+            let activerole = message.member.roles.cache.find (rol => JSON.stringify(Object.values(config.places)).includes(rol.name)); // Gets player's state role
+            if (activerole == null) { // If player doesn't have a role
+                activerole = message.guild.roles.cache.get (config.roles.newyork); // Get New York role
+                message.member.roles.add (activerole); // Add New York role to person
+            }
+            const uri = 'mongodb+srv://FiNSFlexin:happyn06@amediscord-j3h3c.mongodb.net/discord?retryWrites=true&w=majority';
+            let locationdb = '';
+            mongo.connect (uri, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            userinfodb.findOne ({ // Finds something in Mongoose with this info
+                userID: message.author.id,
+                serverID: message.guild.id
+            },
+            (err, userinfo) => { // Gets error and output
+                if (userinfo) {
+                    locationdb = userinfo.state; // Sets what state they "are at"
+                }
+                else {
+                    const newuserinfo = new userinfodb ({
+                        userID: message.author.id,
+                        serverID: message.guild.id,
+                        money: 0,
+                        state: 'ny'
+                    });
+                    newuserinfo.save();
+                    locationdb = userinfo.state; // Sets what state they "are at"
+                }
+            })
+            let statearray = [];
+            Object.values(config.places).forEach (placeval => statearray.push (placeval.name));
+            message.member.roles.cache // Gets all roles
+            .filter (rol => statearray.includes(rol.name)) // Only state roles
+            .filter (rol => activerole.id == rol.id) // All except one's state
+            .each (rol => message.member.roles.remove(rol)); // Remove player's state role
             let method = config.transport[args[0]]; // Gets mode of transportation
-            let locationdb = db.get (`member.${message.member.id}.state`); // Get database... will say "fl"
-            if (locationdb == null) { // If not in the database
-                db.set (`member.${message.member.id}.state`, 'ny'); // Sets database state
-                locationdb = db.get (`member.${message.member.id}.state`); // Gets state of database again
+            activeroleid = Object.keys(config.places).find(key => config.places[key] == activerole.name); // Get the key of this... "Florida" to "fl"
+            if (activeroleid !== locationdb) { // If database has different info than player
+                locationdb = activeroleid; // Set database to player
+                userinfodb.findOne ({ // Finds something in Mongoose with this info
+                    userID: message.author.id,
+                    serverID: message.guild.id
+                }, 
+                (err, userinfo) => { // Gets error and output
+                    userinfo.state = activeroleid; // Update state on database
+                    userinfo.save
+                })
+                message.member.roles.cache // Gets all roles
+                .filter (rol => JSON.stringify(Object.values(config.places)).includes(rol.name)) // Only state roles
+                .filter (rol => !activerole == rol) // All except one's state
+                .each (rol => message.member.roles.remove(rol)); // Remove player's state role
             }
             let location1 = config.places[locationdb] // Gets primary location
             let location2 = config.places[args[1]]; // Gets secondary location
@@ -51,8 +98,7 @@ module.exports = {
             let chlocation2 = location2.replace(/\s+/g, '-').toLowerCase(); // Starting state into discord name
             let flocation1 = message.guild.channels.cache.find (channel => channel.name === chlocation1); // Discord name into discord channel
             let flocation2 = message.guild.channels.cache.find (channel => channel.name === chlocation2); // Discord name into discord channel
-            let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
-            let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
+            let color = config.embedcolors.all [Math.floor(Math.random() * config.embedcolors.all.length)]; // Random color
             if (flocation1 == flocation2) { // Primary and secondary location are the same
                 return message.reply ('You can\'t travel to somewhere you are already at!').then (sentMessage => {
                     sentMessage.delete({timeout: config.autodelete.sent});
@@ -94,7 +140,6 @@ module.exports = {
                     let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
                     message.member.roles.remove (location1role); // Remove location1 role
                     message.member.roles.add (location2role); // Add location2 role
-                    db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
                     const embed = new discord.MessageEmbed() // Creating embed because everything works
                     .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                     .setColor (`0x${color}`)
@@ -127,7 +172,6 @@ module.exports = {
                 let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
                 message.member.roles.remove (location1role); // Remove location1 role
                 message.member.roles.add (location2role); // Add location2 role
-                db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
                 const embed = new discord.MessageEmbed() // Creating embed because everything works
                 .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                 .setColor (`0x${color}`)
@@ -165,7 +209,6 @@ module.exports = {
                 let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
                 message.member.roles.remove (location1role); // Remove location1 role
                 message.member.roles.add (location2role); // Add location2 role
-                db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
                 const embed = new discord.MessageEmbed() // Creating embed because everything works
                 .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                 .setColor (`0x${color}`)
@@ -199,7 +242,6 @@ module.exports = {
                     let location2role = message.guild.roles.cache.find (role => role.name == location2); // Find the role of location2
                     message.member.roles.remove (location1role); // Remove location1 role
                     message.member.roles.add (location2role); // Add location2 role
-                    db.set (`member.${message.member.id}.state`, args[1]); // Sets state in database
                     const embed = new discord.MessageEmbed() // Creating embed because everything works
                     .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
                     .setColor (`0x${color}`)

@@ -18,10 +18,8 @@
   "description": "",
   "dependencies": {
     "discord.js": "^12.2.0",
-    "moment": "^2.26.0",
-    "node-cron": "^2.0.3",
-    "nodemailer": "^6.4.6",
-    "quick.db": "^7.1.1"
+    "mongoose": "^5.9.15",
+    "node-cron": "^2.0.3"
   },
   "engines": {
     "node": "12.16.2"

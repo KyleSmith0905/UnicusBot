@@ -2,14 +2,6 @@
     "prefix": "-",
     "owner": "311258277365284866",
     "token": "NzA3MDQzMzY1NTIyNTA1ODAw.XriBag.Et5NmgcAv0CIIPhhwqJ5kieEQ0E",
-    "autodelete": {
-        "received": 9500,
-        "sent": 9000,
-        "receivedlong": 12500,
-        "sentlong": 12000,
-        "help": 60000,
-        "collector": 20000
-    },
     "guild": "702179393006469120",
     "categorys": {
         "transport": "707574680781062205",
@@ -28,58 +20,230 @@
         "statesid": "709538524277506099",
         "statestoken": "Tio-OoMGGSrsh1A2XQEfRsz8zBYnRRS47MjQuzAKm9eYrzGJsi0POAcI4p6YB0ub9Nkf"
     },
+    "roles": {
+        "newyork": "709329330278236181"
+    },
+    "autodelete": {
+        "received": 9500,
+        "sent": 9000,
+        "receivedlong": 12500,
+        "sentlong": 12000,
+        "help": 60000,
+        "collector": 20000
+    },
+    "embedcolors": {
+        "red": ["be0027", "d4002c", "d81941"],
+        "blue": ["0045b4", "004dc9", "195ece"],
+        "white": ["fefefe", "e4e4e4", "cbcbcb"],
+        "all": ["be0027", "d4002c", "d81941", "0045b4", "004dc9", "195ece", "fefefe", "e4e4e4", "cbcbcb"]
+    },
     "places": {
-        "al": "Alabama",
-        "ak": "Alaska",
-        "az": "Arizona",
-        "ar": "Arkansas",
-        "ca": "California",
-        "co": "Colorado",
-        "ct": "Connecticut",
-        "de": "Delaware",
-        "fl": "Florida",
-        "ga": "Georgia",
-        "hi": "Hawaii",
-        "id": "Idaho",
-        "il": "Illinois",
-        "in": "Indiana",
-        "ia": "Iowa",
-        "ks": "Kansas",
-        "ky": "Kentucky",
-        "la": "Louisiana",
-        "me": "Maine",
-        "md": "Maryland",
-        "ma": "Massachusetts",
-        "mi": "Michigan",
-        "mn": "Minnesota",
-        "ms": "Mississippi",
-        "mo": "Missouri",
-        "mt": "Montana",
-        "ne": "Nebraska",
-        "nv": "Nevada",
-        "nh": "New Hampshire",
-        "nj": "New Jersey",
-        "nm": "New Mexico",
-        "ny": "New York",
-        "nc": "North Carolina",
-        "nd": "North Dakota",
-        "oh": "Ohio",
-        "ok": "Oklahoma",
-        "or": "Oregon",
-        "pa": "Pennsylvania",
-        "ri": "Rhode Island",
-        "sc": "South Carolina",
-        "sd": "South Dakota",
-        "tn": "Tennessee",
-        "tx": "Texas",
-        "ut": "Utah",
-        "vt": "Vermont",
-        "va": "Virginia",
-        "wa": "Washington",
-        "wv": "West Virginia",
-        "wi": "Wisconsin",
-        "wy": "Wyoming",
-        "rn": "Random"
+        "al": {
+            "name": "Alabama",
+            "alias:": ["al", "alabama"]
+        },
+        "ak": {
+            "name": "Alaska",
+            "alias:": ["ak", "alaska"]
+        },
+        "az": {
+            "name": "Arizona",
+            "alias:": ["az", "arizona"]
+        },
+        "ar": {
+            "name": "Arkansas",
+            "alias:": ["ar", "arkansas"]
+        },
+        "ca": {
+            "name": "California",
+            "alias:": ["ca", "california"]
+        },
+        "co": {
+            "name": "Colorado",
+            "alias:": ["co", "colorado"]
+        },
+        "ct": {
+            "name": "Connecticut",
+            "alias:": ["ct", "connecticut"]
+        },
+        "de": {
+            "name": "Delaware",
+            "alias:": ["de", "delaware"]
+        },
+        "fl": {
+            "name": "Florida",
+            "alias:": ["fl", "florida"]
+        },
+        "ga": {
+            "name": "Georgia",
+            "alias:": ["ga", "georgia"]
+        },
+        "hi": {
+            "name": "Hawaii",
+            "alias:": ["hi", "hawaii"]
+        },
+        "id": {
+            "name": "Idaho",
+            "alias:": ["id", "idaho"]
+        },
+        "il": {
+            "name": "Illinois",
+            "alias:": ["il", "illinois"]
+        },
+        "in": {
+            "name": "Indiana",
+            "alias:": ["in", "Indiana"]
+        },
+        "ia": {
+            "name": "Iowa",
+            "alias:": ["ia", "iowa"]
+        },
+        "ks": {
+            "name": "Kansas",
+            "alias:": ["ks", "kansas"]
+        },
+        "ky": {
+            "name": "Kentucky",
+            "alias:": ["ky", "kentucky"]
+        },
+        "la": {
+            "name": "Louisiana",
+            "alias:": ["la", "louisiana"]
+        },
+        "me": {
+            "name": "Maine",
+            "alias:": ["ma", "maine"]
+        },
+        "md": {
+            "name": "Maryland",
+            "alias:": ["md", "maryland"]
+        },
+        "ma": {
+            "name": "Massachusetts",
+            "alias:": ["ma", "massachusetts"]
+        },
+        "mi": {
+            "name": "Michigan",
+            "alias:": ["mi", "michigan"]
+        },
+        "mn": {
+            "name": "Minnesota",
+            "alias:": ["mn", "minnesota"]
+        },
+        "ms": {
+            "name": "Mississippi",
+            "alias:": ["ms", "mississippi"]
+        },
+        "mo": {
+            "name": "Missouri",
+            "alias:": ["mo", "missouri"]
+        },
+        "mt": {
+            "name": "Montana",
+            "alias:": ["mt", "montana"]
+        },
+        "ne": {
+            "name": "Nebraska",
+            "alias:": ["ne", "nebraska"]
+        },
+        "nv": {
+            "name": "Nevada",
+            "alias:": ["nv", "nevada"]
+        },
+        "nh": {
+            "name": "New Hampshire",
+            "alias:": ["nh", "new hampshire"]
+        },
+        "nj": {
+            "name": "New Jersey",
+            "alias:": ["nj", "new jersey"]
+        },
+        "nm": {
+            "name": "New Mexico",
+            "alias:": ["nm", "new mexico"]
+        },
+        "ny": {
+            "name": "New York",
+            "alias:": ["ny", "new york"]
+        },
+        "nc": {
+            "name": "North Carolina",
+            "alias:": ["nc", "north carolina"]
+        },
+        "nd": {
+            "name": "North Dakota",
+            "alias:": ["nd", "north dakota"]
+        },
+        "oh": {
+            "name": "Ohio",
+            "alias:": ["oh", "ohio"]
+        },
+        "ok": {
+            "name": "Oklahoma",
+            "alias:": ["ok", "oklahoma"]
+        },
+        "or": {
+            "name": "Oregon",
+            "alias:": ["or", "oregon"]
+        },
+        "pa": {
+            "name": "Pennsylvania",
+            "alias:": ["pa", "pennsylvania"]
+        },
+        "ri": {
+            "name": "Rhode Island",
+            "alias:": ["ri", "rhode island"]
+        },
+        "sc": {
+            "name": "South Carolina",
+            "alias:": ["sc", "south carolina"]
+        },
+        "sd": {
+            "name": "South Dakota",
+            "alias:": ["sd", "south dakota"]
+        },
+        "tn": {
+            "name": "Tennessee",
+            "alias:": ["tn", "tennessee"]
+        },
+        "tx": {
+            "name": "Texas",
+            "alias:": ["tx", "texas"]
+        },
+        "ut": {
+            "name": "Utah",
+            "alias:": ["ut", "utah"]
+        },
+        "vt": {
+            "name": "Vermont",
+            "alias:": ["vt", "vermont"]
+        },
+        "va": {
+            "name": "Virginia",
+            "alias:": ["va", "virgina"]
+        },
+        "wa": {
+            "name": "Washington",
+            "alias:": ["wa", "washington"]
+        },
+        "wv": {
+            "name": "West Virginia",
+            "alias:": ["wv", "west virginia"]
+        },
+        "wi": {
+            "name": "Wisconsin",
+            "alias:": ["wi", "wisconsin"]
+        },
+        "wy": {
+            "name": "Wyoming",
+            "alias:": ["wy", "wyoming"]
+        }
+    },
+    "traplaces": {
+        "rn": {
+            "name": "Random",
+            "alias": ["rn", "random"]
+        }
     },
     "transport": {
         "drv": "Drive",
