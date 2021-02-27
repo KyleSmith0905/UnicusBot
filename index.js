@@ -1,297 +1,197 @@
-// DEFINE ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-const fs = require ('fs'); // Declares file system management thing
-const discord = require ('discord.js'); // Javascript npm of Discord
-const cron = require('node-cron'); // Declares cron (automated timing)
-const mongo = require ('mongoose'); // Database
-const config = require ('./config.json'); // Config file where everything is organized
-const client = new discord.Client (); // The client
-client.external = new discord.Collection (); // The client and external files
-const cooldowns = new discord.Collection();
-const guildInvites = new Map(); // Get a map of all guild invites
+const fs = require ('fs');
+const discord = require ('eris');
+const cron = require('node-cron');
+const mongo = require ('mongoose');
+const canvas = require ('canvas');
+const fetch = require("node-fetch");
+const config = require ('./config.json');
+const errorLog = require ('./external/error.js')
+const {ReactionCollector, MessageCollector} = require ("eris-collector");
+require('dotenv').config();
+const {randomColor, getUserInfo} = require ('./external/functions');
 
-// Declaring global variables
+const client = new discord(process.env.DISCORD_TOKEN, {
+    restMode: true
+});
+client.external = new discord.Collection();
+const cooldowns = new Map();
+const guildInvites = new Map();
+
 global.config = config;
 global.discord = discord;
 global.client = client;
-global.fs = fs;
-global.mongo = mongo;
+global.guildInvites = guildInvites;
+global.canvas = canvas;
+global.cron = cron;
+global.fetch = fetch;
+global.reactionCollector = ReactionCollector;
+global.messageCollector = MessageCollector;
+global.errorLog = errorLog;
 
-// Code with script used above
-const userinfodb = require ('./database/userinfo.js'); // Userinfo file for Mongoose
-global.userinfodb = userinfodb
-//Setting up database
-const uri = 'mongodb+srv://FiNSFlexin:happyn06@amediscord-j3h3c.mongodb.net/discord?retryWrites=true&w=majority';
+const userInfoDB = require ('./database/userinfo.js');
+const stateInfoDB = require ('./database/stateinfo.js');
+
+const uri = process.env.MONGODB_URI;
 mongo.connect (uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
 
-// Get external files
-const externalFiles = fs.readdirSync ('./external').filter (file => file.endsWith('.js')); // Gets all Javascript files under /external/
+const externalFiles = fs.readdirSync ('./external').filter (file => file.endsWith('.js'));
 for (const file of externalFiles) {
-    const external = require (`./external/${file}`); // Gets the file itself
-    client.external.set (external.name, external); // Sets the file name
-}
+    const external = require (`./external/${file}`);
+    client.external.set (external.name, external);
+};
 
-// Activates when updated
 client.on ('ready', () => {
-    console.log ('active'); // To test if active
-    client.user.setActivity ('for -help', {type: "WATCHING"}); // Sets activity... "Watching for -help"
-    cron.schedule('0 0,30 * * * *', () => { // Starts cron-node
-        console.log ('still on'); // Wakes up heroku
+    console.log ('active');
+    client.editStatus('online', {name: 'for -help', type: 3})
+    cron.schedule ('0 0,30 * * * *', () => {
+        console.log ('still on');
     })
-    client.guilds.cache.forEach(guild => {
-        guild.fetchInvites()
-        .then(invites => guildInvites.set(guild.id, invites))
-    });
-})
-
-// JOINS -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-client.on('inviteCreate', async invite => guildInvites.set(invite.guild.id, await invite.guild.fetchInvites()));
-client.on ('guildMemberAdd', async member => {
-    let welcomechannel = member.guild.channels.cache.get (config.channels.welcome); // Get welcome channel
-    let infochannel = member.guild.channels.cache.get (config.channels.info); // Get info channel
-    let logchannel = member.guild.channels.cache.get (config.channels.log);
-    let welcomemessage = new discord.MessageEmbed () // Create welcome message
-    .setAuthor (member.user.username, member.user.avatarURL ({dynamic: true}), 'https://discordapp.com/users/' + member.user.id)
-    .setTimestamp ();
-    let welcomemessagelog = new discord.MessageEmbed () // Creates log message
-    .setTimestamp ()
-    .setThumbnail (member.user.avatarURL ({dynamic: true}))
-    .addField ('**User:**', member, true)
-    .addField ('ID:', member.id, true)
-    .addField ('Position:', member.guild.memberCount, true)
-    await userinfodb.findOne ({ // Finds something in Mongoose with this info
-        userID: member.user.id,
-        serverID: member.guild.id
-    },
-    (err, oldjoiner) => { // Gets error and output
-        if (oldjoiner) { // If returning member
-            let color = config.embedcolors.white [Math.floor(Math.random() * config.embedcolors.white.length)]; // Random color
-            welcomemessage.setTitle ('Member - Returned')
-            .setDescription (`Welcome back ${member}! Read ${infochannel} for more information regarding this server!`)
-            .setColor (color)
-            let color2 = config.embedcolors.blue [Math.floor(Math.random() * config.embedcolors.blue.length)]; // Random color
-            welcomemessagelog.setTitle ('Member - Returned')
-            .setDescription (`A guild member returned: **${member.user.username}**`)
-            .setColor (color2)
-        }
-        else { // If new member
-            let color = config.embedcolors.blue [Math.floor(Math.random() * config.embedcolors.blue.length)]; // Random color
-            welcomemessage.setTitle ('Member - Joined')
-            .setDescription (`Welcome ${member}! Read ${infochannel} for more information regarding this server!`)
-            .setColor (color);
-            let color2 = config.embedcolors.blue [Math.floor(Math.random() * config.embedcolors.blue.length)]; // Random color
-            welcomemessagelog.setTitle ('Member - Joined')
-            .setDescription (`A guild member joined: **${member.user.username}**`)
-            .setColor (color2);
-            const newuserinfo = new userinfodb ({ // Sets values for new member
-                userID: member.id,
-                serverID: member.guild.id,
-                money: 0,
-                state: 'ny'
-            });
-            newuserinfo.save(); // Saves new values into database
-        }
-    })
-    const cachedInvites = guildInvites.get (member.guild.id);
-    await member.guild.fetchInvites().then (newInvites => {
-        guildInvites.set(member.guild.id, newInvites);
-        const usedInvite = newInvites.find(inv => cachedInvites.get(inv.code).uses < inv.uses);
-        if (usedInvite == null) return welcomemessagelog.addField ('Invite:', 'Invite link can not be obtained', false);
-        let differencetime = member.joinedTimestamp - usedInvite.createdTimestamp;
-        let differenceday = differencetime / (1000 * 60 * 60 * 24);
-        let sortedmembers = member.guild.members.cache.array().sort((a, b) => a.joinedAt - b.joinedAt);
-        let joinposition = 0;
-        try {
-            for (j = 0; j < sortedmembers.length; j++) {
-                if (sortedmembers[j].id == usedInvite.inviter.id) return joinposition = j + 1;
-            }
-        }
-        catch {
-            joinposition == '??';
-        }
-        finally {
-            return welcomemessagelog.addField ('**Inviter:**', usedInvite.inviter, true)
-            .addField ('ID:', usedInvite.inviter.id, true)
-            .addField ('Position:', joinposition, true)
-            .addField ('**Invite:**', usedInvite.code, true)
-            .addField ('Age:', differenceday.toFixed (1) + ' days', true)
-            .addField ('Usage:', usedInvite.uses, true)
-            .addField ('URL:', usedInvite.url, false)
-        }
-    })
-    welcomechannel.send (welcomemessage);
-    logchannel.send (welcomemessagelog);
-    const addedroles = ['707571677948543026', '709329330278236181']; // Gets citizen role
-    addedroles.forEach (role => { // Independently do things to selected roles
-        let role2 = member.guild.roles.cache.get (role); // Cache roles
-        member.roles.add (role2); // Add roles independently
-    })
-})
-
-// LEAVES ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-client.on ('guildMemberRemove', async member => {
-    let welcomechannel = member.guild.channels.cache.get (config.channels.welcome); // Get welcome channel
-    let logchannel = member.guild.channels.cache.get (config.channels.log);
-    let color = config.embedcolors.red [Math.floor(Math.random() * config.embedcolors.red.length)]; // Random color
-    let color2 = config.embedcolors.red [Math.floor(Math.random() * config.embedcolors.red.length)]; // Random color
-    let sortedmembers = member.guild.members.cache.array();
-    sortedmembers.push (member)
-    sortedmembers.sort((a, b) => a.joinedAt - b.joinedAt);
-    let joinposition = 0;
-    try {
-        for (j = 0; j < sortedmembers.length; j++) {
-            if (sortedmembers[j].id == member.id) return joinposition = j + 1;
-        }
-    }
-    catch {
-        joinposition = '??'
-    }
-    finally {
-        let welcomemessage = new discord.MessageEmbed () // Create an embed
-        .setTimestamp ()
-        .setColor (color)
-        .setAuthor (member.user.username, member.user.avatarURL ({dynamic: true}), 'https://discordapp.com/users/' + member.user.id)
-        let welcomemessagelog = new discord.MessageEmbed () // Creates log message
-        .setTimestamp ()
-        .setColor (color2)
-        .setThumbnail (member.user.avatarURL ({dynamic: true}))
-        let lastmessagelog = (member.lastMessage.content) ? member.lastMessage.content.slice (0,63) : 'No apparent last message';
-        if (member.lastMessage && member.lastMessage.content.length >= 64) lastmessagelog = lastmessagelog.trim() + '...';
-        await member.guild.fetchAuditLogs({ type: 'MEMBER_KICK' }) // Get all kick audit logs
-        .then(audit => audit.entries.first()).then (audit => {
-            if (audit.target.id !== member.id || audit.createdTimestamp < (Date.now() - 5000)) { // If person wasn't kicked
-                welcomemessage.setTitle ('Member - Left')
-                .setDescription (`Farewell ${member}! We hope you come back another time!`)
-                welcomemessagelog.setTitle ('Member - Left')
-                .setDescription (`A guild member left: **${member.user.username}**`)
-                .addField ('**User:**', member, true)
-                .addField ('ID:', member.id, true)
-                .addField ('Position:', joinposition, true)
-                .addField ('Last Message:', lastmessagelog.replace( /[\r\n]+/gm," "), false)
-            }
-            else {
-                let kickreason = (audit.reason) ? `\nfor "${audit.reason}"` : '';
-                let kickreasonlog = (audit.reason) ? audit.reason.slice (0,63) : 'No specified reason for kicking';
-                if (audit.reason && audit.reason.length >= 64) {
-                    kickreasonlog = kickreasonlog.trim() + '...';
-                    kickreason = kickreason.trim() + '...';
-                }
-                let executorposition = 0
-                try {
-                    for (j = 0; j < sortedmembers.length; j++) {
-                        if (sortedmembers[j].id == audit.executor.id) return executorposition = j + 1;
+    client.guilds.forEach(async guild => {
+        guild.getInvites().then(invites => guildInvites.set(guild.id, invites))
+        const travelRole = guild.roles.find (ele => ele.id == process.env.ROLE_TRAVELING);
+        guild.members.forEach (async member => {
+            if (member.roles.includes (travelRole.id)) {
+                let userInfo = await userInfoDB.findOne ({
+                    userID: member.id,
+                    guildID: guild.id
+                })
+                userInfo.arrival = {from: null, timestamp: null, cost: null};
+                userInfo.save();
+                const toRole = guild.roles.find (ele => ele.name == config.places[userInfo.state].name);
+                member.removeRole(travelRole.id);
+                member.addRole(toRole.id);
+                const stateInfo = await getStateInfo (guild, userInfo.state)
+                if (stateInfo.welcomeMessage) {
+                    const governor = guild.members.find (ele => ele.id == stateInfo.governorID)
+                    embed = {
+                        title: 'Travel - Arrival',
+                        description: stateInfo.welcomeMessage,
+                        timestamp: new Date().toISOString(),
+                        fields: [
+                            {name: 'State:', value: config.places[userInfo.state].name, inline: true},
+                            {name: 'From:', value: config.places[userInfo.arrival.from].name, inline: true},
+                            {name: 'Governor:', value: governor.mention, inline: true}
+                        ]
                     }
                 }
-                catch {
-                    executorposition = '??'
-                }
-                finally {
-                    welcomemessage.setTitle ('Member - Kicked')
-                    .setDescription (`Farewell ${member}! They have been kicked by ${audit.executor}${kickreason.replace( /[\r\n]+/gm," ")}!`)
-                    welcomemessagelog.setTitle ('Member - Kicked')
-                    .setDescription (`A guild member got kicked: **${member.user.username}**`)
-                    .addField ('**Target:**', member, true)
-                    .addField ('ID:', member.id, true)
-                    .addField ('Position:', joinposition, true)
-                    .addField ('Last Message:', lastmessagelog.replace( /[\r\n]+/gm," "), false)
-                    .addField ('**Executor:**', audit.executor, true)
-                    .addField ('ID:', audit.executor.id, true)
-                    .addField ('Position:', executorposition, true)
-                    .addField ('Reason:', kickreasonlog.replace( /[\r\n]+/gm," "), false)
-                }
             }
         })
-        welcomechannel.send (welcomemessage);
-        logchannel.send (welcomemessagelog);
-    }
-})
-
-// MESSAGES -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-client.on ('message', message => {
-    if (!message.channel.type == 'text' || message.author.bot || !message.content.startsWith(config.prefix)) return; // Checks if message was sent in server, by human, with prefix
-    let lowermessage = message.content.toLowerCase (); // Lowercases the message
-    let args = lowermessage.slice(config.prefix.length).split(/ +/); // Seperates the message into arguments
-    const externalex = client.external.find (ext => ext.summoner && ext.summoner.includes (args[0])) // Gets 'summoner' from other files (ways it can be identified)
-    if (externalex == null) return message.reply ('There was an error with the command').then (sentMessage => {  // Error with defining command
-        sentMessage.delete({timeout: config.autodelete.sent});
-        message.delete ({timeout: config.autodelete.received});
-    });
-    if (!cooldowns.has(externalex.name)) { // Gets name of command
-		cooldowns.set(externalex.name, new discord.Collection()); // A collection of the cooldown
-    }
-	const timestamps = cooldowns.get (externalex.name); // Get the cooldowns for a specific thing
-    const cooldownAmount = (externalex.cooldown || 3) * 1000; // Length of cooldown
-    if (timestamps.has(message.author.id)) { // Checks personwise
-		const expirationTime = timestamps.get(message.author.id) + cooldownAmount; // time till it cooldown ends
-		if (Date.now() < expirationTime) { // Checks if cooldown checks good!
-            const timeLeft = (expirationTime - Date.now()) / 1000; // Time left
-            let reply = ''; // Defines reply as nothing
-            if (timeLeft.toFixed(1) == 1) reply = `Wait ${timeLeft.toFixed(1)} more second before reusing the \`-${externalex.name}\` command.`; // If one second is left exactly
-            else reply = `Wait ${timeLeft.toFixed(1)} more seconds before reusing the \`-${externalex.name}\` command.`; // If not one second is left
-            return message.reply (reply).then (sentMessage => {  // Error with command
-                sentMessage.delete({timeout: timeLeft + 3500});
-                message.delete ({timeout: timeLeft + 4000});
-            })
+        const startedChannel = guild.channels.find (ele => ele.parentID == process.env.CHANNEL_P_STARTED && ele.name.charAt(0) == '╙');
+        const permissionOverwrites = Array.from(startedChannel.permissionOverwrites.values());
+        const newStartChannel = await guild.createChannel (startedChannel.name, startedChannel.type, {nsfw: startedChannel.nsfw, parentID: startedChannel.parentID, permissionOverwrites: permissionOverwrites, rateLimitPerUser: startedChannel.rateLimitPerUser, reason: 'Automated', topic: startedChannel.topic});
+        startedChannel.delete()
+        const informationChannel = guild.channels.find (ele => ele.id == process.env.CHANNEL_INFO);
+        let embed = {
+            timestamp: new Date().toISOString(),
+            color: randomColor ('all'),
+            title: 'Introductions',
+            description: 'Welcome to *' + guild.name + '*, please follow the rules listed in ' + informationChannel.mention + ' as you journey through the server.\nBegin by typing your ideal starting state using the formatting: `-EX` or `-Example`.',
+            fields: [
+                {name: 'States:', value: '`AK`| `AL`| `AR`| `AZ`| `CA`| `CO`| `CT`| `DE`| `FL`| `GA`| `HI`| `IA`| `ID`| `IL`| `IN`| `KS`| `KY`| `LA`| `MA`| `MD`| `ME`| `MI`| `MN`| `MO`| `MS`| `MT`| `NC`| `ND`| `NE`| `NH`| `NJ`| `NM`| `NV`| `NY`| `OH`| `OK`| `OR`| `PA`| `RI`| `SC`| `SD`| `TN`| `TX`| `UT`| `VA`| `VT`| `WA`| `WI`| `WV`| `WY`', inline: false},
+            ]
         }
-	}
-	timestamps.set(message.author.id, Date.now()); // Record the time
-    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount); // Deletes the timestamp when it should be over
-    try {
-        externalex.execute (message, args) // Execute to external file
-    }
-    catch {
-        return message.reply ('There was an error with the command').then (sentMessage => {  // Error with command
-            sentMessage.delete({timeout: config.autodelete.sent});
-            message.delete ({timeout: config.autodelete.received});
-        });
-    }
-})
-
-// Channel based
-client.on ('message', message => {
-/*    if (message.channel.type == 'dm' || message.channel.type !== 'text' || message.author.bot) return; /// If the messages was sent in category "USA"
-    if ((message.channel.parent !== null || message.channel.parent.id == config.categorys.states) && !message.content.startsWith(config.prefix)) {
-        let secretvalue = db.get (`channel.${message.channel.id}.secret`);
-        if (secretvalue == true) return;
-        if (secretvalue == null) {
-            db.set (`channel.${message.channel.id}.secret`, false);
-            secretvalue = db.get (`channel.${message.channel.id}.secret`);
+        newStartChannel.createMessage ({embed: embed});
+        const playerArray = guild.members.filter (ele => ele.roles.length == 0);
+        if (playerArray.length <= 0) return;
+        let welcomeEmbed = {
+            timestamp: new Date().toISOString(),
         }
-        const stateswebhook = new discord.WebhookClient(config.webhooks.statesid, config.webhooks.statestoken); // The webhook specifically designed for this
-        let channelm = message.channel.name // The name of the #All-states channel
-        channelm = channelm.replace(/-/g, ' '); // Changes state names to no spaces
-        channelm = channelm.replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Uppercase the first letter
-        let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
-        let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
-        let onehourmessages = message.createdTimestamp - 3600000; // One hour since the message was sent
-        message.channel.messages.fetch ().then (fetchedmessages => { // Fetch messages
-            let fetchedmessages2 = fetchedmessages.filter(msg => msg.createdTimestamp >= onehourmessages); // Filters only messages from the past hour
-            const embed = new discord.MessageEmbed() // Creating embed that mimics people
-            .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true})) // The picture and name of the messenger
-            .setColor (`0x${color}`) // Sets the color
-            .setTitle (`In ${channelm}`) // Says the channel
-            .setDescription (message.content) // Says what the message was said
-            .setTimestamp () // Time
-            .setFooter (`${fetchedmessages2.size} messages sent there since the past hour.`) // Messages since the past hour
-            stateswebhook.send (embed); // Message sent
-        })
-    }
-    else if (message.channel.parent.id == config.categorys.transport) {
-        if (message.content.startsWith (config.prefix)) {
-            let lowermessage = message.content.toLowerCase ();
-            let args = lowermessage.slice (config.prefix.length).split(/ +/);
-            if (!Object.keys(config.transport).includes (args[0])) {
-                message.delete ();
+        const welcomeChannel = guild.channels.find (ele => ele.id == process.env.CHANNEL_WELCOME);
+        playerArray.forEach (async (ele) => {
+            const userInfo = await getUserInfo (ele, guild);
+            if (!userInfo || !userInfo.roleID.length) {
+                let rolesID = [];
+                guild.roles.forEach (ele2 => {
+                    if (!process.env.ROLE_NEW.split(',').includes (ele2.id)) return;
+                    rolesID.push (ele2.id);
+                })
+                ele.edit ({roles: rolesID});
             }
+            else ele.edit ({roles: userInfo.roleID});
+        })
+        if (playerArray.length == 1) {
+            welcomeEmbed.color = randomColor ('white');
+            welcomeEmbed.title = 'Member - Arrived';
+            welcomeEmbed.description = 'Welcome ' + playerArray[0].mention + '. Approve yourself into this server by reading ' + newStartChannel.mention + '. The transmission of this message was delayed because the bot was either hibernating or updating';
         }
         else {
-            message.delete ();
+            welcomeEmbed.color = randomColor ('blue');
+            welcomeEmbed.title = 'Members - Arrived';
+            welcomeEmbed.description = 'Welcome new members. Approve yourselves into this server by reading ' + newStartChannel.mention + '. The transmission of this message was delayed because the bot was either hibernating or updating';
         }
-    }
-    */
+        let contentString = 'To all new members,';
+        if (playerArray.length < 10) {
+            contentString = '';
+            playerArray.forEach (ele => contentString = contentString + ele.mention + ', ');
+        }
+        welcomeChannel.createMessage ({content: contentString, embed: welcomeEmbed});
+    })
 })
 
-// Confirming the bots token
-client.login(config.token);
+client.on ('messageCreate', message => {
+    if (!message.guildID || message.author.bot || (message.channel.parentID == process.env.CHANNEL_P_STARTED && message.channel.name.charAt(0) == '╙')) return;
+    let prefix;
+    config.discordInfo.prefix.forEach (ele => {if (message.content.startsWith(ele)) prefix = ele})
+    if (prefix == null) return;
+    const lowermessage = message.content.toLowerCase ();
+    let args = lowermessage.slice(prefix.length).split(/ +/);
+    if (args[0] == '') {
+        message.mentions.shift();
+        args.shift();
+    }
+    const externalex = client.external.find (ext => ext.summoner && ext.summoner.includes (args[0]));
+    if (externalex == null) return errorLog (message, args, 'General', 'notCommand');
+    if (!cooldowns.has(externalex.name)) {
+		cooldowns.set(externalex.name, new discord.Collection());
+    }
+    const configCommand = config.commands[externalex.name];
+	const timestamps = cooldowns.get (externalex.name);
+    if (timestamps.has(message.author.id)) {
+		const expirationTime = timestamps.get(message.author.id) + 1500;
+		if (Date.now() < expirationTime) {
+            const timeLeft = (expirationTime - Date.now()) / 1000;
+            return errorLog (message, args, configCommand.name, 'cooldown', [timeLeft.toFixed(1)]);
+        }
+    }
+    if (!configCommand.channels.some(ele => ele == 'all' || (ele == 'bot' && message.channel.id == process.env.CHANNEL_BOT) || (ele == 'spam' && message.channel.id == process.env.CHANNEL_SPAM) || (ele == 'store' && message.channel.id == process.env.CHANNEL_STORE) || (ele == 'transport' && message.channel.parentID == process.env.CHANNEL_STORE))) {
+        breaker: {
+            let breaker;
+            if (configCommand.channels.includes ('state')) {
+                let category = message.channel.guild.channels.find (ele => ele.id == message.channel.parentID);
+                if (!category) return;
+                breaker = Object.keys(config.places).some (ele => config.places[ele].name.toLowerCase() == category.name.toLowerCase())
+            }
+            if (breaker) break breaker;
+            return errorLog (message, args, configCommand.name, 'channel', []);
+        }
+    }
+	timestamps.set(message.author.id, Date.now());
+    setTimeout(() => timestamps.delete(message.author.id), 1500);
+    try {
+        externalex.execute (message, args);
+    }
+    catch {
+        return errorLog (message, args, 'General', 'general');
+    }
+})
+
+client.connect();
+
+async function getStateInfo (guild, state) {
+    let stateInfo = await stateInfoDB.findOne ({
+        guildID: guild.id,
+        postalCode: state
+    })
+    if (!stateInfo) {
+        const newStateInfo = await new stateInfoDB ({
+            guildID: guild.id,
+            postalCode: state
+        });
+        newStateInfo.save();
+        stateInfo = newStateInfo
+    }
+    return stateInfo;
+}

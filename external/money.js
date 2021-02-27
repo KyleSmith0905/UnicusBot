@@ -1,155 +1,183 @@
+const moneyConfig = config.commands.money;
+const commandConfig = moneyConfig.arguments.command.inputs;
+const actionInputConfig = moneyConfig.arguments.action.inputs;
+const {randomColor, getUserInfo, currencyFormat} = require ('./functions');
+
 module.exports = {
-    name: 'money', // Name referred to execute
-    description: 'Changing and adjusting currency values', // Description of file
-	summoner: ['money', 'currency', 'economy', '$', 'cash'], // Things that activate this
+	name: 'money',
+	summoner: moneyConfig.alias,
 	cooldown: 1,
-	execute (message, args) {
-// USERS -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-		let balance = db.get (`member.${message.author.id}.money`); // Get their money
-		// BALANCE -------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (config.money.balance.includes(args[1])) { // Asking for balance
-			if (args[2] && (!args[2].match(/^<@!?(\d+)>$/) || args[3])) { // Checks if syntax was correct
-				return message.reply ('There was an error, try using just `-money balance [mention]`').then (sentMessage => replymessage(sentMessage))
+	async execute (message, args) {
+		let member = message.member;
+		const guild = message.channel.guild;
+		let mention = message.mentions[0] || message.member;
+		let userInfo = await getUserInfo (mention, guild);
+		if (commandConfig.bal.includes(args[1])) {
+			if ((args[2] && !args[2].match(/^<@!?(\d+)>$/)) || args[3]) return errorLog (message, args, 'money', 'invalidUsage', ['target']);
+			const balance = currencyFormat(userInfo.money)
+			let embed = {
+				title: 'Money - Balance',
+				color: randomColor ('white'),
+				timestamp: new Date().toISOString(),
+				description: ((mention.id == message.member.id) ? 'You have ' : 'They have ') + balance + ' in liquid assets.',
+				fields: [
+					{name: 'Member:', value: mention.mention, inline: true},
+					{name: 'Money:', value: balance, inline: true},
+				]
 			}
-			const mention = message.mentions.members.first() || message.author; // Get cache of balnce person
-			let balance = db.get (`member.${mention.id}.money`); // Get their money
-			if (balance == null){ // If not already have money, get it
-				db.set (`member.${mention.id}.money`, 0); // Set money
-				balance = db.get (`member.${mention.id}.money`); // Get money again
+			if (userInfo.experience > 0) embed.fields.push ({name: 'Experience:', value: userInfo.experience.toFixed(2), inline: true})
+			message.channel.createMessage ({content: member.mention + ',', embed: embed})
+		}
+		else if (commandConfig.ast.includes(args[1])) {
+			if ((args[2] && !args[2].match(/^<@!?(\d+)>$/)) || args[3]) return errorLog (message, args, 'money', 'invalidUsage', ['target']);
+			let embed = {
+				title: 'Money - Assets',
+				color: randomColor ((userInfo.items.length == 0) ? 'orange' : ((userInfo.items.length >= 5) ? 'blue': 'white')),
+				timestamp: new Date().toISOString(),
+				description: ((mention.id == message.member.id) ? 'You have ' : 'They have ') + ((userInfo.items.length == 0) ? 'no' : userInfo.items.length) + ' long-term assets',
+				fields: [
+					{name: 'Member:', value: mention.mention, inline: true},
+					{name: 'Assets:', value: ((userInfo.items.length == 0) ? '*No long-term assets*' : '`' + userInfo.items.join('`| `') +'`'), inline: true},
+					{name: 'Liquid:', value: currencyFormat(userInfo.money), inline: true}
+				]
 			}
-			balance = balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-			let balancemessage = ''; // Defines this
-			if (mention.id == message.author.id) { // If balance was requested by author
-				balancemessage = `You have **$${balance}** on you right now!`; // Says balance
+			message.channel.createMessage ({content: member.mention + ',', embed: embed})
+		}
+		else if (commandConfig.pay.includes(args[1])) {
+			let transaction = (args[3]) ? args[3].replace (/[,$]/g, "") : null;
+			let errors = ((mention && message.member.id == mention.id) || !args[2] || !args[2].match(/^<@!?(\d+)>$/)) ? ['target'] : [];
+			if (!args[3] || isNaN(transaction) || args[3].includes ('.') || args[3] == 0 || (-1000000000 >= transaction || transaction >= 1000000000)) errors.push ('currency');
+			if (errors.length) return errorLog (message, args, 'money', 'invalidUsage', errors);
+			let userInfoSender = await getUserInfo (member, guild);
+			if (transaction < 0) {
+				transaction = Math.abs (transaction);
+				const cloneSenderInfo = userInfoSender; const cloneSender = member;
+				userInfoSender = userInfo; member = mention;
+				userInfo = cloneSenderInfo; mention = cloneSender
 			}
-			else {
-				balancemessage = `${mention} has **$${balance}** on them right now!`; // Says balance
-			};
-			return message.reply (balancemessage).then (sentMessage => replymessagelong(sentMessage));
-		} 
-		// PAY -----------------------------------------------------------------------------------------------------------------------------------------------------------
-		else if (config.money.pay.includes(args[1])) { // Paying someone else money, sharing basically
-			if (!args[2] || !args[2].match(/^<@!?(\d+)>$/) || isNaN(args[3])) { // Checks if wrong syntax
-				return message.reply ('There was an error, try using just `-money pay <mention> <amount> [additional]`!').then (sentMessage => replymessage(sentMessage))
+			if (transaction > userInfoSender.money || -transaction > userInfo.money) return errorLog (message, args, 'money', 'money', ['Payment', transaction, userInfoSender.money]);
+			const paymentString = 'Payment of ' + toCurrencyFormat (Math.abs(transaction)) + ' from ' + member.mention + ' to ' + mention.mention + '.';
+			let embed = {
+				title: 'Money - Pay',
+				color: randomColor ('white'),
+				timestamp: new Date().toISOString(),
+				description: 'Payment Pending: ' + paymentString,
+				fields: [
+					{name: 'Sender:', value: member.mention, inline: true},
+					{name: 'Balance:', value: toCurrencyFormat (userInfoSender.money), inline: true},
+					{name: 'Confirmation:', value: 'Pending', inline: true},
+					{name: 'Receiver:', value: mention.mention, inline: true},
+					{name: 'Balance:', value: toCurrencyFormat (userInfo.money), inline: true},
+					{name: 'Confirmation:', value: 'Pending', inline: true}
+				]
 			}
-			if (args[3].includes ('.')) { // Check if transaction will be a decimal
-				return message.reply ('Please round to the nearest whole dollar, no cents!').then (sentMessage => replymessage(sentMessage));
-			}
-			if (args[3] <= 0) { // Paying negative or zero money
-				return message.reply ('A transaction can\'t be zero dollars or less').then (sentMessage => replymessage(sentMessage));
-			}
-			let mention = message.mentions.members.first(); // Gets the mentioned user
-			let additional = '' // Additional information for footer
-			if (args[4]) {
-				additional = message.content.substring(message.content.indexOf(args[4])); // Everything after agument 2
-				additional = `\nReason for transaction: ${additional}`;
-			}
-			let balance1 = db.get (`member.${mention.id}.money`); // Get their money
-			if (balance1 == null) { // If not already have money, get it
-				db.set (`member.${mention.id}.money`, 0); // Set money
-				balance1 = db.get (`member.${mention.id}.money`); // Get money again
-			}
-			if (message.author.id == mention.id) { // Giving money to yourself
-				return message.reply ('You can\'t pay yourself, only other people!').then (sentMessage => replymessage(sentMessage));
-			}
-			if (args[3] > balance) { // Giving more than you have
-				let difference = args[3] - balance
-				return message.reply (`You currently have **$${balance}**, that is **$${difference}** less than the amount you are trying to give, **$${args[3]}**!`).then (sentMessage => replymessage(sentMessage));
-			}
-			return message.reply (`Are you sure you want to give **$${args[3]}** to ${mention}?${additional}`).then (sentMessage => { // Confirmation message
-				sentMessage.react ('👍'); // React
-				const filter = (reaction, user) => { // Creates the filter for the collector
-					return reaction.emoji.name === '👍' && user.id === message.author.id; // Author mentions thumbs up
-				};
-				const confirmcollector = sentMessage.createReactionCollector(filter,{time: config.autodelete.collector}); // Collector
-				confirmcollector.on ('collect', () => { // Collected despite filter
-					sentMessage.delete (); // Delete
-					confirmcollector.stop ('transaction done'); // Reason so it won't activate an event
-					db.subtract (`member.${message.author.id}.money`, args[3])
-					db.add (`member.${mention.id}.money`, args[3])
-					message.reply (`The transaction of **$${args[3]}** to ${mention} was completed!${additional}`).then (sentMessage => replymessagelong(sentMessage));
-				});
-				confirmcollector.on ('end', (collected, reason) => { // When it ends
-					if (reason !== 'transaction done'){ // Only ends through nonresponsiveness
-						message.reply (`The transaction of **$${args[3]}** to ${mention} was cancelled!${additional}`).then (sentMessage => replymessagelong(sentMessage));
-					}
-				})
+			if (args[4]) embed.fields.push ({name: 'Description', value: message.content.substring(message.content.indexOf(args[4])), inline: false})
+			const sentMessage = await message.channel.createMessage ({content: member.mention + ',', embed: embed})
+			sentMessage.addReaction ('👍');
+			const filter = (mes, emj, usr) => (emj.name == '👍') && (usr == member.id || usr == mention.id);
+			const collector = new reactionCollector (client, sentMessage, filter, {time: 300000});
+			let countSender; let countReceiver;
+			collector.on ('collect', async (sentMessage2nd, emoji, userID) => {
+				if (userID == member.id && !countSender) {
+					embed.fields[2] = {name: 'Confirmation:', value: 'Confirmed', inline: true};
+					countSender = 1;
+				}
+				else if (userID == mention.id && !countReceiver) {
+					embed.fields[5] = {name: 'Confirmation:', value: 'Confirmed', inline: true};
+					countReceiver = 1
+				}
+				if (countReceiver && countSender) {
+					collector.stop ('payment confirmed');
+					embed.description = 'Payment Confirmed: ' + paymentString;
+					embed.color = randomColor ('blue');
+					embed.fields[1] = {name: 'Balance:', value: toCurrencyFormat (userInfoSender.money - transaction), inline: true};
+					embed.fields[4] = {name: 'Balance:', value: toCurrencyFormat (userInfo.money + transaction), inline: true};
+					setUserInfo (member, guild, 'money', 'add', transaction * -1,);
+					setUserInfo (mention, guild, 'money', 'add', transaction);
+				}
+				sentMessage.edit ({content: member.mention + ',', embed: embed});
+			});
+			collector.on ('end', (collected, reason) => {
+				sentMessage.removeReactions ()
+				if (reason == 'payment confirmed') return;
+				embed.color = randomColor ('orange');
+				embed.description = 'Payment Cancelled: ' + paymentString;
+				sentMessage.edit ({content: member.mention + ',', embed: embed});
 			})
 		}
-// ADMIN -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-		// ADD -----------------------------------------------------------------------------------------------------------------------------------------------------------
-		else if (config.money.add.includes (args[1]) || config.money.remove.includes (args[1]) || config.money.set.includes (args[1])) { // Add command (admin usage)
-			if (message.author.id !== config.owner) { // Not an admin
-				return message.reply ('You do not have permissions to use this command!').then (sentMessage => replymessage(sentMessage));
+		else if (commandConfig.adm.includes(args[1])) {
+			const ownerRole = guild.roles.find (ele => ele.id == process.env.ROLE_OWNER)
+			if (!member.roles.includes (ownerRole.id)) return errorLog (message, args, 'money', 'permission', [ownerRole]);
+			let transaction = args[4].replace (/[,$]/g, '');
+			let subcommand = Object.keys(actionInputConfig).find (ele => actionInputConfig[ele].alias.includes (args[2]))
+			let errors = (!subcommand) ? ['admin'] : [];
+			if (!args[3] || !args[3].match(/^<@!?(\d+)>$/)) errors.push ('target');
+			if (args[4].includes ('.') || isNaN(transaction) || (-1000000000 >= transaction || transaction >= 1000000000)) errors.push ('currency')
+			if (errors.length) return errorLog (message, args, 'money', 'invalidUsage', errors);
+			let phrasePayment = 'deposited to';
+			transaction = parseInt(transaction)
+			const subcommandSet = (subcommand == 'set') ? true : false
+			if (subcommand == 'set') {
+				transaction = transaction - userInfo.money;
+				subcommand = 'add';
+			};
+			if ((subcommand == 'remove' && transaction > 0) || (subcommand == 'add' && transaction < 0)) {
+				phrasePayment = 'withdrawn from';
+				if (subcommand == 'add' && transaction < 0) {
+					transaction = Math.abs(transaction);
+					subcommand = 'remove';
+				};
 			}
-			if (args[3].includes ('.')) {
-				return message.reply ('Please round to the nearest whole dollar, no cents!').then (sentMessage => replymessage(sentMessage));
+			else if (subcommand == 'remove' && transaction < 0) {
+				transaction = Math.abs(transaction);
+				subcommand = 'add';
 			}
-			args[3] = args[3].replace (/,/g, "");
-			let mention = message.mentions.members.first(); // Gets the mentioned user
-			let addstring = 'add'; // Sentence will say 'add' when adding
-			let tostring = 'to';
-			let addedstring = 'added';
-			let transaction = args[3];
-			let transactionabs = Math.abs(args[3]);
-			if ((config.money.remove.includes (args[1]) && args[3] > 0) || (config.money.add.includes (args[1]) && args[3] < 0)) { // Check if we're removing money
-				addstring = 'remove'; // Sentence will say 'remove' when removing
-				tostring = 'from';
-				addedstring = 'removed';
-				transaction = transaction * -1 // Make official transaction negative
-			}
-			if (config.money.set.includes (args[1])) { // Check if the message being sent is 'set'
-				addstring = 'set';
-				addedstring = 'changed';
-				mentionbal = db.get (`member.${mention.id}.money`)
-				transaction = transaction - mentionbal
-			}
-			transactionabs = transactionabs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-			if (!args[2] || !args[2].match(/^<@!?(\d+)>$/) || isNaN(args[3])) { // Doesn't follow syntax
-				return message.reply.reply ('There was an error, try using just `-money ' + addstring + ' <mention> <amount> [additional]`!').then (sentMessage => replymessage(sentMessage));
-			}
-			else {
-				let additional = '' // Additional information for footer
-				if (args[4]) {
-					additional = message.content.substring(message.content.indexOf(args[4])); // Everything after agument 2
-					additional = `\nReason for transaction: ${additional}`;
+			const paymentString = ('Transfer of ' + toCurrencyFormat(Math.abs(transaction)) + ' ' + phrasePayment + ' ' + mention.mention + '.')
+			let embed = {
+				title: 'Money - Admin',
+				color: randomColor ('white'),
+				timestamp: new Date().toISOString(),
+				description: 'Allocation Pending: ' + paymentString,
+				fields: [
+					{name: 'Receiver:', value: mention.mention, inline: true},
+					{name: 'Balance:', value: toCurrencyFormat (userInfo.money), inline: true},
+					{name: 'Result:', value: toCurrencyFormat ((subcommand == 'remove') ? userInfo.money - transaction : userInfo.money + transaction), inline: true}
+				]
+			};
+			const sentMessage = await message.channel.createMessage ({content: member.mention + ',', embed: embed});
+			sentMessage.addReaction ('👍');
+			const filter = (mes, emj, usr) => (emj.name == '👍') && (usr == member.id);
+			const collector = new reactionCollector (client, sentMessage, filter, {time: 300000});
+			collector.on ('collect', async (sentMessage2nd, emoji, userID) => {
+				if (userID == member.id) {
+					collector.stop ('confirmed');
+					embed.description = 'Allocation Confirmed: ' + paymentString;
+					embed.color = randomColor ('blue');
+					embed.fields[1].name = 'Before';
+					embed.fields[2].name = 'Balance';
+					setUserInfo (mention, guild, 'money', (subcommandSet) ? 'set' : 'add' , (subcommandSet) ? args[4].replace (/,/g, "") : (subcommand == 'remove') ? transaction * -1 : transaction);
+					sentMessage.edit ({embed})
 				}
-				let startreply = `Are you sure you want to ${addstring} **$${transactionabs}** ${tostring} ${mention}'s balance?${additional}`;
-				let confirmreply = `You have ${addedstring} **$${transactionabs}** ${tostring} ${mention}'s balance!${additional}`;
-				let denyreply = `The transaction to ${addstring} **$${transactionabs}** to ${mention}'s balance was cancelled!`;
-				if (config.money.set.includes (args[1])) {
-					startreply = `Are you sure you want to set ${mention}'s balance to **$${transactionabs}**?${additional}`;
-					confirmreply = `You have set ${mention}'s balance to **${transactionabs}**!${additional}`
-					denyreply = `The transaction to set ${mention}'s balance to **$${transactionabs}** was cancelled!`;
-				}
-				return message.reply (startreply).then(sentMessage => { // Confirmation message
-					sentMessage.react ('👍'); // React
-					const filter = (reaction, user) => { // Creates the filter for the collector
-						return reaction.emoji.name == '👍' && user.id == message.author.id; // Author mentions thumbs up
-					};
-					const collector = sentMessage.createReactionCollector (filter, {time: config.autodelete.collector}); // Collector
-					collector.on ('collect', (reaction, user) => { // Collected despite filter
-						collector.stop ('transaction done'); // Reason so it won't activate an event
-						db.add (`member.${mention.id}.money`, transaction)
-						sentMessage.edit (`${message.author}, ` + confirmreply).then (sentMessage => replymessagelong(sentMessage));
-						sentMessage.reactions.removeAll(). then(sentMessage.react ('✅'));
-					});
-					collector.on ('end', (collected, reason) => { // When it ends
-						if (reason !== 'transaction done'){ // Only ends through nonresponsiveness
-							sentMessage.edit (`${message.author}, ` + denyreply).then (sentMessage => replymessagelong(sentMessage));
-							sentMessage.reactions.removeAll(). then(sentMessage.react ('❌'));
-						}
-					})
-				})
-			}
+			})
+			return collector.on ('end', (collected, reason) => {
+				sentMessage.removeReactions();
+				if (reason == 'confirmed') return
+				embed.color == randomColor ('orange');
+				embed.description = 'Allocation Cancelled: ' + paymentString;
+				sentMessage.edit ({embed})
+			})
 		}
-		function replymessage (sentMessage) {
-            sentMessage.delete({timeout: config.autodelete.sent});
-			message.delete ({timeout: config.autodelete.received});
-		}
-		function replymessagelong (sentMessage) {
-			sentMessage.delete ({timeout: config.autodelete.sentlong});
-			message.delete ({timeout: config.autodelete.receivedlong})
-		}
+		else return errorLog (message, args, 'money', 'invalidUsage', ['command']);
 	}
 };
+
+async function setUserInfo (member, guild, fieldInput, equation, value) {
+	let userInfo = await getUserInfo (member, guild);
+	let setValue = (equation == 'add') ? userInfo.money + value : value;
+	if (fieldInput == 'money') userInfo.set ({money: setValue});
+    userInfo.save ();
+}
+
+function toCurrencyFormat (number) {
+	return ((parseFloat(number) < 0) ? '-' : '') + '$' + Math.round(Math.abs(number)).toLocaleString()
+}

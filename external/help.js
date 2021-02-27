@@ -1,93 +1,38 @@
+const {randomColor} = require ('./functions');
+
 module.exports = {
-    name: 'help', // Name referred to execute
-    description: 'For help', // Description of file
-    summoner: ['help', '?', 'helps', 'helped'], // Things that activate this
-    cooldown: 5,
+    name: 'help',
+    summoner: config.commands.help.alias,
     execute (message, args) {
-        try {
-            let colors = ['d4002c', '004dc9', 'fefefe']; // American colors
-            let color = colors [Math.floor(Math.random() * colors.length)]; // Random color
-// TRAVEL ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-            if (config.help.travel.standard.includes (args[1])) { // If first argument was travel
-                if (!args[2]) {
-                    const embed = new discord.MessageEmbed() // Creating embed because everything works
-                    .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
-                    .setColor (`0x${color}`)
-                    .setTitle ('Help Command - Travel')
-                    .setDescription ('The **travel command** allows you to travel to one state to another through various modes of transportation. These have their respective advantages and disadvantages with each.')
-                    .addField ('Usage', 'The travel command is only to be used in their respective locations: `-<method> <location> [additional]` or try `-drv ca`.')
-                    .addField ('<method>', '**drv**: Car\n**fly**: Plane\n**rde**: Train\n**sal**: Boat', true)
-                    .addField ('<location>', '`-help transport places`\n**??**: 2-letter acronym\n**rn**: random location', true)
-                    .setTimestamp ()
-                    message.channel.send ({embed}).then (sentMessage => { // Sends the embed message
-                        sentMessage.delete({timeout: config.autodelete.help});
-                    });
-                    return message.delete ();
-                }
-                else if (config.help.travel.location.includes (args[2]) && !args[3]) { // For places argument only (lists all states)
-                    const embed = new discord.MessageEmbed() // Creating embed because everything works
-                    .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
-                    .setColor (`0x${color}`)
-                    .setTitle ('Help Command - Travel - Location')
-                    .setDescription ('The location argument of the **travel command** states the place where you are coming from and where you will be going, it could either be the 50 states or other selected places.')
-                    .addField ('Usage', 'The location argument of the travel command is used with the travel command: `-<method> <location> [additional]` or try `-drv tx ca`.')
-                    .addField ('<location>', '**al**: Alabama\n**ak**: Alaska\n**az**: Arizona\n**ar**: Arkansas\n**ca**: California\n**co**: Colorado\n**ct**: Connecticut\n**de**: Delaware\n**fl**: Florida\n**ga**: Georgia\n**hi**: Hawaii\n**id**: Idaho\n**il**: Illinois\n**in**: Indiana\n**ia**: Iowa\n**ks**: Kansas\n**ky**: Kentucky', true)
-                    .addField ('** **', '**la**: Louisiana\n**me**: Maine\n**md**: Maryland\n**ma**: Massachusetts\n**mi**: Michigan\n**mn**: Minnesota\n**ms**: Mississippi\n**mo**: Missouri\n**mt**: Montana\n**ne**: Nebraska\n**nv**: Nevada\n**nh**: New Hampshire\n**nj**: New Jersey\n**nm**: New Mexico\n**ny**: New York\n**nc**: North Carolina\n**nd**: North Dakota', true)
-                    .addField ('** **', '**oh**: Ohio\n**ok**: Oklahoma\n**or**: Oregon\n**pa**: Pennsylvania\n**ri**: Rhode Island\n**sc**: South Carolina\n**sd**: South Dakota\n**tn**: Tennessee\n**tx**: Texas\n**ut**: Utah\n**vt**: Vermont\n**va**: Virginia\n**wa**: Washington\n**wv**: West Virginia\n**wi**: Wisconsin\n**wy**: Wyoming\n**rn**: Random', true)
-                    .setTimestamp ()
-                    message.channel.send ({embed}).then (sentMessage => { // Sends the embed message
-                        sentMessage.delete({timeout: config.autodelete.help});
-                    });
-                    return message.delete ();
-                }
-                else if (config.help.travel.method.includes (args[2]) && !args[3]) {
-                    const embed = new discord.MessageEmbed() // Creating embed because everything works
-                    .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
-                    .setColor (`0x${color}`)
-                    .setTitle ('Help Command - Travel - Method')
-                    .setDescription ('The method argument of the **travel command** states how you will be traveling, some methods may not be able to travel to certain locations.')
-                    .addField ('Usage', 'The method argument of the travel command is used with the travel command: `-<method> <location> [additional]` or try `-drv tx ca`.')
-                    .addField ('<method>', '**drv**: Drive in a car to a nearby state\n**fly**: Fly in a plane to a distant state\n**rde**: Ride in a HSR train to a select state\n**sal**: Sail in a boat to a coastal state')
-                    .setTimestamp ()
-                    message.channel.send ({embed}).then (sentMessage => { // Sends the embed message
-                        sentMessage.delete({timeout: config.autodelete.help});
-                    });
-                    return message.delete ();
-                }
-                else {
-                    message.channel.send (`${message.author} Try typing just \`-help travel\``).then (sentMessage => { //extra arguments included
-                        sentMessage.delete({timeout: config.autodelete.sent});
-                        message.delete ({timeout: config.autodelete.received})
-                    });
-                }
-            }
-// HELP ------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            else if (!args[2] && (config.help.help.includes (args[1]) || !args[1])) {
-                const embed = new discord.MessageEmbed() // Creating embed because everything works
-                .setAuthor (message.author.username, message.author.displayAvatarURL({format: "png", dynamic: true}))
-                .setColor (`0x${color}`)
-                .setTitle ('Help Command - Help')
-                .setDescription ('The **help command** helps you understand the various commands and their subcommands. It describes a description of the command, how to use it, and the arguments for it.')
-                .addField ('Usage', 'The help command could be used in most channels: `-help <command> [subcommand]` or try `-help travel`.')
-                .addField ('<command>', '**Help**: Help with how to use the bot, try `-help`\n**Travel**: Allows you to travel to new places `-help travel`', false) // Help command
-                .setTimestamp ()
-                message.channel.send ({embed}).then (sentMessage => { // Sends the embed message
-                    sentMessage.delete({timeout: config.autodelete.help});
-                });
-                return message.delete ();
-            }
-            else {
-                message.channel.send (`${message.author} Try typing just \`-help\``).then (sentMessage => { //extra arguments included
-                    sentMessage.delete({timeout: config.autodelete.sent});
-                    message.delete ({timeout: config.autodelete.received})
-                });
-            }
+        let command = (args[1]) ? Object.keys (config.commands).find (ele => config.commands[ele].alias.includes (args[1])) : null;
+        let configCommand = config.commands[command];
+        let descriptionString = (configCommand) ? ('The **' + configCommand.name + ' Command** ' + configCommand.description) : ('Below is a list of commands. For further help, the command is `-help [command:string]`.');
+        let embed = {
+            timestamp: new Date().toISOString(),
+            color: randomColor ((configCommand) ? 'blue' : 'white'),
+            title: 'Help' + ((configCommand) ? ' - ' + configCommand.name : ''),
+            description: descriptionString,
+            fields: []
         }
-        catch {
-            message.channel.send (`${message.author} There was an error, try using just \`-help\``).then (sentMessage => { // Something didn't work
-                sentMessage.delete({timeout: config.autodelete.sent});
-                message.delete ({timeout: config.autodelete.received})
-            });
+        if (configCommand) {
+            let usage = configCommand.usage;
+            let usageArguments = usage.split(/ +/);
+            embed.fields.push ({name: 'Usage:', value: '`' + usage + '`', inline: false});
+            usageArguments.shift();
+            usageArguments.forEach (ele => {
+                let arg = ele.match (/[\[<](.*?)[\:|]/);
+                if (arg == null) return;
+                let items = configCommand.arguments[arg[1]].items;
+                if (typeof items == 'string') return embed.fields.push ({name: ele, value: items, inline: false});
+                else return embed.fields.push ({name: ele, value: '`' + items.toString().replace(/,/g, '`| `') + '`', inline: false});
+            })
         }
+        else if (!args[1]) {
+            embed.fields.push (
+                {name: 'Commands:', value: '`' + config.commands.help.arguments.command.items.join('`| `') + '`', inline: false}
+            )
+        }
+        else return errorLog (message, args, 'Help', 'invalidUsage', ['command'])
+        return message.channel.createMessage ({content: message.member.mention + ',', embed: embed})
     }
 }

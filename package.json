@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -17,9 +18,13 @@
   "homepage": "https://github.com/FiNSFlexin/AmeBot1782590#readme",
   "description": "",
   "dependencies": {
-    "discord.js": "^12.2.0",
-    "mongoose": "^5.9.15",
-    "node-cron": "^2.0.3"
+    "canvas": "^2.6.1",
+    "dotenv": "^8.2.0",
+    "eris": "^0.13.4",
+    "eris-collector": "^1.0.1",
+    "mongoose": "^5.11.18",
+    "node-cron": "^2.0.3",
+    "node-fetch": "^2.6.1"
   },
   "engines": {
     "node": "12.16.2"

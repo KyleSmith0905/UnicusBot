@@ -1,288 +1,1321 @@
 {
-    "prefix": "-",
-    "owner": "311258277365284866",
-    "token": "NzA3MDQzMzY1NTIyNTA1ODAw.XriBag.Et5NmgcAv0CIIPhhwqJ5kieEQ0E",
-    "guild": "702179393006469120",
-    "categorys": {
-        "transport": "707574680781062205",
-        "states": "707572265415344228"
-    },
-    "channels": {
-        "drive": "707574823194329188",
-        "fly": "707575287789125664",
-        "ride": "707583534948286474",
-        "sail": "707583858467405937",
-        "log": "707666424092557402",
-        "welcome": "709436200078934016",
-        "info": "708106157784432721"
-    },
-    "webhooks": {
-        "statesid": "709538524277506099",
-        "statestoken": "Tio-OoMGGSrsh1A2XQEfRsz8zBYnRRS47MjQuzAKm9eYrzGJsi0POAcI4p6YB0ub9Nkf"
-    },
-    "roles": {
-        "newyork": "709329330278236181"
-    },
-    "autodelete": {
-        "received": 9500,
-        "sent": 9000,
-        "receivedlong": 12500,
-        "sentlong": 12000,
-        "help": 60000,
-        "collector": 20000
-    },
-    "embedcolors": {
-        "red": ["be0027", "d4002c", "d81941"],
-        "blue": ["0045b4", "004dc9", "195ece"],
-        "white": ["fefefe", "e4e4e4", "cbcbcb"],
-        "all": ["be0027", "d4002c", "d81941", "0045b4", "004dc9", "195ece", "fefefe", "e4e4e4", "cbcbcb"]
-    },
-    "places": {
-        "al": {
-            "name": "Alabama",
-            "alias:": ["al", "alabama"]
-        },
-        "ak": {
-            "name": "Alaska",
-            "alias:": ["ak", "alaska"]
-        },
-        "az": {
-            "name": "Arizona",
-            "alias:": ["az", "arizona"]
-        },
-        "ar": {
-            "name": "Arkansas",
-            "alias:": ["ar", "arkansas"]
-        },
-        "ca": {
-            "name": "California",
-            "alias:": ["ca", "california"]
-        },
-        "co": {
-            "name": "Colorado",
-            "alias:": ["co", "colorado"]
-        },
-        "ct": {
-            "name": "Connecticut",
-            "alias:": ["ct", "connecticut"]
-        },
-        "de": {
-            "name": "Delaware",
-            "alias:": ["de", "delaware"]
-        },
-        "fl": {
-            "name": "Florida",
-            "alias:": ["fl", "florida"]
-        },
-        "ga": {
-            "name": "Georgia",
-            "alias:": ["ga", "georgia"]
-        },
-        "hi": {
-            "name": "Hawaii",
-            "alias:": ["hi", "hawaii"]
-        },
-        "id": {
-            "name": "Idaho",
-            "alias:": ["id", "idaho"]
-        },
-        "il": {
-            "name": "Illinois",
-            "alias:": ["il", "illinois"]
-        },
-        "in": {
-            "name": "Indiana",
-            "alias:": ["in", "Indiana"]
-        },
-        "ia": {
-            "name": "Iowa",
-            "alias:": ["ia", "iowa"]
-        },
-        "ks": {
-            "name": "Kansas",
-            "alias:": ["ks", "kansas"]
-        },
-        "ky": {
-            "name": "Kentucky",
-            "alias:": ["ky", "kentucky"]
-        },
-        "la": {
-            "name": "Louisiana",
-            "alias:": ["la", "louisiana"]
-        },
-        "me": {
-            "name": "Maine",
-            "alias:": ["ma", "maine"]
-        },
-        "md": {
-            "name": "Maryland",
-            "alias:": ["md", "maryland"]
-        },
-        "ma": {
-            "name": "Massachusetts",
-            "alias:": ["ma", "massachusetts"]
-        },
-        "mi": {
-            "name": "Michigan",
-            "alias:": ["mi", "michigan"]
-        },
-        "mn": {
-            "name": "Minnesota",
-            "alias:": ["mn", "minnesota"]
-        },
-        "ms": {
-            "name": "Mississippi",
-            "alias:": ["ms", "mississippi"]
-        },
-        "mo": {
-            "name": "Missouri",
-            "alias:": ["mo", "missouri"]
-        },
-        "mt": {
-            "name": "Montana",
-            "alias:": ["mt", "montana"]
-        },
-        "ne": {
-            "name": "Nebraska",
-            "alias:": ["ne", "nebraska"]
-        },
-        "nv": {
-            "name": "Nevada",
-            "alias:": ["nv", "nevada"]
-        },
-        "nh": {
-            "name": "New Hampshire",
-            "alias:": ["nh", "new hampshire"]
-        },
-        "nj": {
-            "name": "New Jersey",
-            "alias:": ["nj", "new jersey"]
-        },
-        "nm": {
-            "name": "New Mexico",
-            "alias:": ["nm", "new mexico"]
-        },
-        "ny": {
-            "name": "New York",
-            "alias:": ["ny", "new york"]
-        },
-        "nc": {
-            "name": "North Carolina",
-            "alias:": ["nc", "north carolina"]
-        },
-        "nd": {
-            "name": "North Dakota",
-            "alias:": ["nd", "north dakota"]
-        },
-        "oh": {
-            "name": "Ohio",
-            "alias:": ["oh", "ohio"]
-        },
-        "ok": {
-            "name": "Oklahoma",
-            "alias:": ["ok", "oklahoma"]
-        },
-        "or": {
-            "name": "Oregon",
-            "alias:": ["or", "oregon"]
-        },
-        "pa": {
-            "name": "Pennsylvania",
-            "alias:": ["pa", "pennsylvania"]
-        },
-        "ri": {
-            "name": "Rhode Island",
-            "alias:": ["ri", "rhode island"]
-        },
-        "sc": {
-            "name": "South Carolina",
-            "alias:": ["sc", "south carolina"]
-        },
-        "sd": {
-            "name": "South Dakota",
-            "alias:": ["sd", "south dakota"]
-        },
-        "tn": {
-            "name": "Tennessee",
-            "alias:": ["tn", "tennessee"]
-        },
-        "tx": {
-            "name": "Texas",
-            "alias:": ["tx", "texas"]
-        },
-        "ut": {
-            "name": "Utah",
-            "alias:": ["ut", "utah"]
-        },
-        "vt": {
-            "name": "Vermont",
-            "alias:": ["vt", "vermont"]
-        },
-        "va": {
-            "name": "Virginia",
-            "alias:": ["va", "virgina"]
-        },
-        "wa": {
-            "name": "Washington",
-            "alias:": ["wa", "washington"]
-        },
-        "wv": {
-            "name": "West Virginia",
-            "alias:": ["wv", "west virginia"]
-        },
-        "wi": {
-            "name": "Wisconsin",
-            "alias:": ["wi", "wisconsin"]
-        },
-        "wy": {
-            "name": "Wyoming",
-            "alias:": ["wy", "wyoming"]
-        }
-    },
-    "traplaces": {
-        "rn": {
-            "name": "Random",
-            "alias": ["rn", "random"]
-        }
-    },
-    "transport": {
-        "drv": "Drive",
-        "fly": "Fly",
-        "rde": "Ride",
-        "sal": "Sail",
-
-        "drive": "Drive",
-        "car": "Drive",
-        "automobile": "Drive",
-        "plane": "Fly",
-        "airplane": "Fly",
-        "pilot": "Fly",
-        "ride": "Ride",
-        "train": "Ride",
-        "railway": "Ride",
-        "cruise": "Sail",
-        "sail": "Sail",
-        "boat": "Sail"
-    },
-    "rdrv": ["Hawaii"],
-    "rfly": [],
-    "rrde": ["Delaware", "Hawaii", "Idaho", "Kansas", "Kentucky", "Mississippi", "Montana", "New Hampshire", "New Jersey", "North Dakota", "South Carolina", "South Dakota", "West Virginia", "Wyoming"],
-    "osalw": ["Alaska", "California", "Hawaii", "Oregon", "Washington"],
-    "osale": ["Alabama", "Connecticut", "Delaware", "Florida", "Georgia", "Louisiana", "Maine", "Maryland", "Massachusetts", "Mississippi", "New Hampshire", "New Jersey", "New York", "North Carolina", "Rhode Island", "South Carolina", "Texas", "Virginia"],
-
-    "help": {
-        "help": ["help", "helps", "?", "how"],
-        "travel": {
-            "standard": ["travel", "move", "transport", "transportation"],
-            "location": ["states", "state", "places", "place", "location", "locations", "map", "maps"],
-            "method": ["method", "methods", "mode", "modes"]
-        }
-    },
-    "money": {
-        "balance": ["balance", "bal", "money"],
-        "pay": ["pay", "donate", "paid", "give", "share"],
-        "add": ["add", "remove"],
-        "remove": ["rmv", "remove"],
-        "set": ["set", "setting"]
-    }
+	"discordInfo": {
+		"prefix": ["-", "=", "!", "<@!716466423056302120>"],
+		"owner": "796501482740383745",
+		"constants": {
+			"autoModTim": 10000,
+			"autoModDif": 5000,
+			"autoModLim": 4
+		},
+		"boolean": {
+			"true": ["true", "1", "on", "yes"],
+			"false": ["false", "0", "off", "no"]
+		},
+		"embedColors": {
+			"orange": ["cc6600", "e67a00", "f5780a"],
+			"blue": ["0042ad", "21508a", "195ece"],
+			"white": ["fefefe", "ececec", "cbcbcb"],
+			"all": ["cc6600", "e67a00", "f5780a", "0042ad", "21508a", "195ece", "fefefe", "ececec", "cbcbcb"]
+		},
+		"channelTypes": {
+			"Text": 0,
+			"DM": 1,
+			"Voice": 2,
+			"Group DM": 3,
+			"Category": 4,
+			"News": 5,
+			"Store": 6
+		},
+		"planets": {
+			"mercury": {
+				"N1": 48.3313,
+				"N2": 3.24587E-5,
+				"i1": 7.0047,
+				"i2": 5.00E-8,
+				"w1": 29.1241,
+				"w2": 1.01444E-5,
+				"a1": 0.387098,
+				"e1": 0.205635,
+				"e2": 5.59E-10,
+				"M1": 168.6562,
+				"M2": 4.0923344368,
+				"rotation": 4222.6,
+				"revolution": 88,
+				"gravity": 0.378,
+				"distance": 0.387,
+				"diameter": 0.383,
+				"color": "d7d6d4"
+			},
+			"venus": {
+				"N1": 76.6799,
+				"N2": 2.46590E-5,
+				"i1": 3.3946,
+				"i2": 2.75E-8,
+				"w1": 54.8910,
+				"w2": 1.38374E-5,
+				"a1": 0.723330,
+				"e1": 0.006773,
+				"e2": -1.302E-9,
+				"M1": 48.0052,
+				"M2": 1.6021302244, 
+				"rotation": 2802,
+				"revolution": 224.7,
+				"gravity": 0.907,
+				"distance": 0.723,
+				"diameter": 0.949,
+				"color": "bd8c55"
+			},
+			"earth": {
+				"N1": "earth",
+				"rotation": 24,
+				"revolution": 365.2,
+				"gravity": 1,
+				"distance": 1,
+				"diameter": 1,
+				"color": "7fdbe3"
+			},
+			"mars": {
+				"N1": 49.5574,
+				"N2": 2.11081E-5,
+				"i1": 1.8497,
+				"i2": -1.78E-8,
+				"w1": 286.5016,
+				"w2": 2.92961E-5,
+				"a1": 1.523688,
+				"e1": 0.093405,
+				"e2": 2.516E-9,
+				"M1": 18.6021,
+				"M2": 0.5240207766,
+				"rotation": 24.7,
+				"revolution": 687,
+				"gravity": 0.377,
+				"distance": 1.52,
+				"diameter": 0.532,
+				"color": "d55d5f"
+			},
+			"jupiter": {
+				"N1": 100.4542,
+				"N2": 2.76854E-5,
+				"i1": 1.3030,
+				"i2": -1.557E-7,
+				"w1": 273.8777,
+				"w2": 1.64505E-5,
+				"a1": 5.20256,
+				"e1": 0.048498,
+				"e2": 4.469E-9,
+				"M1": 19.8950,
+				"M2": 0.0830853001,
+				"rotation": 9.9,
+				"revolution": 4331,
+				"gravity": 2.36,
+				"distance": 5.2,
+				"diameter": 11.21,
+				"color": "d1855f"
+			},
+			"saturn": {
+				"N1": 113.6634,
+				"N2": 2.38980E-5,
+				"i1": 2.4886,
+				"i2": -1.081E-7,
+				"w1": 339.3939,
+				"w2": 2.97661E-5,
+				"a1": 9.55475,
+				"e1": 0.055546,
+				"e2": -9.499E-9,
+				"M1": 316.9670,
+				"M2": 0.0334442282,
+				"rotation": 10.7,
+				"revolution": 10747,
+				"gravity": 0.916,
+				"distance": 9.58,
+				"diameter": 9.45,
+				"color": "d4b684"
+			},
+			"uranus": {
+				"N1": 74.0005,
+				"N2": 1.3978E-5,
+				"i1": 0.7733,
+				"i2": 1.9E-8,
+				"w1": 96.6612,
+				"w2": 3.0565E-5,
+				"a1": 19.18171,
+				"e1": 0.047318,
+				"e2": 7.45E-9,
+				"M1": 142.5905,
+				"M2": 0.011725806,
+				"rotation": 17.2,
+				"revolution": 30589,
+				"gravity": 0.889,	
+				"distance": 19.2,
+				"diameter": 4.01,
+				"color": "68c9d4"
+			},
+			"neptune": {
+				"N1": 131.7806,
+				"N2": 3.0173E-5,
+				"i1": 1.7700,
+				"i2": -2.55E-7,
+				"w1": 272.8461,
+				"w2": -6.027E-6,
+				"a1": 30.05826,
+				"e1": 0.008606,
+				"e2": 2.15E-9,
+				"M1": 260.2471,
+				"M2": 0.005995147,
+				"rotation": 16.1,
+				"revolution": 59800,
+				"gravity": 1.12,
+				"distance": 30.05,
+				"diameter": 3.88,
+				"color": "4884b4"
+			}
+		},
+		"polling": {
+			"politics": ["In regards to American politics what political party do you support? Democrat, Republican, or Third party", "🔵", "🔴", "🟡"],
+			"gender": ["What's your gender? Male, Female, or Unlisted", "♀️", "♂️", "🟨"],
+			"religion": ["What's your religion do you identify yourself as? Protestant, Catholic, Other religions, or Unaffiliated", "🇵", "🇨", "🇳", "🇺"],
+			"server": ["Why are you in this Discord server? Role-playing, Economy, Communication, or Unlisted", "🧳", "💼", "🎒", "👝"],
+			"sports": ["What's your favorite sport to watch/play? Football, Basketball, Baseball, Soccer, Hockey, or Unlisted", "🏈", "🏀", "⚾", "⚽", "🏒", "🎲"],
+			"nationality": ["Where is your current residence? Choose a flag", "flag"],
+			"patriotism": ["Which country do you have the most positive perception of? Choose a flag", "flag"],
+			"culture": ["which country would you prioritize a vacation to? Choose a flag", "flag"],
+			"mood": ["How would you describe your current mood? Choose a face", "face"],
+			"future" : ["Which face describes 100 years into the future? Choose a face", "face"]
+		},
+		"emoji": {
+			"face": ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "☺️", "😊", "😇", "🙂", "🙃", "😉", "😌", "🥲", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🥱", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "🥸", "😈", "👿", "🤡"],
+			"flag": ["🇺🇸", "🇨🇳", "🇯🇵", "🇩🇪", "🇬🇧", "🇮🇳", "🇫🇷", "🇮🇹", "🇨🇦", "🇰🇷", "🇷🇺", "🇧🇷", "🇦🇺", "🇪🇸", "🇮🇩", "🇲🇽", "🇳🇱", "🇨🇭", "🇸🇦", "🇹🇷"],
+			"numbers": [":zero:", ":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:"],
+			"letters": [":regional_indicator_a:", ":regional_indicator_b:", ":regional_indicator_c:", ":regional_indicator_d:", ":regional_indicator_e:", ":regional_indicator_f:", ":regional_indicator_g:", ":regional_indicator_h:", ":regional_indicator_i:", ":regional_indicator_j:", ":regional_indicator_k:", ":regional_indicator_l:", ":regional_indicator_m:", ":regional_indicator_n:", ":regional_indicator_o:", ":regional_indicator_p:", ":regional_indicator_q:", ":regional_indicator_r:", ":regional_indicator_s:", ":regional_indicator_t:", ":regional_indicator_u:", ":regional_indicator_v:", ":regional_indicator_w:", ":regional_indicator_x:", ":regional_indicator_y:", ":regional_indicator_z:"]
+		}
+	},
+	"places": {
+		"al": {
+			"state": true,
+			"postalCode": "al",
+			"name": "Alabama",
+			"demonym": "Alabamian",
+			"alias": ["al", "alabama"],
+			"y": 32.4,
+			"x": -86.3
+		},
+		"ak": {
+			"state": true,
+			"postalCode": "ak",
+			"name": "Alaska",
+			"demonym": "Alaskan",
+			"alias": ["ak", "alaska"],
+			"y": 58.3,
+			"x": -134.4
+		},
+		"az": {
+			"state": true,
+			"postalCode": "az",
+			"name": "Arizona",
+			"demonym": "Arizonan",
+			"alias": ["az", "arizona"],
+			"y": 33.5,
+			"x": -112.1
+		},
+		"ar": {
+			"state": true,
+			"postalCode": "ar",
+			"name": "Arkansas",
+			"demonym": "Arkansan",
+			"alias": ["ar", "arkansas"],
+			"y": 34.7,
+			"x": -92.3
+		},
+		"ca": {
+			"state": true,
+			"postalCode": "ca",
+			"name": "California",
+			"demonym": "Californian",
+			"alias": ["ca", "california"],
+			"y": 38.6,
+			"x": -121.5
+		},
+		"co": {
+			"state": true,
+			"postalCode": "co",
+			"name": "Colorado",
+			"demonym": "Coloradan",
+			"alias": ["co", "colorado"],
+			"y": 39.7,
+			"x": -105.0
+		},
+		"ct": {
+			"state": true,
+			"postalCode": "ct",
+			"name": "Connecticut",
+			"demonym": "Connecticuter",
+			"alias": ["ct", "connecticut", "connect"],
+			"y": 41.8,
+			"x": -72.7
+		},
+		"de": {
+			"state": true,
+			"postalCode": "de",
+			"name": "Delaware",
+			"demonym": "Delawarean",
+			"alias": ["de", "delaware"],
+			"y": 39.2,
+			"x": -75.5
+		},
+		"fl": {
+			"state": true,
+			"postalCode": "fl",
+			"name": "Florida",
+			"demonym": "Floridian",
+			"alias": ["fl", "florida"],
+			"y": 30.4,
+			"x": -84.3
+		},
+		"ga": {
+			"state": true,
+			"postalCode": "ga",
+			"name": "Georgia",
+			"demonym": "Georgian",
+			"alias": ["ga", "georgia"],
+			"y": 33.7,
+			"x": -84.4
+		},
+		"hi": {
+			"state": true,
+			"postalCode": "hi",
+			"name": "Hawaii",
+			"demonym": "Hawaii resident",
+			"alias": ["hi", "hawaii"],
+			"y": 21.3,
+			"x": -157.9
+		},
+		"id": {
+			"state": true,
+			"postalCode": "id",
+			"name": "Idaho",
+			"demonym": "Idahoan",
+			"alias": ["id", "idaho", "idoho"],
+			"y": 43.6,
+			"x": -116.2
+		},
+		"il": {
+			"state": true,
+			"postalCode": "il",
+			"name": "Illinois",
+			"demonym": "Illinoisan",
+			"alias": ["il", "illinois", "ill"],
+			"y": 39.8,
+			"x": -89.6
+		},
+		"in": {
+			"state": true,
+			"postalCode": "in",
+			"name": "Indiana",
+			"demonym": "Hoosier",
+			"alias": ["in", "Indiana"],
+			"y": 39.8,
+			"x": -86.1
+		},
+		"ia": {
+			"state": true,
+			"postalCode": "ia",
+			"name": "Iowa",
+			"demonym": "Iowan",
+			"alias": ["ia", "iowa"],
+			"y": 41.6,
+			"x": -93.6
+		},
+		"ks": {
+			"state": true,
+			"postalCode": "ks",
+			"name": "Kansas",
+			"demonym": "Kansan",
+			"alias": ["ks", "kansas", "ka"],
+			"y": 39.0,
+			"x": -95.7
+		},
+		"ky": {
+			"state": true,
+			"postalCode": "ky",
+			"name": "Kentucky",
+			"demonym": "Kentuckian",
+			"alias": ["ky", "kentucky"],
+			"y": 38.2,
+			"x": -84.9
+		},
+		"la": {
+			"state": true,
+			"postalCode": "la",
+			"name": "Louisiana",
+			"demonym": "Louisianian",
+			"alias": ["la", "louisiana"],
+			"y": 30.4,
+			"x": -91.2
+		},
+		"me": {
+			"state": true,
+			"postalCode": "me",
+			"name": "Maine",
+			"demonym": "Mainer",
+			"alias": ["me", "maine", "main"],
+			"y": 44.3,
+			"x": -69.8
+		},
+		"md": {
+			"state": true,
+			"postalCode": "md",
+			"name": "Maryland",
+			"demonym": "Marylander",
+			"alias": ["md", "maryland"],
+			"y": 39.0,
+			"x": -76.5
+		},
+		"ma": {
+			"state": true,
+			"postalCode": "ma",
+			"name": "Massachusetts",
+			"demonym": "Massachusettsan",
+			"alias": ["ma", "massachusetts"],
+			"y": 42.4,
+			"x": -71.1
+		},
+		"mi": {
+			"state": true,
+			"postalCode": "mi",
+			"name": "Michigan",
+			"demonym": "Michiganian",
+			"alias": ["mi", "michigan"],
+			"y": 42.7,
+			"x": -84.6
+		},
+		"mn": {
+			"state": true,
+			"postalCode": "mn",
+			"name": "Minnesota",
+			"demonym": "Minnesotan",
+			"alias": ["mn", "minnesota"],
+			"y": 44.9,
+			"x": -93.1
+		},
+		"ms": {
+			"state": true,
+			"postalCode": "ms",
+			"name": "Mississippi",
+			"demonym": "Mississippian",
+			"alias": ["ms", "mississippi"],
+			"y": 32.3,
+			"x": -90.2
+		},
+		"mo": {
+			"state": true,
+			"postalCode": "mo",
+			"name": "Missouri",
+			"demonym": "Missourian",
+			"alias": ["mo", "missouri"],
+			"y": 38.6,
+			"x": -92.2
+		},
+		"mt": {
+			"state": true,
+			"postalCode": "mt",
+			"name": "Montana",
+			"demonym": "Montanan",
+			"alias": ["mt", "montana"],
+			"y": 46.6,
+			"x": -112.0
+		},
+		"ne": {
+			"state": true,
+			"postalCode": "ne",
+			"name": "Nebraska",
+			"demonym": "Nebraskan",
+			"alias": ["ne", "nebraska"],
+			"y": 40.8,
+			"x": -96.7
+		},
+		"nv": {
+			"state": true,
+			"postalCode": "nv",
+			"name": "Nevada",
+			"demonym": "Nevadan",
+			"alias": ["nv", "nevada"],
+			"y": 39.2,
+			"x": -119.8
+		},
+		"nh": {
+			"state": true,
+			"postalCode": "nh",
+			"name": "New Hampshire",
+			"demonym": "New Hampshirite",
+			"alias": ["nh", "newhampshire"],
+			"y": 43.2,
+			"x": -71.5
+		},
+		"nj": {
+			"state": true,
+			"postalCode": "nj",
+			"name": "New Jersey",
+			"demonym": "New Jerseyan",
+			"alias": ["nj", "newjersey"],
+			"y": 40.2,
+			"x": -74.8
+		},
+		"nm": {
+			"state": true,
+			"postalCode": "nm",
+			"name": "New Mexico",
+			"demonym": "New Mexican",
+			"alias": ["nm", "newmexico"],
+			"y": 35.7,
+			"x": -105.9
+		},
+		"ny": {
+			"state": true,
+			"postalCode": "ny",
+			"name": "New York",
+			"demonym": "New Yorker",
+			"alias": ["ny", "newyork"],
+			"y": 42.7,
+			"x": -73.8
+		},
+		"nc": {
+			"state": true,
+			"postalCode": "nc",
+			"name": "North Carolina",
+			"demonym": "North Carolinian",
+			"alias": ["nc", "northcarolina"],
+			"y": 35.8,
+			"x": -78.6
+		},
+		"nd": {
+			"state": true,
+			"postalCode": "nd",
+			"name": "North Dakota",
+			"demonym": "North Dakotan",
+			"alias": ["nd", "northdakota"],
+			"y": 46.8,
+			"x": -100.8
+		},
+		"oh": {
+			"state": true,
+			"postalCode": "oh",
+			"name": "Ohio",
+			"demonym": "Ohioan",
+			"alias": ["oh", "ohio"],
+			"y": 40.0,
+			"x": -83.0
+		},
+		"ok": {
+			"state": true,
+			"postalCode": "ok",
+			"name": "Oklahoma",
+			"demonym": "Oklahoman",
+			"alias": ["ok", "oklahoma"],
+			"y": 35.5,
+			"x": -97.5
+		},
+		"or": {
+			"state": true,
+			"postalCode": "or",
+			"name": "Oregon",
+			"demonym": "Oregonian",
+			"alias": ["or", "oregon"],
+			"y": 45.0,
+			"x": -123.0
+		},
+		"pa": {
+			"state": true,
+			"postalCode": "pa",
+			"name": "Pennsylvania",
+			"demonym": "Pennsylvanian",
+			"alias": ["pa", "pennsylvania"],
+			"y": 40.3,
+			"x": -76.9
+		},
+		"ri": {
+			"state": true,
+			"postalCode": "ri",
+			"name": "Rhode Island",
+			"demonym": "Rhode Islander",
+			"alias": ["ri", "rhodeisland"],
+			"y": 41.8,
+			"x": -71.4
+		},
+		"sc": {
+			"state": true,
+			"postalCode": "sc",
+			"name": "South Carolina",
+			"demonym": "South Carolinian",
+			"alias": ["sc", "southcarolina"],
+			"y": 34.0,
+			"x": -81.0
+		},
+		"sd": {
+			"state": true,
+			"postalCode": "sd",
+			"name": "South Dakota",
+			"demonym": "South Dakotan",
+			"alias": ["sd", "southdakota"],
+			"y": 44.4,
+			"x": -100.4
+		},
+		"tn": {
+			"state": true,
+			"postalCode": "tn",
+			"name": "Tennessee",
+			"demonym": "Tennessean",
+			"alias": ["tn", "tennessee"],
+			"y": 36.2,
+			"x": -86.8
+		},
+		"tx": {
+			"state": true,
+			"postalCode": "tx",
+			"name": "Texas",
+			"demonym": "Texan",
+			"alias": ["tx", "texas"],
+			"y": 30.3,
+			"x": -97.7
+		},
+		"ut": {
+			"state": true,
+			"postalCode": "ut",
+			"name": "Utah",
+			"demonym": "Utahn",
+			"alias": ["ut", "utah"],
+			"y": 40.8,
+			"x": -111.9
+		},
+		"vt": {
+			"state": true,
+			"postalCode": "vt",
+			"name": "Vermont",
+			"demonym": "Vermonter",
+			"alias": ["vt", "vermont"],
+			"y": 44.3,
+			"x": -72.6
+		},
+		"va": {
+			"state": true,
+			"postalCode": "va",
+			"name": "Virginia",
+			"demonym": "Virginian",
+			"alias": ["va", "virgina"],
+			"y": 37.5,
+			"x": -77.4
+		},
+		"wa": {
+			"state": true,
+			"postalCode": "wa",
+			"name": "Washington",
+			"demonym": "Washingtonian",
+			"alias": ["wa", "washington"],
+			"y": 47.0,
+			"x": -122.9
+		},
+		"wv": {
+			"state": true,
+			"postalCode": "wv",
+			"name": "West Virginia",
+			"demonym": "West Virginian",
+			"alias": ["wv", "westvirginia"],
+			"y": 38.4,
+			"x": -81.6
+		},
+		"wi": {
+			"state": true,
+			"postalCode": "wi",
+			"name": "Wisconsin",
+			"demonym": "Wisconsinite",
+			"alias": ["wi", "wisconsin"],
+			"y": 43.0,
+			"x": -89.3
+		},
+		"wy": {
+			"state": true,
+			"postalCode": "wy",
+			"name": "Wyoming",
+			"demonym": "Wyomingite",
+			"alias": ["wy", "wyoming"],
+			"y": 41.1,
+			"x": -104.8
+		},
+		"rn": {
+			"state": false,
+			"postalCode": "rn",
+			"name": "Random",
+			"alias": ["rn", "random"]
+		}
+	},
+	"commands": {
+		"help": {
+			"name": "Help",
+			"short": "?",
+			"alias": ["help", "helps", "?", "how"],
+			"description": "instructs the user how to use specific commands and arguments by showing a variety of information about it.",
+			"usage": "-help [command:string]",
+			"channels": ["bot", "spam"],
+			"arguments": {
+				"command": {
+					"name": "Command",
+					"items": ["help", "travel", "money", "election", "governor", "security", "job", "company", "purchase", "fun"]
+				}
+			}
+		},
+		"travel": {
+			"name": "Travel",
+			"short": "t",
+			"alias": ["t", "trv", "travel", "transport", "move", "transportation"],
+			"description": "allows the user to travel to one state to another through various modes of transportation each with respective advantages.",
+			"usage": "-travel <method:string> <location:string>",
+			"channels": ["transport", "bot", "spam"],
+			"arguments": {
+				"method": {
+					"name": "Method", 
+					"items": ["DRV", "FLY", "RDE", "SAL", "LCH"],
+					"inputs": {
+						"drv": {
+							"short": "drv",
+							"name": "Drive",
+							"alias": ["drv", "drive", "car", "automobile", "highway"],
+							"description": "allows the usage of a cheap, but slow car.",
+							"noun": "Highway",
+							"privateTransport": "Personal Car",
+							"channel": "716471682717712441",
+							"distance": 800,
+							"initialSpeed": 2,
+							"constantSpeed": 55,
+							"initialCost": 2,
+							"constantCost": 23,
+							"connections": {
+								"groupA": ["ak", "al", "ar", "az", "ca", "co", "ct", "de", "fl", "ga", "ia", "id", "il", "in", "ks", "ky", "la", "ma", "md", "me", "mi", "mn", "mo", "ms", "mt", "nc", "nd", "ne", "nh", "nj", "nm", "nv", "ny", "oh", "ok", "or", "pa", "ri", "sc", "sd", "tn", "tx", "ut", "va", "vt", "wa", "wi", "wv", "wy"]
+							},
+							"comingEmojis": [":taxi:", ":blue_car:", ":minibus:"],
+							"leavingEmojis": [":red_car:", ":truck:", ":bus:"],
+							"sounds": ["vrroooooom", "skrrrrtttt", "vrum-vroom"],
+							"comings": ["has arrived in", "just stopped at", "is visiting"],
+							"leavings": ["is driving from", "has exited", "is traveling from"],
+							"come": ["arrive in", "stop at", "travel to"],
+							"leave": ["drive from", "exit", "travel from"]
+						},
+						"fly": {
+							"short": "fly",
+							"name": "Fly",
+							"alias": ["fly", "plane", "airplane", "pilot", "airport", "flight"],
+							"description": "allows the usage of a fast, but moderately priced plane.",
+							"noun": "Flight Path",
+							"privateTransport": "Private Jet",
+							"channel": "722320245922070528",
+							"distance": 1800,
+							"initialSpeed": 8,
+							"constantSpeed": 2,
+							"initialCost": 120,
+							"constantCost": 45,
+							"connections": {
+								"groupA": ["ak", "al", "ar", "az", "ca", "co", "ct", "de", "fl", "ga", "hi", "ia", "id", "il", "in", "ks", "ky", "la", "ma", "md", "me", "mi", "mn", "mo", "ms", "mt", "nc", "nd", "ne", "nh", "nj", "nm", "nv", "ny", "oh", "ok", "or", "pa", "ri", "sc", "sd", "tn", "tx", "ut", "va", "vt", "wa", "wi", "wv", "wy"]
+							},
+							"comingEmojis": [":luggage:", ":airplane_departure:", ":seat:"],
+							"leavingEmojis": [":airplane:", ":airplane_arriving:", ":map:"],
+							"sounds": ["nyeeeerrmm", "whoooosssh", "pweeeeeew"],
+							"comings": ["has deplaned in", "is landing at", "just docked at"],
+							"leavings": ["departuring from", "is taking off from", "is fleeing"],
+							"come": ["deplane in", "dock at", "land at"],
+							"leave": ["departure from", "take off from", "flee"]
+						},
+						"rde": {
+							"short": "rde",
+							"name": "Ride",
+							"alias": ["rde", "ride", "train", "railway", "rail"],
+							"description": "allows the usage of a fast, but limited train.",
+							"noun": "Railway",
+							"channel": "716471682717712441",
+							"distance": 1400,
+							"initialSpeed": 10,
+							"constantSpeed": 4,
+							"initialCost": 65,
+							"constantCost": 1,
+							"connections": {
+								"groupA": ["la", "ms", "al", "ga", "sc", "nc", "va", "md", "de", "pa", "nj", "ny"],
+								"groupB": ["il", "in", "oh", "ky", "wv", "va", "md", "de", "pa", "nj", "ny"],
+								"groupC": ["fl", "ga", "sc", "nc", "va", "md", "de", "pa", "nj", "ny"],
+								"groupP": ["va", "md", "de", "pa", "nj", "ny", "ct", "me", "nh", "vt"],
+								"groupD": ["va", "md", "de", "pa", "nj", "ny", "ct", "ri", "me"],
+								"groupE": ["or", "wa", "id", "mt", "nd", "mn", "wi", "il"],
+								"groupF": ["ca", "az", "nm", "co", "ks", "mo", "ia", "il"],
+								"groupG": ["ca", "nv", "ut", "co", "ne", "ia", "il"],
+								"groupH": ["ca", "az", "nm", "tx", "ar", "mo", "il"],
+								"groupI": ["il", "in", "oh", "pa", "ny", "ma"],
+								"groupJ": ["ca", "az", "nm", "tx", "la"],
+								"groupK": ["la", "ms", "tn", "ky", "il"],
+								"groupL": ["ca", "or", "wa"],
+								"groupM": ["il", "in", "mi"],
+								"groupN": ["ma", "nh", "me"],
+								"groupO": ["tx", "ok"]
+							},
+							"comingEmojis": [":bullettrain_side:", ":light_rail:", ":tram:"],
+							"leavingEmojis": [":bullettrain_front:", ":station:", ":monorail:"],
+							"sounds": ["clieeketee", "choo-chooo", "chugachuga"],
+							"comings": ["has rode to", "is alighting to", "just ended in"],
+							"leavings": ["is riding from", "is boarding at", "has appeared in"],
+							"come": ["ride to", "get off at", "appear in"],
+							"leave": ["ride from", "boart at", "appear in"]
+						},
+						"sal": {
+							"short": "sal",
+							"name": "Sail",
+							"alias": ["sal", "cruise" ,"sail", "boat", "water"],
+							"description": "allows the usage of a cheap, but limited boat.",
+							"noun": "Cruise Routes",
+							"privateTransport": "Sailboat",
+							"channel": "716471682717712442",
+							"distance": 3000,
+							"initialSpeed": 7,
+							"constantSpeed": 8,
+							"initialCost": 50,
+							"constantCost": 20,
+							"connections": {
+								"groupA": ["ak", "ca", "hi", "or", "wa"],
+								"groupB": ["al", "ct", "de", "fl", "ga", "la", "me", "md", "ma", "ms", "nh", "nj", "ny", "nc", "ri", "sc", "tx", "va"]
+							},
+							"comingEmojis": [":cruise_ship:", ":ocean:", ":ship:"],
+							"leavingEmojis": [":sunrise:", ":ferry:", ":anchor:"],
+							"sounds": ["vrreeeeeee", "buuurrrrrr", "vummmmmmmm"],
+							"comings": ["has cruised to", "is voyaging to", "just navigated to"],
+							"leavings": ["had left", "is boating from", "has parted from"],
+							"come": ["navigate to", "boat to", "part to"],
+							"leave": ["leave", "boat from", "part from"]
+						},
+						"lch": {
+							"short": "lch",
+							"name": "Launch",
+							"alias": ["launch", "lch", "space", "spaceflight", "orbital", "spc", "rocket"],
+							"description": "allows the usage of a fast, but expensive rocket.",
+							"noun": "Launch Pad",
+							"channel": "722089729922695309",
+							"distance": 15000,
+							"initialSpeed": 3,
+							"constantSpeed": 1,
+							"initialCost": 150000,
+							"constantCost": 10000,
+							"connections": {
+								"groupA": ["ak", "al", "ar", "az", "ca", "co", "ct", "de", "fl", "ga", "hi", "ia", "id", "il", "in", "ks", "ky", "la", "ma", "md", "me", "mi", "mn", "mo", "ms", "mt", "nc", "nd", "ne", "nh", "nj", "nm", "nv", "ny", "oh", "ok", "or", "pa", "ri", "sc", "sd", "tn", "tx", "ut", "va", "vt", "wa", "wi", "wv", "wy"]
+							},
+							"comingEmojis": [":rocket:", ":woman_astronaut:", ":earth_americas:"],
+							"leavingEmojis": [":comet:", ":man_astronaut:", ":milky_way:"],
+							"sounds": ["shshshshss", "ding-ding-", ".........."],
+							"comings": ["is souring to", "is touching down at", "just steered towards"],
+							"leavings": ["had blasted off from", "is lifting off from", "has launched from"],
+							"come": ["soar towards", "touch down at", "steer towards"],
+							"leave": ["blast off from", "lift off from", "launch from"]
+						}
+					}
+				},
+				"location": {
+					"name": "Location",
+					"items": ["AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY", "RN"]
+				}
+			}
+		},
+		"money": {
+			"name": "Money",
+			"short": "$",
+			"alias": ["money", "currency", "economy", "$", "cash", "mny"],
+			"description": "provides multiple financial services exclusively involving money and transactions.",
+			"usage": "-money <command:string> ...",
+			"channels": ["store", "bot", "spam"],
+			"arguments": {
+				"command": {
+					"name": "Command",
+					"items": ["BAL", "AST", "PAY", "ADM"],
+					"inputs": {
+						"bal": ["bal", "balance", "wallet", "bank"],
+						"ast": ["ast", "asset", "assets", "property"],
+						"pay": ["pay", "payment", "give", "donate"],
+						"adm": ["adm", "admin", "mod", "moderator"]
+					}
+				},
+				"currency": {
+					"name": "Currency",
+					"items": "Scope: `Integers`|\nBetween: `-1,000,000,000 - 1,000,000,000`|\nSpecial Characters: `Only digits and commas`"
+				},
+				"target": {
+					"name": "Target",
+					"items": "Scope: `Mention`|\nType: `User`"
+				},
+				"action": {
+					"name": "Action",
+					"items": ["ADD", "SUB", "SET"],
+					"inputs": {
+						"add": {
+							"alias": ["add", "adds", "addition", "give", "grant", "give", "award"]
+						},
+						"sub": {
+							"alias": ["remove", "sub", "rmv", "subtract", "takeaway"]
+						},
+						"set": {
+							"alias": ["set", "change", "reset"]
+						}
+					}
+				}
+			}
+		},
+		"election": {
+			"name": "Election",
+			"short": "e",
+			"alias": ["election", "elect", "elected", "elections", "e", "vote"],
+			"description": "provides the commands to handle community election services such as application and voting.",
+			"usage": "-election <command:string> ...",
+			"channels": ["state", "bot", "spam"],
+			"arguments": {
+				"command": {
+					"name": "Command",
+					"items": ["RUN", "VOT", "DTA", "CND"],
+					"inputs": {
+						"run": ["run", "running", "runs", "ran", "compete", "race", "participate", "compete", "apply", "application"],
+						"vot": ["vot", "vote", "voted", "voting", "votes", "elect", "pick"],
+						"dta": ["dta", "data", "datas", "information", "info", "stat", "stats", "statistics"],
+						"cnd": ["cnd", "cand", "candidate", "candidates", "applicant", "applicants", "nominee", "nominees", "contestant"]
+					}
+				},
+				"target": {
+					"name": "Target",
+					"items": "Scope: `Mention`|\nType: `User`"
+				},
+				"speech": {
+					"name": "Speech",
+					"items": "Scope: `Message`|\nLimit: `256 characters or fewer`"
+				}
+			},
+			"event": {
+				"application": {
+          			"process": "application",
+					"title": "Application",
+					"color": "orange",
+					"description": "The local election will begin soon, type `-election run <speech:message>` to run as a candidate."
+				},
+				"voting": {
+          			"process": "voting",
+					"title": "Voting",
+					"color": "white",
+					"description": "The local election has begun, type `-election vote <target:mention>` to vote for your favorite candidate."
+				},
+				"result": {
+          			"process": "result",
+					"title": "Results",
+					"color": "blue",
+					"description": "The local election has ended, the previous governor has been replaced by the winner of this election."
+				},
+				"cancelled": {
+         			"process": "cancelled",
+					"title": "Cancelled",
+					"color": "orange",
+					"description": "Election requirements doesn't permit states with fewer than 5 population, or states with no running candidates to start elections."
+				},
+				"empty": {
+          			"process": "empty",
+					"title": "Vacant",
+					"color": "orange",
+					"description": "Due to the local election being cancelled, this state has no local government officials till the next election in 50 days."
+        		}
+			}
+		},
+		"governor": {
+			"name": "Governor",
+			"short": "g",
+			"alias": ["g", "governor", "governors", "gov", "guv"],
+			"description": "allows governors to control their state with multiple commands.",
+			"usage": "-governor <command:string> ...",
+			"channels": ["state", "bot", "spam"],
+			"arguments": {
+				"command": {
+					"name": "Command",
+					"items": "Ban: `BAN`| Unban: `UNB`| Channel: `CHN`| Welcome Message: `WLC`| Announcement: `ANN`",
+					"inputs": {
+						"ban": ["ban", "banned", "banning", "bans", "deport", "deports", "deportation", "deported", "exile"],
+						"unb": ["unb", "unban", "unbans", "unbanned", "unbanning"],
+						"chn": ["chn", "channel", "channels", "chat", "group", "room"],
+						"wlc": ["wlc", "welcome", "welcomes", "greeting", "greetings"],
+						"ann": ["ann", "announcement", "message", "msg", "announce"]
+					}
+				},
+				"target": {
+					"name": "Target",
+					"items": "Scope: `Mention`|\nType: `User`"
+				},
+				"channel": {
+					"name": "Channel",
+					"items": "Scope: `Mention`|\nType: `Channel`"
+				},
+				"explanation": {
+					"name": "Explanation",
+					"items": "Scope: `Message`|\nLimit: `256 characters or fewer`"
+				},
+				"channelType": {
+					"name": "Type",
+					"items": "Text: `TXT`| Voice: `VOC`",
+					"inputs": {
+						"txt": ["0", "txt", "text", "texts"],
+						"voc": ["2", "voc", "voice", "voip"]
+					}
+				},
+				"action": {
+					"name": "Action",
+					"items": "Create: `CRT`| Delete: `DEL`| Update: `UPD`",
+					"inputs": {
+						"crt": ["crt", "create", "created", "creates"],
+						"del": ["del", "delete", "deleted", "deletes"],
+						"upd": ["upd", "update", "updated", "updates"]
+					}
+				},
+				"settings": {
+					"name": "Channel Settings",
+					"items": "**[RICH TEXT]** Name: `NAM`| Topic: `TPC`| Permissions: `PRM`| Rate Limit Per User: `RTE`| NSFW: `NSF`| User Limit: `USR`| Bitrate: `BIT`",
+					"inputs": {
+						"nam": ["nam", "name", "names", "named", "title"],
+						"tpc": ["tpc", "topic", "topics", "description", "information"],
+						"prm": ["prm", "permission", "permissions", "perms", "perm", "privilege"],
+						"rte": ["rte", "rate", "ratelimit", "ratelimitperuser"],
+						"nsf": ["nsf", "nsfw", "nsfl", "safe"],
+						"usr": ["usr", "user", "userlimit"],
+						"bit": ["bit", "bitrate", "kbps"]
+					}
+				},
+				"embed": {
+					"name": "Embed",
+					"items": "Scope: `Boolean`"
+				},
+				"message": {
+					"name": "Message",
+					"items": "Scope: `Message`|\nLimit: `1024 characters or fewer`"
+				},
+				"embedSettings": {
+					"name": "Embed Settings",
+					"items": "**[RICH TEXT]** Content: `CON`| Title: `TTL`| Description: `DES`| Hex Color: `RGB`| Footer: `FTR`| Fields: `FLD`| Picture: `PIC`",
+					"inputs": {
+						"con": ["con", "content", "contents"],
+						"ttl": ["ttl", "title", "name", "subject"],
+						"des": ["des", "description", "text"],
+						"rgb": ["rgb", "color", "hex", "paint"],
+						"ftr": ["ftr", "footer", "foot"],
+						"fld": ["fld", "field", "fields"],
+						"pic": ["pic", "picture", "image", "png", "jpg"]
+					}
+				}
+			}
+		},
+		"security": {
+			"name": "Security",
+			"short": "s",
+			"alias": ["security", "sec", "mod", "protect", "s"],
+			"description": "streamlines the user's process of reporting and moderating exclusively used by moderators.",
+			"usage": "-security <accusation:string> ...",
+			"channels": ["all"],
+			"arguments": {
+				"accusation": {
+					"name": "Accusation",
+					"items": "Spam: `SPM`| Harrassment: `HAR`| Discrimination: `DIS`| Mass Mention: `MTN`| Picture: `PIC`| Advertise: `ADS`| Moderation: `MOD`| Age: `AGE`| Client: `CLI`| Custom: `CST`| Info: `INF`",
+					"inputs": {
+						"spm": {
+							"alias": ["spm", "spam", "spamming", "junk"],
+							"name": "Spam",
+							"adminDescription": "has received a warning for spamming.",
+							"description": "spamming is rightfully forbidden. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true
+						},
+						"har": {
+							"alias": ["har", "harass", "harrassment", "bully", "bul", "abuse", "exploit", "attacks", "attack"],
+							"name": "Harrassment",
+							"adminDescription": "has received a warning for harrassment.",
+							"description": "harrassment is rightfully forbidden. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true
+						},
+						"dis": {
+							"alias": ["dis", "discrimination", "hate", "racism", "racist", "bigotry", "sexism", "sexist", "prejudice", "prejudiced", "homophobic"],
+							"name": "Discrimination",
+							"adminDescription": "has received a warning for discriminating.",
+							"description": "discrimination is rightfully forbidden. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true              
+						},
+						"mtn": {
+							"alias": ["mtn", "mention", "mentioned", "mentions", "png", "ping"],
+							"name": "Mass Mention",
+							"adminDescription": "has received a warning for mass mentioning",
+							"description": "mass mentioning is rightfully forbidden. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true
+						},
+						"pic": {
+							"alias": ["pic", "picture", "img", "image", "images", "photo", "photos"],
+							"name": "Picture",
+							"adminDescription": "has received a warning for mass mentioning",
+							"description": "mass mentioning is rightfully forbidden. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true 
+						},
+						"ads": {
+							"alias": ["ads", "ad", "advertise", "advertisement", "advertising", "commercial", "flyer", "promo", "promotion"],
+							"name": "Advertise",
+							"adminDescription": "has received a warning for mass advertising",
+							"description": "advertising is rightfully forbidden. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true
+						},
+						"mod": {
+							"alias": ["mod", "moderate", "moderator", "moderation", "delete", "roles", "channels"],
+							"name": "Moderation",
+							"adminDescription": "has received a warning for malicious moderation",
+							"description": "malicious moderation is rightfully forbidden. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true
+						},
+						"age": {
+							"alias": ["age", "verifyage", "under13", "13+", "13", "ages", "young", "underage"],
+							"name": "Age",
+							"adminDescription": "has received an age confirmation prompt.",
+							"description": "due to Discord's Terms of Service and United States' Laws and Regulations, you cannot be under the age of 13 years old on discord. You are receiving this because your age was stated or implied, please confirm your age to protect us legally.",
+							"color": "white",
+							"prompt": {
+								"field": "`I am 13 years old or over`👍| `I am under 13 years old`👎",
+								"emoji": ["👍", "👎"],
+								"👍": {
+									"color": "blue",
+									"adminField": "has confirmed they are 13 years old or over.",
+									"field": "You have confrimed you are 13 years old or over, no adverse actions have been enacted."
+								},
+								"👎": {
+									"color": "orange",
+									"adminField": "has denied they are under 13 years old, They have been removed from the guild.",
+									"field": "You've been removed from the guild for being underaged. By joining back into the server, you have confirmed you are no longer under 13 years old, https://discord.gg/",
+									"invite": true,
+									"kick": true
+								},
+								"end": {
+									"color": "orange",
+									"adminField": "has ignored they are under 13 years old, They have been removed from the guild.",
+									"field": "You've been removed from the guild for not confirming your age. By joining back into the server, you have confirmed you were never no longer under 13 years old, https://discord.gg/",
+									"invite": true,
+									"kick": true
+								}
+							}
+						},
+						"cst": {
+							"alias": ["cst", "custom", "cust", "customed", "cus", "warn", "warning", "warned"],
+							"adminDescription": "has received a custom warning for",
+							"description": "you've received a custom warning about your recent actions. If this persists, we will enforce moderator powers. If this ruling was unjust, you can contact an admin privately.",
+							"warn": true
+						},
+						"inf": {
+							"alias": ["inf", "inform", "information", "info", "tip", "message", "msg", "messaged"],
+							"adminDescription": "has received information about",
+							"description": "you've received information about your recent actions. No moderator actions have been enforced.",
+							"color": "white"
+						}
+					}
+				},
+				"target": {
+					"name": "Target",
+					"items": "Scope: `Mention`|\nType: `User`"
+				},
+				"explanation": {
+					"name": "Explanation",
+					"items": "Scope: `Message`|\nLimit: `256 characters or fewer`"
+				},
+				"title": {
+					"name": "Title",
+					"items": "Scope: `String`|\nLimit: `16 characters or fewer`|\nSpecial Characters: `No spaces`"
+				}
+			}
+		},
+		"job": {
+			"name": "Job",
+			"short": "j",
+			"alias": ["job", "employ", "j", "work", "jobs"],
+			"description": "offers the tools to start employment or find employment.",
+			"usage": "-job <command:string> ...",
+			"channels": ["bot", "spam"],
+			"arguments": {
+				"command": {
+					"name": "Action",
+					"items": "Apply: `APL`| Work: `WRK`| Catalog: `CTG`| Create: `CRT`| Update: `UPD`| Delete: `DEL`| Info: `INF`",
+					"inputs": {
+						"apl": ["apply", "apl", "application"],
+						"wrk": ["wrk", "work", "works"],
+						"ctg": ["ctg", "catalog", "list"],
+						"crt": ["crt", "create", "created", "creates"],
+						"upd": ["upd", "update", "updated", "updates"],
+						"del": ["del", "delete", "deleted", "deletes"],
+						"inf": ["inf", "info", "information", "data"]
+					}
+				},
+				"ticker": {
+					"name": "Ticker",
+					"items": "Scope: `Message`|\nLimit: `5 characters`"
+				},
+				"title": {
+					"name": "Job Name",
+					"items": "Scope: `Message`|\nLimit: `16 characters`"
+				},
+				"operation": {
+					"name": "Operation",
+					"items": "Math: `MTH`| Speed: `SPD`| Precision: `PRC`| Count: `CNT`| Inspect: `INS`",
+					"inputs": {
+						"math": ["mth", "math", "mathematics"],
+						"speed": ["spd", "speed", "race"],
+						"precision": ["prc", "precision", "accuracy"],
+						"count": ["cnt", "count", "total"],
+						"inspect": ["ins", "inspect", "review"]
+					}
+				},
+				"settings": {
+					"name": "Settings",
+					"items": "**[RICH TEXT]** Name: `NAM`| Private: `PVT`| Operation: `OPR`| Frequency: `FRQ`| Cooldown: `CDN`",
+					"inputs": {
+						"nam": ["nam", "name", "title"],
+						"pvt": ["pvt", "private", "invite"],
+						"opr": ["opr", "operation", "work"],
+						"frq": ["frq", "frequency", "number"],
+						"cdn": ["cdn", "cooldown", "time"]
+					}
+				}
+			}
+		},
+		"company": {
+			"name": "Company",
+			"short": "c",
+			"alias": ["company", "c", "corporation", "business"],
+			"description": "enables you to establish a corporation and customize it.",
+			"usage": "-company <command:string> ...",
+			"channels": ["bot", "spam"],
+			"arguments": {
+				"command": {
+					"name": "Action",
+					"items": "Create: `CRT`| Update: `UPD`| Delete: `DEL`",
+					"inputs": {
+						"crt": ["crt", "create", "created", "creates"],
+						"upd": ["upd", "update", "updated", "updates"],
+						"del": ["del", "delete", "deleted", "deletes"]
+					}
+				},
+				"ticker": {
+					"name": "Ticker",
+					"items": "Scope: `Message`|\nLimit: `5 characters`"
+				},
+				"title": {
+					"name": "Title",
+					"items": "Scope: `Message`|\nLimit: `16 characters`"
+				},
+				"settings": {
+					"name": "Settings",
+					"items": "**[RICH TEXT]** Ticker: `TKR`| Title: `TTL`",
+					"inputs": {
+						"tkr": ["tkr", "ticker", "stock", "symbol"],
+						"ttl": ["ttl", "title", "name", "subject"]
+					}
+				}
+			}
+		},
+		"purchase": {
+			"name": "Purchase",
+			"short": "p",
+			"alias": ["purchase", "p", "buy", "pay", "spend"],
+			"description": "permits the ability to buy things from an official store.",
+			"usage": "-purchase <item:string> ...",
+			"channels": ["store", "bot", "spam"],
+			"arguments": {
+				"item": {
+					"name": "Items",
+					"items": "Gift: `GFT`| Personal Car: `CAR`| Sailboat: `SAL`| Private Jet: `JET`",
+					"inputs": {
+						"gft": {
+							"name": "Gift",
+							"alias": ["gft", "gift", "donate", "charity", "giveaway", "gifts"],
+							"description": "By donating to the community charity, a large portion of your donation will be given to spread throughout the server's lowest net worth people.",
+							"items": "**[RICH TEXT]** Value: `VAL`",
+							"inputs": {
+								"val": {
+									"name": "Value",
+									"alias": ["val", "value", "price", "worth", "values"],
+									"input": "integer"
+								}
+							}
+						},
+						"car": {
+							"name": "Personal Car",
+							"alias": ["car", "vehicle", "motor"],
+							"description": "With a personal car, transportation costs for driving is significantly reduced."
+						},
+						"sal": {
+							"name": "Sailboat",
+							"alias": ["sailboat", "sal", "boat", "yacht", "motor"],
+							"description": "With a sailboat, transportation costs for sailing is significantly reduced."
+						},
+						"jet": {
+							"name": "Private Jet",
+							"alias": ["jet", "plane", "airplane", "aircraft"],
+							"description": "With a private jet, transportation costs for flying is significantly reduced."
+						}
+					}
+				},
+				"gftSettings": {
+					"name": "Settings",
+					"items": "**[RICH TEXT]** Value: `VAL`"
+				}
+			}
+		},
+		"setup": {
+			"channels": ["all"],
+			"arguments": {
+				"embedSettings": {
+					"name": "Embed Settings",
+					"items": "**[RICH TEXT]** Content: `CON`| Title: `TTL`| Description: `DES`| Hex Color: `RGB`| Fields: `FLD`| Picture: `PIC`",
+					"inputs": {
+						"con": ["con", "content", "contents"],
+						"ttl": ["ttl", "title", "name", "subject"],
+						"des": ["des", "description", "text"],
+						"rgb": ["rgb", "color", "hex", "paint"],
+						"ftr": ["ftr", "footer", "foot"],
+						"fld": ["fld", "field", "fields"],
+						"pic": ["pic", "picture", "image", "png", "jpg"]
+					}
+				}
+			}
+		},
+		"fun": {
+			"name": "Fun",
+			"short": "f",
+			"alias": ["f", "fun", "funny", "game", "games"],
+			"description": "maintains control over commands that designed for user enjoyment.",
+			"usage": "-fun <game:string> ...",
+			"channels": ["bot", "spam", "state"],
+			"arguments": {
+				"game": {
+					"name": "Game",
+					"items": "Either: `WYR`| Riddle: `RDL`| Pictionary: `PIC`| Deception: `DEC`| Gamble: `GAM`",
+					"inputs": {
+						"wyr": ["wyr", "either", "dilemma", "wouldyourather"],
+						"rdl": ["rdl", "riddle", "riddles"],
+						"pic": ["pic", "pictionary", "picture", "charades"],
+						"dec": ["dec", "deception", "deduction"],
+						"gam": ["gam", "gamble", "gamblin"],
+						"chs": ["chs", "chess"]
+					}
+				},
+				"constants": {
+					"randomWords": ["acorn", "adult", "afro", "airplane", "ant", "apple", "archer", "arrow", "baby", "backpack", "bacon", "bait", "bald", "ball", "balloon", "banana", "bandaid", "barber", "barbwire", "baseball", "bat", "bathtub", "beach", "beanbag", "beard", "bed", "bees", "bell", "belt", "bike", "bikini", "bird", "blonde", "boat", "boil", "bones", "book", "bookmark", "boot", "bottle", "bow", "bowl", "bowling", "box", "bracelet", "braces", "braid", "brain", "branch", "bread", "brick", "bridge", "broom", "brush", "bubble", "bucket", "bug", "bun", "bunny", "burger", "bus", "butter", "button", "cactus", "camel", "camera", "camp", "can", "canada", "candle", "candy", "cane", "cannon", "cape", "car", "carrot", "cast", "cat", "cereal", "chair", "chalk", "check", "cheese", "cherry", "chess", "chicken", "chips", "circle", "claw", "clock", "cloud", "clown", "coat", "coconut", "coffee", "coin", "comb", "comet", "comic", "compass", "computer", "concert", "cone", "cookie", "corgi", "corn", "couch", "cow", "cowboy", "crab", "crown", "crutches", "cry", "cube", "cup", "cupcake", "curtain", "dance", "dancer", "dandruff", "dart", "dentist", "desk", "diamond", "dice", "dinosaur", "disco", "dog", "doll", "dominos", "door", "dragon", "draw", "drawing", "dream", "dress", "driver", "drool", "drums", "duck", "earbuds", "earring", "ears", "egg", "elbow", "elephant", "elevator", "eraser", "eyebrow", "eyelash", "eyes", "face", "fan", "fang", "farm", "feather", "fire", "fish", "fishing", "flag", "floss", "flowers", "flute", "football", "forest", "fountain", "freckle", "freezer", "fridge", "fries", "garbage", "garden", "gate", "ghost", "giraffe", "glasses", "gloves", "goat", "goatee", "goldfish", "golf", "grapes", "graph", "grass", "green", "gum", "hair", "hammer", "hand", "happy", "harp", "hat", "head", "heart", "helmet", "hero", "hexagon", "highway", "hoe", "hook", "horn", "horse", "house", "idea", "igloo", "island", "jacket", "jar", "juggle", "kayak", "ketchup", "key", "keyboard", "kick", "kiss", "kitchen", "kite", "kitten", "knee", "knife", "ladder", "ladybug", "lake", "leaf", "leash", "lemon", "letter", "light", "lion", "lips", "lock", "locker", "lollipop", "loop", "lung", "magic", "mail", "map", "mask", "maze", "mermaid", "milk", "mirror", "mochi", "mohawk", "money", "monkey", "moon", "mountain", "mouse", "mouth", "mow", "mushroom", "music", "mustache", "nail", "nametag", "napkin", "neck", "needle", "north", "nose", "ocean", "octopus", "onion", "open", "orange", "oval", "owl", "paint", "painter", "pajamas", "panda", "pants", "paper", "pasta", "peace", "peach", "pear", "pearl", "pen", "pencil", "penguin", "pentagon", "pepper", "perfume", "phone", "photo", "piano", "pie", "pig", "pillow", "pinata", "pirate", "pizza", "plate", "pocket", "pole", "police", "pool", "popcorn", "postcard", "poster", "pot", "potato", "power", "pretzel", "prison", "puddle", "purse", "puzzle", "pyramid", "quilt", "rain", "rainbow", "record", "rich", "ring", "river", "robot", "rocket", "roof", "rope", "ruler", "safe", "salt", "sandwich", "santa", "saturn", "saw", "scarf", "scissors", "shadow", "shampoo", "shark", "shell", "shirt", "shoe", "shoelace", "shorts", "shovel", "shower", "sick", "sign", "singer", "sink", "ski", "skirt", "sky", "sledding", "sleep", "slide", "smile", "smoke", "snail", "snake", "sneeze", "snow", "snowball", "snowman", "soap", "soccer", "socks", "south", "space", "speaker", "sphere", "spider", "sponge", "spoon", "square", "squirrel", "stairs", "stamp", "staple", "stapler", "star", "starfish", "statue", "stick", "stickers", "stop", "straw", "stretch", "student", "suit", "suitcase", "sun", "sunrise", "sunset", "swimmer", "swimsuit", "swing", "sword", "table", "tail", "tape", "tattoo", "tea", "teacher", "teeth", "tennis", "thorn", "thunder", "ticket", "tie", "tire", "toast", "toaster", "toe", "toilet", "tomato", "tongue", "tornado", "towel", "train", "tree", "triangle", "trophy", "truck", "turkey", "turtle", "tutu", "tv", "umbrella", "unicorn", "unicycle", "usa", "vacuum", "vampire", "vine", "volcano", "vote", "waffle", "watch", "water", "wave", "wax", "web", "wedding", "werewolf", "whistle", "wind", "window", "wings", "wink", "winner", "world", "worm", "yolk", "you", "zebra", "zit"],
+					"questions": ["apple", "tree", "soccer", "sun", "North America", "South America", "Europe", "Africa", "Asia", "Australia", "Antartica", "bread", "grass", "corner", "center", "horizon line", "sword", "one", "jump", "bingo", "crouch", "slide", "stand", "math", "Earth", "money", "bird", "flower", "bald", "nucleus", "gravity", "taco", "laser", "dozen", "color", "letter G", "outerspace", "you", "illegal", "safe", "diagonal", "pi", "checkerboard", "hole", "red", "line", "internet", "giraffe", "Saturn", "decrease", "roof", "door", "mirror", "explode", "outlier", "bull", "dividends", "singer", "humor", "fountain", "ignore", "shop", "coach", "even", "blue", "politics", "your height", "your gender", "your internet speed", "your name", "your weakness", "your strength", "your favorite color", "your personality"]
+				},
+				"deceptionSettings": {
+					"name": "Deception Settings",
+					"items": "**[RICH TEXT]** Wager: `WGR`",
+					"inputs": {
+						"wgr": ["wager", "bet", "wgr"]
+					}
+				},
+				"currency": {
+					"name": "Currency",
+					"items": "Scope: `Integers`|\nBetween: `0 - 1,000,000,000`|\nSpecial Characters: `Only digits and commas`"
+				},
+				"odds": {
+					"name": "Betting Odds",
+					"items": "Scope: `Integers`|\nBetween: `1 - 99`|"
+				}
+			}
+		}
+	}
 }
