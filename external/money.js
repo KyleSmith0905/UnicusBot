@@ -11,7 +11,10 @@ module.exports = {
 		let member = message.member;
 		const guild = message.channel.guild;
 		let mention = message.mentions[0] || message.member;
+		console.log (1)
 		let userInfo = await getUserInfo (mention, guild);
+		console.log (2)
+		console.log (userInfo)
 		if (commandConfig.bal.includes(args[1])) {
 			if ((args[2] && !args[2].match(/^<@!?(\d+)>$/)) || args[3]) return errorLog (message, args, 'money', 'invalidUsage', ['target']);
 			const balance = currencyFormat(userInfo.money)
