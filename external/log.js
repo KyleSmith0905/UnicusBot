@@ -728,9 +728,9 @@ client.on ('messageCreate', async message => {
         );
         allStatesChannel.createMessage ({embed: embed}, (attachment) ? {file: attachment.toBuffer(), name: 'image.png'} : null);
     }
-    else if (message.channel.parentID == process.env.CHANNEL_P_STARTED && message.channel.name.charAt(0) == '╙') {
+    else if (message.channel.parentID == process.env.CHANNEL_P_STARTED && message.channel.name.startsWith('╙')) {
         message.delete('Automated');
-        if (message.content.charAt(0) != '-') return;
+        if (!message.content.startsWith('-')) return;
         let state = message.content.toLowerCase().substring(1).replace(' ', '');
         let postalCode = Object.keys(config.places).find(key => config.places[key].alias.includes (state));
         if (!postalCode) return;

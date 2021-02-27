@@ -5,12 +5,13 @@ function randomColor (color) {
 }
 
 async function getUserInfo (member, guild) {
+    if (!member?.id || !guild?.id) return errorLog (message, args, 'General', 'general')
     let userInfo = await userInfoDB.findOne ({
         userID: member.id,
         guildID: guild.id
     })
     if (!userInfo) {
-        const newUserInfo = await new userInfoDB ({
+        const newUserInfo = new userInfoDB({
             userID: member.id,
             guildID: guild.id,
             experience: 10,

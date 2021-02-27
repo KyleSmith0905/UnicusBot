@@ -143,7 +143,7 @@ module.exports = {
             }
             message.channel.createMessage ({content: member.mention + ',', embed: embed});
         }
-        else if (commandConfig.chs.includes (args[1]) && false) {
+        else if (commandConfig.chs.includes (args[1]) && process.env.CHANNEL_TRANSPORT == '716471682717712439') {
             let embedStart = {
                 title: 'Fun - Chess',
                 color: randomColor ('white'),
@@ -156,7 +156,7 @@ module.exports = {
                 ]
             }
             let lobbyMessage = await message.channel.createMessage ({content: member.mention + ',', embed: embedStart});
-            gameLobby (lobbyMessage, embedStart, 'Chess', member.mention, 2, 2, chessStarter);
+            gameLobby (lobbyMessage, embedStart, 'Chess', member.mention, 2, 2, chessStarter, 0);
         }
         else return errorLog (message, args, 'Fun', 'invalidUsage', ['game']);
     }
@@ -173,18 +173,19 @@ async function gameLobby (sentMessage, sentEmbed, gameName, host, minPlayers, ma
         setTimeout(async () => {
             let userInfos = [];
             if (compareID != startID) return;
-            let messageReaction = await sentMessage.channel.getMessageReaction(sentMessage.id, '👍', maxPlayers);
+            let messageReaction = await sentMessage.channel.getMessageReaction(sentMessage.id, '👍', maxPlayers + 1);
             let userInfoPromise = new Promise ((resolve) => {
-                if (wager == 0) return resolve()
+                if (wager == 0) return resolve();
                 messageReaction.forEach(async (ele,i) => {
                     let userInfo = await getUserInfo(ele.id, sentMessage.channel.guild.id);
                     userInfos.push(userInfo);
-                    if (i == messageReaction.length-1) resolve()
+                    if (i == messageReaction.length-1) resolve();
                 })
             })
             userInfoPromise.then (() => {
                 messageReaction = messageReaction.filter ((ele, i) => !ele.bot && (wager == 0 || userInfos[i].money >= wager));
                 if (messageReaction.length < minPlayers) return;
+                if (messageReaction.length > maxPlayers) messageReaction.pop();
                 collector.stop ('started');
                 gameFunction (sentMessage, messageReaction, wager);
             })
@@ -493,7 +494,41 @@ async function deceptionRound (startMessage, startPlayers, startEmbed, wager) {
 }
 
 async function chessStarter (startMessage, startPlayers) {
-    let board = ['cdeghedc', 'bbbbbbbb', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'BBBBBBBB', 'CDEGHEDC'];
+    let board = ['cdefgedc', 'bbbbbbbb', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'BBBBBBBB', 'CDEFGEDC'];
+    let playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
+    let turn = Math.floor(Math.random() * 2);
+    let embedGame = {
+        title: 'Fun - Pictionary',
+        color: randomColor ('blue'),
+        timestamp: new Date().toISOString(),
+        fields: [
+            {name: 'How to Move:', value: 'Use [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)) to interact with the chess board.', inline: false},
+            {name: 'Notation Resources:', value: '[FIDE Handbook](https://handbook.fide.com/chapter/E012018)', inline: true},
+            {name: '\u200b', value: '[Notation Cheat Sheet](https://cheatography.com/davechild/cheat-sheets/chess-algebraic-notation/)', inline: true},
+            {name: '\u200b', value: '[Notation Trainer](https://mattjliu.github.io/Notation-Trainer/#/practice)', inline: true},
+            {name: 'Turn:', value: 'It is ' + startPlayers[turn].mention + '\'s turn. Use `move <notation>` to move.', inline: false},
+            {name: 'Chess Board:', value: lettersToChess(board.join('\n')), inline: false},
+        ]
+    }
+    let message = await startMessage.channel.createMessage ({content: playerMentions + ',', embed: embedGame});
+    chessRound (startMessage, startPlayers)
+}
+
+function chessRound (startMessage) {
+    let filter = (msg) => msg.content.startsWith('move ');
+    const collector = new messageCollector (client, startMessage.channel, filter, {time: 60000});
+    collector.on ('collect', async (messageReceiver) => {
+        console.log('f');
+    })
+}
+
+function lettersToChess (board) {
+    let replace = [['a','◻️'],['A','◼️'],['b','🧑🏻‍🌾'],['B','🧑🏿‍🌾'],['c','👮🏻'],['C','👮🏿'],['d','🧑🏻‍✈️'],['D','🧑🏿‍✈️'],['e','🧙🏻'],['E','🧙🏿'],['f','🦸🏻'],['F','🦸🏿'],['g','🤵🏻'],['G','🤵🏿']]
+    for (let i = 0; i < replace.length; i++) {
+        let regexV = new RegExp(replace[i][0], 'g');
+    	board = board.replace(regexV, replace[i][1])
+    }
+    return board;
 }
 
 /*

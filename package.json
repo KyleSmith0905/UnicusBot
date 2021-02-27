@@ -10,23 +10,23 @@
     "type": "git",
     "url": "git+https://github.com/FiNSFlexin/AmeBot1782590.git"
   },
-  "author": "",
+  "author": "FiNS Flexin",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/FiNSFlexin/AmeBot1782590/issues"
   },
   "homepage": "https://github.com/FiNSFlexin/AmeBot1782590#readme",
-  "description": "",
+  "description": "The Discord bot for Domicile, the Discord server.",
   "dependencies": {
     "canvas": "^2.6.1",
     "dotenv": "^8.2.0",
     "eris": "^0.13.4",
     "eris-collector": "^1.0.1",
-    "mongoose": "^5.11.18",
+    "mongoose": "^5.11.15",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1"
   },
   "engines": {
-    "node": "12.16.2"
+    "node": "14.16.0"
   }
 }

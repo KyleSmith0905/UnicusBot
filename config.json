@@ -1261,6 +1261,10 @@
 		"setup": {
 			"channels": ["all"],
 			"arguments": {
+				"command": {
+					"name": "Command",
+					"items": "State Update: `sta`| Reset Rules: `rul`| Embed: `emb`| Channel Embed: `cmb`| Bot's Down: `dwn`"
+				},
 				"embedSettings": {
 					"name": "Embed Settings",
 					"items": "**[RICH TEXT]** Content: `CON`| Title: `TTL`| Description: `DES`| Hex Color: `RGB`| Fields: `FLD`| Picture: `PIC`",
