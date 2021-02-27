@@ -34,7 +34,8 @@ const stateInfoDB = require ('./database/stateinfo.js');
 const uri = process.env.MONGODB_URI;
 mongo.connect (uri, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    bufferCommands: false
 });
 
 const externalFiles = fs.readdirSync ('./external').filter (file => file.endsWith('.js'));
