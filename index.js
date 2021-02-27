@@ -32,12 +32,11 @@ const userInfoDB = require ('./database/userinfo.js');
 const stateInfoDB = require ('./database/stateinfo.js');
 
 const uri = process.env.MONGODB_URI;
-async function testing () {
-    await mongo.connect (uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-};
+console.log (uri)
+await mongo.connect (uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
 
 testing()
 
