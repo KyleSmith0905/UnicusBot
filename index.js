@@ -32,10 +32,14 @@ const userInfoDB = require ('./database/userinfo.js');
 const stateInfoDB = require ('./database/stateinfo.js');
 
 const uri = process.env.MONGODB_URI;
-mongo.connect (uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
+async function testing () {
+    await mongo.connect (uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+};
+
+testing()
 
 const externalFiles = fs.readdirSync ('./external').filter (file => file.endsWith('.js'));
 for (const file of externalFiles) {
