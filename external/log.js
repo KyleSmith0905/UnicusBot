@@ -87,6 +87,7 @@ client.on ('guildMemberUpdate', async (guild, member, oldMember) => {
     if (oldMember.roles != member.roles) {
         let userInfo = await getUserInfo (member, guild);
         userInfo.roleID = member.roles;
+        await timeout (50);
         userInfo.save();
     }
     if (oldMember.nick == member.nick) return;
@@ -741,7 +742,8 @@ client.on ('messageCreate', async message => {
         if (!postalCode) return;
         let userInfo = await getUserInfo (message.member, message.channel.guild);
         userInfo.state = postalCode;
-        userInfo.save()
+        await timeout (100);
+        userInfo.save();
         let stateRole = guild.roles.find (ele => ele.name == config.places[postalCode].name);
         message.member.addRole (stateRole.id, 'Automated');
         message.member.removeRole (process.env.ROLE_NEWCOMER, 'Automated');
