@@ -1,5 +1,4 @@
 const {randomColor, timeout, getUserInfo} = require ('./functions');
-const userInfoDB = require ('../database/userinfo.js');
 const stateInfoDB = require ('../database/stateinfo.js');
 
 let logChannel; let welcomeChannel; let allStatesChannel; let guild;
@@ -14,14 +13,19 @@ client.on ('inviteCreate', async (guild, invite) => guildInvites.set(guild.id, a
 
 // Members
 client.on ('guildMemberAdd', async (guild, member) => {
+    console.log (0)
     const userInfo = await getUserInfo (member, guild);
-    if (!userInfo?.roleID?.length) {
+    console.log (1)
+    if (!userInfo || !userInfo.roleID || !userInfo.roleID.length) {
+        console.log (2)
         let rolesID = [];
         guild.roles.forEach (ele => {
             if (!process.env.ROLE_NEW.split(',').includes (ele.id)) return;
             rolesID.push (ele.id);
         })
+        console.log (3)
         member.edit ({roles: rolesID});
+        console.log (4)
     }
     else member.edit ({roles: userInfo.roleID});
     const timestamp = new Date();
@@ -625,9 +629,7 @@ client.on ('guildRoleDelete', async (guild, role) => {
 // Misc
 const usersMap = new Map(); const statesMap = new Map();
 client.on ('messageCreate', async message => {
-    console.log (message.author)
     if (!message.channel.guild || message.author.bot) return;
-    console.log (message.author.bot)
     let messageCategory = message.channel.guild.channels.find (ele => ele.id == message.channel.parentID);
     if (!messageCategory) return;
     if(usersMap.has (message.author.id)) {
