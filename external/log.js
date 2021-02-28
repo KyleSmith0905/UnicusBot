@@ -14,13 +14,9 @@ client.on ('inviteCreate', async (guild, invite) => guildInvites.set(guild.id, a
 
 // Members
 client.on ('guildMemberAdd', async (guild, member) => {
-    console.log (0)
     const userInfo = await getUserInfo (member, guild);
-    console.log (1)
     if (!userInfo?.roleID?.length) {
-        console.log (2)
         let rolesID = [];
-        console.log (3)
         guild.roles.forEach (ele => {
             if (!process.env.ROLE_NEW.split(',').includes (ele.id)) return;
             rolesID.push (ele.id);
@@ -671,6 +667,7 @@ client.on ('messageCreate', async message => {
     else {
         if (!config.discordInfo.prefix.includes (message.content.charAt(0)) && !message.content.replace('!', '').startsWith(client.user.mention)) {
             let userInfo = await getUserInfo (message.member, guild);
+            if (!userInfo) return;
             userInfo.money += 1;
             userInfo.save();
         }
