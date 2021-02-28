@@ -667,8 +667,7 @@ client.on ('messageCreate', async message => {
     else {
         if (!config.discordInfo.prefix.includes (message.content.charAt(0)) && !message.content.replace('!', '').startsWith(client.user.mention)) {
             let userInfo = await getUserInfo (message.member, guild);
-            if (!userInfo) return;
-            console.log (userInfo)
+            if (!userInfo || !userInfo.money) return;
             userInfo.money = userInfo.money + 1;
             userInfo.save();
         }
