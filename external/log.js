@@ -1,4 +1,4 @@
-const {randomColor, timeout} = require ('./functions');
+const {randomColor, timeout, getUserInfo} = require ('./functions');
 const userInfoDB = require ('../database/userinfo.js');
 const stateInfoDB = require ('../database/stateinfo.js');
 
@@ -14,8 +14,8 @@ client.on ('inviteCreate', async (guild, invite) => guildInvites.set(guild.id, a
 
 // Members
 client.on ('guildMemberAdd', async (guild, member) => {
-    const userInfo = await getUserInfo (member, guild, true);
-    if (!userInfo || !userInfo.roleID.length) {
+    const userInfo = await getUserInfo (member, guild);
+    if (!userInfo?.roleID?.length) {
         let rolesID = [];
         guild.roles.forEach (ele => {
             if (!process.env.ROLE_NEW.split(',').includes (ele.id)) return;
@@ -82,7 +82,6 @@ client.on ('guildMemberAdd', async (guild, member) => {
 client.on ('guildMemberUpdate', async (guild, member, oldMember) => {
     if (oldMember.roles != member.roles) {
         let userInfo = await getUserInfo (member, guild);
-        if (!userInfo) return;
         userInfo.roleID = member.roles;
         userInfo.save();
     }
@@ -813,22 +812,6 @@ async function getAudit (guild, target, actionType, timestamp) {
     let dateTimestamp = new Date(discordTimestamp)
     if (!finalAudit || dateTimestamp.getTime() <= timestamp.getTime() - 5000) return null;
     return finalAudit;
-}
-
-async function getUserInfo (member, guild, nullForNone) {
-    let userInfo = await userInfoDB.findOne ({
-        userID: member.id,
-        guildID: guild.id
-    })
-    if (!userInfo) {
-        const newUserInfo = await new userInfoDB ({
-            userID: member.id,
-            guildID: guild.id,
-        });
-        newUserInfo.save();
-    }
-    if (nullForNone == true && !userInfo) userInfo = null
-    return userInfo;
 }
 
 async function getAttachment (attachment) {
