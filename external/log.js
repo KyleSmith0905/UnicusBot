@@ -14,9 +14,13 @@ client.on ('inviteCreate', async (guild, invite) => guildInvites.set(guild.id, a
 
 // Members
 client.on ('guildMemberAdd', async (guild, member) => {
+    console.log (0)
     const userInfo = await getUserInfo (member, guild);
+    console.log (1)
     if (!userInfo?.roleID?.length) {
+        console.log (2)
         let rolesID = [];
+        console.log (3)
         guild.roles.forEach (ele => {
             if (!process.env.ROLE_NEW.split(',').includes (ele.id)) return;
             rolesID.push (ele.id);
@@ -648,6 +652,7 @@ client.on ('messageCreate', async message => {
                 let embed = createEmbed ('orange', new Date, 'Security - Spam', message.member.mention + ' is temporarily muted preemptively for spamming.');
                 let sentMessage = await message.channel.createMessage({embed: embed});
                 let userInfo = await getUserInfo (message.member, guild);
+                if (!userInfo) return
                 if (userInfo.money <= 5) userInfo.money -= 5;
                 else userInfo.money = 5
                 userInfo.save();

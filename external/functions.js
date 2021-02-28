@@ -15,7 +15,7 @@ async function getUserInfo (member, guild) {
             userID: member.id,
             guildID: guild.id,
             experience: 10,
-            money: 50,
+            money: 50
         });
         newUserInfo.save();
         userInfo = newUserInfo
