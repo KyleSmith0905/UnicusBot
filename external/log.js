@@ -625,7 +625,9 @@ client.on ('guildRoleDelete', async (guild, role) => {
 // Misc
 const usersMap = new Map(); const statesMap = new Map();
 client.on ('messageCreate', async message => {
+    console.log (message.author)
     if (!message.channel.guild || message.author.bot) return;
+    console.log (message.author.bot)
     let messageCategory = message.channel.guild.channels.find (ele => ele.id == message.channel.parentID);
     if (!messageCategory) return;
     if(usersMap.has (message.author.id)) {
