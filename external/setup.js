@@ -36,12 +36,11 @@ module.exports = {
                 message.channel.createMessage ({content: '@everyone,', embed: embed})
             }
             else if (args[1] == 'emb') {
-                console.log (1)
                 embedCreation (message, args, message.channel);
             }
             else if (args[1] == 'cmb') {
                 let sendingChannel = message.channel.guild.channels.find (ele => ele.id == args[2]);
-                args = args.splice (2, 1)
+                args.splice (2, 1)
                 embedCreation (message, args, sendingChannel)
             }
             else if (args[1] == 'dwn') {
@@ -62,8 +61,11 @@ module.exports = {
 }
 
 function embedCreation (message, args, channel) {
+    console.log (args)
     const index = message.content.toLowerCase().indexOf(args[2]);
+    console.log (index)
     const settings = message.content.substring(0, message.content.length - 1).slice(index).replace (/\[n]/g, '\n');
+    console.log (settings)
     const settingsSplit = settings.split ('`| ');
     const settingsConfig = config.commands.setup.arguments.embedSettings.inputs;
     let embed = {}; let content;
@@ -85,6 +87,7 @@ function embedCreation (message, args, channel) {
         else if (settingsConfig.pic.includes (eleSplit[0]) && !embed.image) return embed.image = {url: eleSplit[1]};
         return embed.error = true;
     })
+    console.log (embed)
     embed.timestamp = new Date().toISOString();
     if (embed.error) return errorLog (message, args, 'Setup', 'invalidUsage', ['embedSettings']);
     try {channel.createMessage ({content: content || ' ', embed: embed})}

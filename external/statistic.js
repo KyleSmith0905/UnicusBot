@@ -7,7 +7,6 @@ client.on ('ready', async () => {
     cron.schedule ('0 0 */6 * * *', async () => {
         let guildInfo = await getGuildInfo (guild);
         let memberCountArray = (!guildInfo.memberCount) ? [] : guildInfo.memberCount;
-        guild.memberCount = 6
         memberCountArray.push (guild.memberCount);
         setInfo (guildInfo, {memberCount: memberCountArray});
     })
@@ -50,10 +49,11 @@ client.on ('ready', async () => {
             channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})
         }
         else if (weekday == 1) {
-            const startDate = Math.floor((Date.now() - 1209600000) / 1000)
+            const startDate = Math.floor((Date.now() - 1296000000) / 1000)
             const endDate = Math.floor(Date.now() / 1000);
             let history; let current; let index = false;
-            let ticker = ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'FB', '^DJI', '^GSPC', '^IXIC', '^RUT', '^W5000'] [Math.floor(Math.random() * 10)]
+            let ticker = ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'FB', '^DJI', '^GSPC', '^IXIC', '^RUT', '^W5000']
+            ticker = ticker[Math.floor(Math.random() * 10)]
             if (ticker.startsWith ('^')) index = true;
             await fetch ('https://yahoo.finance/quote/' + ticker + '/history?period1=' + startDate + '&period2=' + endDate + '&interval=1d&filter=history&frequency=1d', {method: 'get'})
             .then (res => res.text())
@@ -87,7 +87,6 @@ client.on ('ready', async () => {
         }
         else if (weekday == 2) {
             let randomValue = Math.floor(Math.random() * 10)
-            randomValue = 5
             const pollKey = Object.keys (config.discordInfo.polling) [randomValue]
             const pollQuestions = config.discordInfo.polling [pollKey]
             const pollCapital = pollKey.charAt(0).toUpperCase() + pollKey.slice(1)

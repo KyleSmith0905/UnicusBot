@@ -13,19 +13,14 @@ client.on ('inviteCreate', async (guild, invite) => guildInvites.set(guild.id, a
 
 // Members
 client.on ('guildMemberAdd', async (guild, member) => {
-    console.log (0)
     const userInfo = await getUserInfo (member, guild);
-    console.log (1)
     if (!userInfo || !userInfo.roleID || !userInfo.roleID.length) {
-        console.log (2)
         let rolesID = [];
         guild.roles.forEach (ele => {
             if (!process.env.ROLE_NEW.split(',').includes (ele.id)) return;
             rolesID.push (ele.id);
         })
-        console.log (3)
         member.edit ({roles: rolesID});
-        console.log (4)
     }
     else member.edit ({roles: userInfo.roleID});
     const timestamp = new Date();

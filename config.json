@@ -1259,11 +1259,12 @@
 			}
 		},
 		"setup": {
+			"name": "Setup",
 			"channels": ["all"],
 			"arguments": {
 				"command": {
 					"name": "Command",
-					"items": "State Update: `sta`| Reset Rules: `rul`| Embed: `emb`| Channel Embed: `cmb`| Bot's Down: `dwn`"
+					"items": "State Update: `STA`| Reset Rules: `RUL`| Embed: `EMB`| Channel Embed: `CMB`| Bot's Down: `DWN`"
 				},
 				"embedSettings": {
 					"name": "Embed Settings",
