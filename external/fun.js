@@ -497,29 +497,88 @@ async function chessStarter (startMessage, startPlayers) {
     let board = ['cdefgedc', 'bbbbbbbb', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'BBBBBBBB', 'CDEFGEDC'];
     let playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
     let turn = Math.floor(Math.random() * 2);
+    if (turn == 1) startPlayers = [startPlayers[1], startPlayers[0]];
     let embedGame = {
         title: 'Fun - Pictionary',
         color: randomColor ('blue'),
         timestamp: new Date().toISOString(),
         fields: [
-            {name: 'How to Move:', value: 'Use [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)) to interact with the chess board.', inline: false},
+            {name: 'How to Move:', value: 'Use algebraic notation to interact with the chess board through text commands.', inline: false},
             {name: 'Notation Resources:', value: '[FIDE Handbook](https://handbook.fide.com/chapter/E012018)', inline: true},
             {name: '\u200b', value: '[Notation Cheat Sheet](https://cheatography.com/davechild/cheat-sheets/chess-algebraic-notation/)', inline: true},
             {name: '\u200b', value: '[Notation Trainer](https://mattjliu.github.io/Notation-Trainer/#/practice)', inline: true},
-            {name: 'Turn:', value: 'It is ' + startPlayers[turn].mention + '\'s turn. Use `move <notation>` to move.', inline: false},
+            {name: 'Turn:', value: 'It is ' + startPlayers[0].mention + '\'s turn to move. Use `move <notation>` to move.', inline: false},
             {name: 'Chess Board:', value: lettersToChess(board.join('\n')), inline: false},
         ]
     }
     let message = await startMessage.channel.createMessage ({content: playerMentions + ',', embed: embedGame});
-    chessRound (startMessage, startPlayers)
+    chessRound (message, startPlayers, board, 0)
 }
 
-function chessRound (startMessage) {
-    let filter = (msg) => msg.content.startsWith('move ');
+function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
+    playerTurn = playerTurn * -1 + 1;
+    const turnOffset = turn * -32;
+    let filter = (msg) => msg.content.startsWith('move ') && msg.author.id == startPlayers[playerTurn].id;
     const collector = new messageCollector (client, startMessage.channel, filter, {time: 60000});
-    collector.on ('collect', async (messageReceiver) => {
-        console.log('f');
+    collector.on ('collect', (msgReceived) => {
+        const notation = msgReceived.substring(4);
+        const coordinateX = sentence[sentence.length-2].charCodeAt(0)-97;
+        const coordinateY = parseFloat(sentence[sentence.length-1]) - 1;
+        if (holdingPiece.charCodeAt(0) > turnOffset + 66 && holdingPiece.charCodeAt(0) <= turnOffset + 91) {
+            chessErrors ('Stalling or Overlap', '', startMessage.channel, startPlayers[playerTurn].mention)
+            return msgReceived.delete();
+        }
+        let originCoordinates = [];
+        switch (notation.charAt(0)) {
+            case '': // pawns
+                break;
+            case 'R': // If in 2nd place, check 6 to the right, 2 to the left
+                let foundPiece, foundCoordinate;
+                foundPiece = foundCoordinate = false;
+                for (let i = 0; i < 16; i++) {
+                    let holdingPiece = (i <= 7) ? chessBoard[coordinateY][i] : chessBoard[i-8][coordinateX];
+                    if ((coordinateX == i && i <= 7) || (coordinateY == i - 8 && i > 7)) return foundCoordinate = true; // It landed on coordinate
+                    else if (holdingPiece.charCodeAt(0) == turnOffset + 99) { // It landed on valid piece
+                        if (foundCoordinate == false && foundPiece == true) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
+                        if (foundCoordinate == true && foundPiece == true) return;
+                        originCoordinates.push (i, coordinateY);
+                    }
+                    else if (holdingPiece.toUpperCase() == 'A') return; // It landed on a blank
+                    else { // It impacted with another piece
+                        if (foundCoordinate == false && foundPiece == true) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
+                        else if (foundCoordinate == true && foundPiece == true)
+                        foundPiece = false;
+                    }
+                }
+                break; // OAOBOOOXO
+            case 'N':
+                break;
+            case 'B': 
+                break;
+            case 'Q':
+                break;
+            case 'K':
+                break;
+            case '0':
+                break;
+        }
     })
+    collector.on ('end', (collected, reason) => {
+        if (reason == 'stopped') return;
+    })
+}
+
+function chessErrors (reasonName, reasonValue, sendChannel, sendMention) {
+    let embed = {
+        title: 'Error - Chess',
+        description: 'The chess notation provided is an illegal move. Consult with an official chess notation website to inscribe the correct notation.',
+        color: randomColor ('orange'),
+        timestamp: new Date().toISOString(),
+        fields: [
+            {name: reasonName, value: reasonValue, inline: false}
+        ]
+    }
+    sendChannel.createMessage ({content: sendMention + ',', embed: embedGame});
 }
 
 function lettersToChess (board) {

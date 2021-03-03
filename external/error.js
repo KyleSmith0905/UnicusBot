@@ -10,9 +10,7 @@ module.exports = async (message, args, command, reason, additional) => {
     }
     switch (reason) {
         case 'invalidUsage':
-            embed.fields = [
-                {name: 'Usage Error:', value: 'The command syntax was inputted incorrectly', inline: false},
-            ]
+            embed.fields = [{name: 'Usage Error:', value: 'The command syntax was inputted incorrectly', inline: false}]
             additional.forEach (add => {
                 let description = inputted (configCommand.arguments[add].items);
                 embed.fields.push ({name: '❯ ' + configCommand.arguments[add].name + ':', value: description, inline: false});

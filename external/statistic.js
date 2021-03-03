@@ -138,6 +138,7 @@ client.on ('ready', async () => {
             let hourLeft = 24;
             let minuteLeft = 0;
             const pollInterval = setInterval(() => {
+                if (!pollMessage) return;
                 if (hourLeft == 0 && minuteLeft == 0) {
                     embed.fields[2].value = 'Completed';
                     clearInterval(pollInterval);
@@ -186,7 +187,7 @@ client.on ('ready', async () => {
                 else return;
                 mapSize = usersMap.size;
                 embed.fields[1].value = (mapSize == 0) ? 'No voters' : mapSize + ((mapSize == 1) ? ' voter' : ' voters');
-                pollMessage.edit({ embed: embed });
+                pollMessage.edit({embed: embed});
             }, 900000)
         }
         else if (weekday == 4) {

@@ -11,7 +11,6 @@ module.exports = {
     async execute (message, args) {
         let member = message.member;
         let guild = message.channel.guild;
-        guild.id = '800012084787544124';
         let userInfo = await getUserInfo (member, guild);
         if (commandConfig.wrk.includes (args[1])) {
             if (args[2]) return errorLog (message, args, 'job', 'invalidUsage', ['command']);
