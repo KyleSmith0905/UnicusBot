@@ -8,267 +8,272 @@ client.on ('ready', async () => {
         let guildInfo = await getGuildInfo (guild);
         let memberCountArray = (!guildInfo.memberCount) ? [] : guildInfo.memberCount;
         memberCountArray.push (guild.memberCount);
-        setInfo (guildInfo, {memberCount: memberCountArray});
+        guildInfo.save()
     })
     cron.schedule ('0 0 0 * * *', async () => {
         let weekday = new Date().getDay();
-        if (weekday == 0) {
-            const startDate = Math.floor((Date.now() - 1123200000) / 1000)
-            const endDate = Math.floor(Date.now() / 1000);
-            let history; let current; let crypto = false;
-            let ticker = ['EURUSD%3DX', 'JPYUSD%3DX', 'GBPUSD%3DX', 'AUDUSD%3DX', 'CADUSD%3DX', 'BTC-USD', 'ETH-USD', 'XRP-USD', 'USDT-USD', 'LTC-USD'] [Math.floor(Math.random() * 10)]
-            if (!ticker.endsWith ('%3DX')) crypto = true;
-            await fetch ('https://yahoo.finance/quote/' + ticker + '/history?period1=' + startDate + '&period2=' + endDate + '&interval=1d&filter=history&frequency=1d', {method: 'get'})
-            .then (res => res.text())
-            .then (body => history = JSON.parse(body.split('HistoricalPriceStore":{"prices":')[1].split(',"isPending')[0]));
-            history.sort ((a, b) => b.date - a.date);
-            await fetch ('https://finance.yahoo.com/quote/' + ticker, {method: 'get'})
-            .then (res => res.text())
-            .then (body => current = body.split ('"' + ticker.replace('%3DX', '') + '=X":{"sourceInterval"')[1].substring (0, 10000))
-            const chart = await currencyGraph (history);
-            let embed = {
-                title: 'Statistics - Currency',
-                color: randomColor ('all'),
-                timestamp: new Date().toISOString(),
-                image: {url: 'attachment://image.png'},
-                fields: [
-                    {name: ((crypto == true) ? 'Cryptocurrency:' : 'Currency:'), value: current.split ('"shortName":"')[1].split('",')[0].replace('USD', ''), inline: true},
-                    {name: 'Exchange:', value: current.split ('"symbol":"')[1].split ('",')[0], inline: true},
-                    {name: 'Market:', value: current.split ('"fullExchangeName":"')[1].split ('",')[0], inline: true},
-                    {name: 'Rate:', value: currencyFormat (parseFloat(current.split ('"regularMarketPrice":{"raw":')[1].split (',')[0])), inline: true},
-                    {name: 'Volume:', value: Math.abs(current.split ('"regularMarketVolume":{"raw":')[1].split (',')[0]).toLocaleString(), inline: true},
-                ]
-            }
-            if (crypto == true) embed.fields.push ({name: 'Capitalization:', value: currencyFormat (parseFloat(current.split ('"marketCap":{"raw":')[1].split (',')[0])), inline: true})
-            else {
-                firstPrice = history.shift();
-                lastPrice = history[9] || history.pop();
-                let difference = ((firstPrice.close - lastPrice.close) / lastPrice.close) * 100;
-                embed.fields.push ({name: 'Change:', value: difference.toFixed(2) + '%', inline: true})
-            }
-            channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})
-        }
-        else if (weekday == 1) {
-            const startDate = Math.floor((Date.now() - 1296000000) / 1000)
-            const endDate = Math.floor(Date.now() / 1000);
-            let history; let current; let index = false;
-            let ticker = ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'FB', '^DJI', '^GSPC', '^IXIC', '^RUT', '^W5000']
-            ticker = ticker[Math.floor(Math.random() * 10)]
-            if (ticker.startsWith ('^')) index = true;
-            await fetch ('https://yahoo.finance/quote/' + ticker + '/history?period1=' + startDate + '&period2=' + endDate + '&interval=1d&filter=history&frequency=1d', {method: 'get'})
-            .then (res => res.text())
-            .then (body => history = JSON.parse(body.split('HistoricalPriceStore":{"prices":')[1].split(',"isPending')[0]));
-            history.sort ((a, b) => b.date - a.date);
-            await fetch ('https://finance.yahoo.com/quote/' + ticker, {method: 'get'})
-            .then (res => res.text())
-            .then (body => current = body.split ('"' + ticker + '":{"sourceInterval"')[1].substring (0, 10000))
-            const chart = await financeGraph (history);
-            let embed = {
-                title: 'Statistics - Finance',
-                color: randomColor ('all'),
-                timestamp: new Date().toISOString(),
-                image: {url: 'attachment://image.png'},
-                fields: [
-                    {name: ((index == true) ? 'Index:' : 'Company:'), value: current.split ('"shortName":"')[1].split ('",')[0], inline: true},
-                    {name: 'Ticker:', value: current.split ('"symbol":"')[1].split ('",')[0], inline: true},
-                    {name: 'Market:', value: current.split ('"fullExchangeName":"')[1].split ('",')[0], inline: true},
-                    {name: 'Stock:', value: currencyFormat (parseFloat(current.split ('"regularMarketPrice":{"raw":')[1].split (',')[0])), inline: true},
-                    {name: 'Volume:', value: Math.abs(current.split ('"regularMarketVolume":{"raw":')[1].split (',')[0]).toLocaleString(), inline: true},
-                ]
-            }
-            if (index == true) {
-                firstPrice = history.shift();
-                lastPrice = history[9] || history.pop();
-                let difference = ((firstPrice.close - lastPrice.close) / lastPrice.close)*100;
-                embed.fields.push ({name: 'Change:', value: (difference).toFixed(2) + '%', inline: true})
-            }
-            else {embed.fields.push ({name: 'Capitalization:', value: currencyFormat (parseFloat(current.split ('"marketCap":{"raw":')[1].split (',')[0])), inline: true})}
-            channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})
-        }
-        else if (weekday == 2) {
-            let randomValue = Math.floor(Math.random() * 10)
-            const pollKey = Object.keys (config.discordInfo.polling) [randomValue]
-            const pollQuestions = config.discordInfo.polling [pollKey]
-            const pollCapital = pollKey.charAt(0).toUpperCase() + pollKey.slice(1)
-            let chart = pollingGraph (pollCapital, 'beginning');
-            let embed = {
-                title: 'Statistics - Polling',
-                color: randomColor ('all'),
-                timestamp: new Date().toISOString(),
-                image: {url: 'attachment://image.png'},
-                fields: [
-                    {name: 'Topic:', value: pollCapital, inline: true},
-                    {name: 'Voters:', value: 'No Voters', inline: true},
-                    {name: 'Time:', value: '24 hours', inline: true},
-                    {name: 'Question:', value: pollQuestions[0], inline: false}
-                ]
-            }
-            let pollMessage = await channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
-            let validReactions = []
-            if (pollQuestions[1] == 'flag') {
-                validReactions = config.discordInfo.emoji.flag;
-                for (let i = 0; i < 20; i++) {
-                    pollMessage.addReaction (validReactions[i]);
+        console.log (weekday);
+        switch (weekday) {
+            case 0: {
+                const startDate = Math.floor((Date.now() - 1123200000) / 1000)
+                const endDate = Math.floor(Date.now() / 1000);
+                let history; let current; let crypto = false;
+                let ticker = ['EURUSD%3DX', 'JPYUSD%3DX', 'GBPUSD%3DX', 'AUDUSD%3DX', 'CADUSD%3DX', 'BTC-USD', 'ETH-USD', 'XRP-USD', 'USDT-USD', 'LTC-USD'] [Math.floor(Math.random() * 10)]
+                if (!ticker.endsWith ('%3DX')) crypto = true;
+                await fetch ('https://yahoo.finance/quote/' + ticker + '/history?period1=' + startDate + '&period2=' + endDate + '&interval=1d&filter=history&frequency=1d', {method: 'get'})
+                .then (res => res.text())
+                .then (body => history = JSON.parse(body.split('HistoricalPriceStore":{"prices":')[1].split(',"isPending')[0]));
+                history.sort ((a, b) => b.date - a.date);
+                await fetch ('https://finance.yahoo.com/quote/' + ticker, {method: 'get'})
+                .then (res => res.text())
+                .then (body => current = body.split ('"' + ticker.replace('%3DX', '') + '=X":{"sourceInterval"')[1].substring (0, 10000))
+                const chart = await currencyGraph (history);
+                let embed = {
+                    title: 'Statistics - Currency',
+                    color: randomColor ('all'),
+                    timestamp: new Date().toISOString(),
+                    image: {url: 'attachment://image.png'},
+                    fields: [
+                        {name: ((crypto == true) ? 'Cryptocurrency:' : 'Currency:'), value: current.split ('"shortName":"')[1].split('",')[0].replace('USD', ''), inline: true},
+                        {name: 'Exchange:', value: current.split ('"symbol":"')[1].split ('",')[0], inline: true},
+                        {name: 'Market:', value: current.split ('"fullExchangeName":"')[1].split ('",')[0], inline: true},
+                        {name: 'Rate:', value: currencyFormat (parseFloat(current.split ('"regularMarketPrice":{"raw":')[1].split (',')[0])), inline: true},
+                        {name: 'Volume:', value: Math.abs(current.split ('"regularMarketVolume":{"raw":')[1].split (',')[0]).toLocaleString(), inline: true},
+                    ]
                 }
-            }
-            else if (pollQuestions[1] == 'face') {
-                let faceEmoji = config.discordInfo.emoji.face;
-                let number = 92;
-                for (let i = 0; i < 20; i++) {
-                    let randomNumber = Math.floor(Math.random() * number);
-                    pollMessage.addReaction (faceEmoji [randomNumber]);
-                    faceEmoji.splice (randomNumber, 1);
-                    validReactions.push (faceEmoji [randomNumber]);
-                    number = number - 1;
+                if (crypto == true) embed.fields.push ({name: 'Capitalization:', value: currencyFormat (parseFloat(current.split ('"marketCap":{"raw":')[1].split (',')[0])), inline: true})
+                else {
+                    firstPrice = history.shift();
+                    lastPrice = history[9] || history.pop();
+                    let difference = ((firstPrice.close - lastPrice.close) / lastPrice.close) * 100;
+                    embed.fields.push ({name: 'Change:', value: difference.toFixed(2) + '%', inline: true})
                 }
+                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})        
             }
-            else {
-                for (let i = 1; i < pollQuestions.length; i++) {
-                    pollMessage.addReaction (pollQuestions[i]);
-                    validReactions.push (pollQuestions[i]);
+            case 1: {
+                const startDate = Math.floor((Date.now() - 1296000000) / 1000)
+                const endDate = Math.floor(Date.now() / 1000);
+                let history; let current; let index = false;
+                let ticker = ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'FB', '^DJI', '^GSPC', '^IXIC', '^RUT', '^W5000']
+                ticker = ticker[Math.floor(Math.random() * 10)]
+                if (ticker.startsWith ('^')) index = true;
+                await fetch ('https://yahoo.finance/quote/' + ticker + '/history?period1=' + startDate + '&period2=' + endDate + '&interval=1d&filter=history&frequency=1d', {method: 'get'})
+                .then (res => res.text())
+                .then (body => history = JSON.parse(body.split('HistoricalPriceStore":{"prices":')[1].split(',"isPending')[0]));
+                history.sort ((a, b) => b.date - a.date);
+                await fetch ('https://finance.yahoo.com/quote/' + ticker, {method: 'get'})
+                .then (res => res.text())
+                .then (body => current = body.split ('"' + ticker + '":{"sourceInterval"')[1].substring (0, 10000))
+                const chart = await financeGraph (history);
+                let embed = {
+                    title: 'Statistics - Finance',
+                    color: randomColor ('all'),
+                    timestamp: new Date().toISOString(),
+                    image: {url: 'attachment://image.png'},
+                    fields: [
+                        {name: ((index == true) ? 'Index:' : 'Company:'), value: current.split ('"shortName":"')[1].split ('",')[0], inline: true},
+                        {name: 'Ticker:', value: current.split ('"symbol":"')[1].split ('",')[0], inline: true},
+                        {name: 'Market:', value: current.split ('"fullExchangeName":"')[1].split ('",')[0], inline: true},
+                        {name: 'Stock:', value: currencyFormat (parseFloat(current.split ('"regularMarketPrice":{"raw":')[1].split (',')[0])), inline: true},
+                        {name: 'Volume:', value: Math.abs(current.split ('"regularMarketVolume":{"raw":')[1].split (',')[0]).toLocaleString(), inline: true},
+                    ]
                 }
+                if (index == true) {
+                    firstPrice = history.shift();
+                    lastPrice = history[9] || history.pop();
+                    let difference = ((firstPrice.close - lastPrice.close) / lastPrice.close)*100;
+                    embed.fields.push ({name: 'Change:', value: (difference).toFixed(2) + '%', inline: true})
+                }
+                else {embed.fields.push ({name: 'Capitalization:', value: currencyFormat (parseFloat(current.split ('"marketCap":{"raw":')[1].split (',')[0])), inline: true})}
+                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})    
             }
-            const usersMap = new Map();
-            const filter = (mes, emj, usr) => usr != client.user.id && validReactions.includes(emj.name);
-            const collector = new reactionCollector (client, pollMessage, filter, {time: 86400000});
-            collector.on ('collect', async (sentMessage2nd, emoji, userID) => {
-                sentMessage2nd.removeReaction(emoji.name, userID)
-                usersMap.set(userID, emoji.name);
-            })
-            let hourLeft = 24;
-            let minuteLeft = 0;
-            const pollInterval = setInterval(() => {
-                if (!pollMessage) return;
-                if (hourLeft == 0 && minuteLeft == 0) {
-                    embed.fields[2].value = 'Completed';
-                    clearInterval(pollInterval);
-                    const totalEmojis = Array.from(usersMap.values());
-                    let emojiArray = [];
-                    totalEmojis.forEach (ele => {
-                        let object = emojiArray.find(ele2 => ele2.name == ele);
-                        if (object) {
-                            object.votes++
-                            const index = emojiArray.findIndex(ele2 => ele2.name == ele);
-                            emojiArray[index] = object
+            case 2: {
+                let randomValue = Math.floor(Math.random() * 10)
+                const pollKey = Object.keys (config.discordInfo.polling) [randomValue]
+                const pollQuestions = config.discordInfo.polling [pollKey]
+                const pollCapital = pollKey.charAt(0).toUpperCase() + pollKey.slice(1)
+                let chart = pollingGraph (pollCapital, 'beginning');
+                let embed = {
+                    title: 'Statistics - Polling',
+                    color: randomColor ('all'),
+                    timestamp: new Date().toISOString(),
+                    image: {url: 'attachment://image.png'},
+                    fields: [
+                        {name: 'Topic:', value: pollCapital, inline: true},
+                        {name: 'Voters:', value: 'No Voters', inline: true},
+                        {name: 'Time:', value: '24 hours', inline: true},
+                        {name: 'Question:', value: pollQuestions[0], inline: false}
+                    ]
+                }
+                let pollMessage = await channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
+                let validReactions = []
+                if (pollQuestions[1] == 'flag') {
+                    validReactions = config.discordInfo.emoji.flag;
+                    for (let i = 0; i < 20; i++) {
+                        pollMessage.addReaction (validReactions[i]);
+                    }
+                }
+                else if (pollQuestions[1] == 'face') {
+                    let faceEmoji = config.discordInfo.emoji.face;
+                    let number = 92;
+                    for (let i = 0; i < 20; i++) {
+                        let randomNumber = Math.floor(Math.random() * number);
+                        pollMessage.addReaction (faceEmoji [randomNumber]);
+                        faceEmoji.splice (randomNumber, 1);
+                        validReactions.push (faceEmoji [randomNumber]);
+                        number = number - 1;
+                    }
+                }
+                else {
+                    for (let i = 1; i < pollQuestions.length; i++) {
+                        pollMessage.addReaction (pollQuestions[i]);
+                        validReactions.push (pollQuestions[i]);
+                    }
+                }
+                const usersMap = new Map();
+                const filter = (mes, emj, usr) => usr != client.user.id && validReactions.includes(emj.name);
+                const collector = new reactionCollector (client, pollMessage, filter, {time: 86400000});
+                collector.on ('collect', async (sentMessage2nd, emoji, userID) => {
+                    sentMessage2nd.removeReaction(emoji.name, userID)
+                    usersMap.set(userID, emoji.name);
+                })
+                let hourLeft = 24;
+                let minuteLeft = 0;
+                const pollInterval = setInterval(() => {
+                    if (!pollMessage) return;
+                    if (hourLeft == 0 && minuteLeft == 0) {
+                        embed.fields[2].value = 'Completed';
+                        clearInterval(pollInterval);
+                        const totalEmojis = Array.from(usersMap.values());
+                        let emojiArray = [];
+                        totalEmojis.forEach (ele => {
+                            let object = emojiArray.find(ele2 => ele2.name == ele);
+                            if (object) {
+                                object.votes++
+                                const index = emojiArray.findIndex(ele2 => ele2.name == ele);
+                                emojiArray[index] = object
+                            }
+                            else emojiArray.push ({name: ele, votes: 1})
+                        })
+                        emojiArray.sort ((a, b) => a.votes - b.votes)
+                        const mapSize = usersMap.size;
+                        let results = ''
+                        for (let i = 0; i < 5; i++) {
+                            if (!emojiArray[i]) i = 6
+                            else results = results + emojiArray[i].name + ' ' + Math.round((emojiArray[i].votes / mapSize) * 100) + '% '
                         }
-                        else emojiArray.push ({name: ele, votes: 1})
-                    })
-                    emojiArray.sort ((a, b) => a.votes - b.votes)
-                    const mapSize = usersMap.size;
-                    let results = ''
-                    for (let i = 0; i < 5; i++) {
-                        if (!emojiArray[i]) i = 6
-                        else results = results + emojiArray[i].name + ' ' + Math.round((emojiArray[i].votes / mapSize) * 100) + '% '
+                        if (results == '') results = 'Nobody voted'
+                        chart = pollingGraph (pollCapital, emojiArray, mapSize);
+                        let finishedEmbed = {
+                            title: 'Statistics - Polling',
+                            color: randomColor ('all'),
+                            timestamp: new Date().toISOString(),
+                            image: { url: 'attachment://image.png' },
+                            fields: [
+                                { name: 'Topic:', value: pollCapital, inline: true },
+                                { name: 'Voters:', value: ((mapSize == 0) ? 'No voters' : mapSize + ((mapSize == 1) ? ' voter' : ' voters')), inline: true },
+                                { name: 'Results:', value: results, inline: true },
+                                { name: 'Question:', value: pollQuestions[0], inline: false }
+                            ]
+                        };
+                        channel.createMessage({embed: finishedEmbed}, {file: chart.toBuffer(), name: 'image.png'});
                     }
-                    if (results == '') results = 'Nobody voted'
-                    chart = pollingGraph (pollCapital, emojiArray, mapSize);
-                    let finishedEmbed = {
-                        title: 'Statistics - Polling',
-                        color: randomColor ('all'),
-                        timestamp: new Date().toISOString(),
-                        image: { url: 'attachment://image.png' },
-                        fields: [
-                            { name: 'Topic:', value: pollCapital, inline: true },
-                            { name: 'Voters:', value: ((mapSize == 0) ? 'No voters' : mapSize + ((mapSize == 1) ? ' voter' : ' voters')), inline: true },
-                            { name: 'Results:', value: results, inline: true },
-                            { name: 'Question:', value: pollQuestions[0], inline: false }
-                        ]
-                    };
-                    channel.createMessage({embed: finishedEmbed}, {file: chart.toBuffer(), name: 'image.png'});
-                }
-                else if (hourLeft > 0 || minuteLeft > 0) {
-                    embed.fields[2].value = ((hourLeft > 0) ? hourLeft + ((hourLeft == 1) ? ' hour ' : ' hours ') : '') + ((minuteLeft == 0) ? '' : minuteLeft + ' minutes');
-                    if (minuteLeft == 0) {
-                        hourLeft = hourLeft - 1;
-                        minuteLeft = 60;
+                    else if (hourLeft > 0 || minuteLeft > 0) {
+                        embed.fields[2].value = ((hourLeft > 0) ? hourLeft + ((hourLeft == 1) ? ' hour ' : ' hours ') : '') + ((minuteLeft == 0) ? '' : minuteLeft + ' minutes');
+                        if (minuteLeft == 0) {
+                            hourLeft = hourLeft - 1;
+                            minuteLeft = 60;
+                        }
+                        minuteLeft = minuteLeft - 15;
                     }
-                    minuteLeft = minuteLeft - 15;
+                    else return;
+                    mapSize = usersMap.size;
+                    embed.fields[1].value = (mapSize == 0) ? 'No voters' : mapSize + ((mapSize == 1) ? ' voter' : ' voters');
+                    pollMessage.edit({embed: embed});
+                }, 900000)
+            }
+            case 4: {
+                let guildDate = new Date (guild.createdAt)
+                const chart = await guildGraph (guild);
+                let channelsNumber = 0; let rolesNumber = 0;
+                guild.channels.forEach (ele => channelsNumber = channelsNumber + 1)
+                guild.roles.forEach (ele => rolesNumber = rolesNumber + 1)
+                let embed = {
+                    title: 'Statistics - Guild',
+                    color: randomColor ('all'),
+                    timestamp: new Date().toISOString(),
+                    image: {url: 'attachment://image.png'},
+                    fields: [
+                        {name: 'Guild:', value: guild.name, inline: true},
+                        {name: 'Region:', value: guild.region, inline: true},
+                        {name: 'Created:', value: guildDate.toLocaleString('en-US'), inline: true},
+                        {name: 'Members:', value: guild.memberCount + ' members', inline: true},
+                        {name: 'Channels:', value: channelsNumber + ' channels', inline: true},
+                        {name: 'Roles:', value: rolesNumber + ' roles', inline: true}
+                    ]
                 }
-                else return;
-                mapSize = usersMap.size;
-                embed.fields[1].value = (mapSize == 0) ? 'No voters' : mapSize + ((mapSize == 1) ? ' voter' : ' voters');
-                pollMessage.edit({embed: embed});
-            }, 900000)
-        }
-        else if (weekday == 4) {
-            let guildDate = new Date (guild.createdAt)
-            const chart = await guildGraph (guild);
-            let channelsNumber = 0; let rolesNumber = 0;
-            guild.channels.forEach (ele => channelsNumber = channelsNumber + 1)
-            guild.roles.forEach (ele => rolesNumber = rolesNumber + 1)
-            let embed = {
-                title: 'Statistics - Guild',
-                color: randomColor ('all'),
-                timestamp: new Date().toISOString(),
-                image: {url: 'attachment://image.png'},
-                fields: [
-                    {name: 'Guild:', value: guild.name, inline: true},
-                    {name: 'Region:', value: guild.region, inline: true},
-                    {name: 'Created:', value: guildDate.toLocaleString('en-US'), inline: true},
-                    {name: 'Members:', value: guild.memberCount + ' members', inline: true},
-                    {name: 'Channels:', value: channelsNumber + ' channels', inline: true},
-                    {name: 'Roles:', value: rolesNumber + ' roles', inline: true}
-                ]
+                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
             }
-            channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
-        }
-        else if (weekday == 5) {
-            let day = 1 + (new Date() - Date.UTC(2000, 0, 1)) / (3600 * 24 * 1000);
-            let randomPlanet = Object.keys(config.discordInfo.planets)[Math.floor(Math.random()*Object.keys(config.discordInfo.planets).length)];
-            let planetObj = config.discordInfo.planets[randomPlanet];
-            let coordinate = planetCoordinates (day, planetObj.N1, planetObj.N2, planetObj.i1, planetObj.i2, planetObj.w1, planetObj.w2, planetObj.a1, planetObj.e1, planetObj.e2, planetObj.M1, planetObj.M2)
-            const chart = await astronomyGraph (day, randomPlanet);
-            let embed = {
-                title: 'Statistics - Astronomy',
-                color: randomColor ('all'),
-                timestamp: new Date().toISOString(),
-                image: {url: 'attachment://image.png'},
-                fields: [
-                    {name: 'Planet:', value: randomPlanet.charAt(0).toUpperCase() + randomPlanet.slice(1), inline: true},
-                    {name: 'Rotation:', value: planetObj.rotation.toFixed(1) + ' hours', inline: true},
-                    {name: 'Revolution:', value: planetObj.revolution.toFixed(1) + ' days', inline: true},
-                    {name: 'Gravity:', value: planetObj.gravity.toFixed(2) + ' g', inline: true},
-                    {name: 'Distance:', value: coordinate.d.toFixed(2) + ' AU', inline: true},
-                    {name: 'Coordinates:', value: '(' + coordinate.x.toFixed(2) + ', ' + coordinate.y.toFixed(2) + ', ' + coordinate.z.toFixed(2) + ')', inline: true}
-                ]
+            case 5: {
+                let day = 1 + (new Date() - Date.UTC(2000, 0, 1)) / (3600 * 24 * 1000);
+                let randomPlanet = Object.keys(config.discordInfo.planets)[Math.floor(Math.random()*Object.keys(config.discordInfo.planets).length)];
+                let planetObj = config.discordInfo.planets[randomPlanet];
+                let coordinate = planetCoordinates (day, planetObj.N1, planetObj.N2, planetObj.i1, planetObj.i2, planetObj.w1, planetObj.w2, planetObj.a1, planetObj.e1, planetObj.e2, planetObj.M1, planetObj.M2)
+                const chart = await astronomyGraph (day, randomPlanet);
+                let embed = {
+                    title: 'Statistics - Astronomy',
+                    color: randomColor ('all'),
+                    timestamp: new Date().toISOString(),
+                    image: {url: 'attachment://image.png'},
+                    fields: [
+                        {name: 'Planet:', value: randomPlanet.charAt(0).toUpperCase() + randomPlanet.slice(1), inline: true},
+                        {name: 'Rotation:', value: planetObj.rotation.toFixed(1) + ' hours', inline: true},
+                        {name: 'Revolution:', value: planetObj.revolution.toFixed(1) + ' days', inline: true},
+                        {name: 'Gravity:', value: planetObj.gravity.toFixed(2) + ' g', inline: true},
+                        {name: 'Distance:', value: coordinate.d.toFixed(2) + ' AU', inline: true},
+                        {name: 'Coordinates:', value: '(' + coordinate.x.toFixed(2) + ', ' + coordinate.y.toFixed(2) + ', ' + coordinate.z.toFixed(2) + ')', inline: true}
+                    ]
+                }
+                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
             }
-            channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
-        }
-        else if (weekday == 6) {
-            let newsInfo;
-            let leaning;
-            await fetch ('https://news.google.com/topstories', {method: 'get'})
-            .then (res => res.text())
-            .then (body => newsInfo = body.split ('>play_arrow</span><')[1].split ('</time></div><menu class="')[0]);
-            let publication = newsInfo.split ('</a><time class="')[0].split ('">').slice(-1)[0];
-            try {
-                await fetch ('https://www.allsides.com/news-source/' + publication.toLowerCase().replace('the ', '').replace(' ', '-'), {method: 'get'})
+            case 6: {
+                let newsInfo;
+                let leaning;
+                await fetch ('https://news.google.com/topstories', {method: 'get'})
                 .then (res => res.text())
-                .then (body => leaning = body.split ('</a></strong></span>')[0].split ('">').slice (-1)[0]);
+                .then (body => newsInfo = body.split ('>play_arrow</span><')[1].split ('</time></div><menu class="')[0]);
+                let publication = newsInfo.split ('</a><time class="')[0].split ('">').slice(-1)[0];
+                try {
+                    await fetch ('https://www.allsides.com/news-source/' + publication.toLowerCase().replace('the ', '').replace(' ', '-'), {method: 'get'})
+                    .then (res => res.text())
+                    .then (body => leaning = body.split ('</a></strong></span>')[0].split ('">').slice (-1)[0]);
+                }
+                catch {
+                    await fetch ('https://www.allsides.com/news-source/' + publication.toLowerCase().replace('the ', '').replace(' ', '-') + '-media-bias', {method: 'get'})
+                    .then (res => res.text())
+                    .then (body => leaning = body.split ('</a></strong></span>')[0].split ('">').slice (-1)[0]);
+                }
+                if (leaning.length > 16) leaning = null;
+                let chart = await mediaGraph (newsInfo.split ('srcset="')[1].split ('-h100-w100')[0], publication);
+                let newsTitle = newsInfo.split ('</a></h3>')[0].split ('" >').slice(-1)[0];
+                newsTitle = newsTitle.replace (/&#39;/g, '\'')
+                let embed = {
+                    title: 'Statistics - News',
+                    color: randomColor ('all'),
+                    timestamp: new Date().toISOString(),
+                    image: {url: 'attachment://image.png'},
+                    fields: [
+                        {name: 'Publication:', value: publication, inline: true},
+                        {name: 'Age:', value: (newsInfo.split ('</time>')[0].split ('">').slice(-1)[0]), inline: true},
+                        {name: 'Leaning', value: ((leaning) ? leaning : 'Not available'), inline: true},
+                        {name: 'Title:', value: '[' + newsTitle + '](https://news.google.com/articles/' + (newsInfo.split ('<a href="./articles/')[1].split ('?hl=en-US')[0]) + ')', inline: false}
+                    ]
+                }
+                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})
             }
-            catch {
-                await fetch ('https://www.allsides.com/news-source/' + publication.toLowerCase().replace('the ', '').replace(' ', '-') + '-media-bias', {method: 'get'})
-                .then (res => res.text())
-                .then (body => leaning = body.split ('</a></strong></span>')[0].split ('">').slice (-1)[0]);
-            }
-            if (leaning.length > 16) leaning = null;
-            let chart = await mediaGraph (newsInfo.split ('srcset="')[1].split ('-h100-w100')[0], publication);
-            let newsTitle = newsInfo.split ('</a></h3>')[0].split ('" >').slice(-1)[0];
-            newsTitle = newsTitle.replace (/&#39;/g, '\'')
-            let embed = {
-                title: 'Statistics - News',
-                color: randomColor ('all'),
-                timestamp: new Date().toISOString(),
-                image: {url: 'attachment://image.png'},
-                fields: [
-                    {name: 'Publication:', value: publication, inline: true},
-                    {name: 'Age:', value: (newsInfo.split ('</time>')[0].split ('">').slice(-1)[0]), inline: true},
-                    {name: 'Leaning', value: ((leaning) ? leaning : 'Not available'), inline: true},
-                    {name: 'Title:', value: '[' + newsTitle + '](https://news.google.com/articles/' + (newsInfo.split ('<a href="./articles/')[1].split ('?hl=en-US')[0]) + ')', inline: false}
-                ]
-            }
-            channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})
         }
+    }, {
+        timezone: 'America/New_York'
     })
 })
 
@@ -385,7 +390,7 @@ function financeGraph (prices) {
     ctx.strokeStyle = '#555555';
     ctx.stroke ();
     let fontSize = 20.5;
-    do ctx.font = (fontSize -= 0.5) + 'px Verdana`';
+    do ctx.font = (fontSize -= 0.5) + 'px Verdana';
     while (ctx.measureText(maxPrice.toFixed(0)).width > 95);
     ctx.fillStyle = '#9c9c9c';
     ctx.textAlign = 'center';
@@ -435,7 +440,7 @@ function astronomyGraph (day, selectedPlanet) {
         ctx.globalAlpha = 0.1 + Math.random() * 0.9;
         ctx.arc (Math.random() * 900, Math.random() * 300, 1 + Math.random(), 0, 2 * Math.PI);
         ctx.shadowBlur = Math.random() * 2;
-        ctx.fillStyle = `#ffd27d`;
+        ctx.fillStyle = '#ffd27d';
         ctx.fill();
     }
     let selPixelX; let selPixelY; let selPixelZ; let selCoordinateY;
@@ -691,8 +696,8 @@ async function guildGraph (guild) {
                 ctx.lineTo (ele + 100, ele2 + 100);
                 ctx.lineTo (ele, ele2 + 100);
                 let grd3 = (ele == 0) ? ctx.createLinearGradient (ele + 97, ele2 + 3, ele + 3, ele2 + 97) : ctx.createLinearGradient (ele + 3, ele2 + 97, ele + 97, ele2 + 3);
-                grd3.addColorStop (0, `rgb(${r1}, ${g1}, ${b1})`);
-                grd3.addColorStop (1, `rgb(${r2}, ${g2}, ${b2})`);
+                grd3.addColorStop (0, 'rgb('+r1+', '+g1+', '+b1+')');
+                grd3.addColorStop (1, 'rgb('+r2+', '+g2+', '+b2+')');
                 ctx.fillStyle = grd3
                 ctx.fill();
                 if (ele == 0) {r1 = r1 + 50; r2 = r2 + 50; b1 = b1 + 25; b2 = b2 + 25; g1 = g1 + 25; g2 = g2 + 25}
@@ -705,7 +710,7 @@ async function guildGraph (guild) {
         })
     })
     let fontSize = 25.5;
-    do ctx.font = `${fontSize -= 0.5}px Verdana`
+    do ctx.font = fontSize -= 0.5 + 'px Verdana'
     while (ctx.measureText(maxMembers).width > 85);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -729,7 +734,8 @@ async function guildGraph (guild) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.shadowColor = ctx.fillStyle;
     ctx.fillText ('(1 Week Graph)', 705, 275)
-    setInfo (guildInfo, {memberCount: []})
+    guildInfo.memberArray = [];
+    guildInfo.save();
     return messageImage;
 }
 
@@ -829,9 +835,4 @@ async function getGuildInfo (guild) {
         guildInfo = newGuildInfo
     }
     return guildInfo;
-}
-
-async function setInfo (info, field) {
-    info.set (field)
-    return info.save ();
 }

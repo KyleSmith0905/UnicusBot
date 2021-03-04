@@ -494,12 +494,12 @@ async function deceptionRound (startMessage, startPlayers, startEmbed, wager) {
 }
 
 async function chessStarter (startMessage, startPlayers) {
-    let board = ['cdefgedc', 'bbbbbbbb', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'BBBBBBBB', 'CDEFGEDC'];
+    let board = ['CDEFGEDC', 'BBBBBBBB', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'bbbbbbbb', 'cdefgedc'];
     let playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
     let turn = Math.floor(Math.random() * 2);
     if (turn == 1) startPlayers = [startPlayers[1], startPlayers[0]];
     let embedGame = {
-        title: 'Fun - Pictionary',
+        title: 'Fun - Chess',
         color: randomColor ('blue'),
         timestamp: new Date().toISOString(),
         fields: [
@@ -517,68 +517,167 @@ async function chessStarter (startMessage, startPlayers) {
 
 function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
     playerTurn = playerTurn * -1 + 1;
-    const turnOffset = turn * -32;
-    let filter = (msg) => msg.content.startsWith('move ') && msg.author.id == startPlayers[playerTurn].id;
+    const turnOffset = playerTurn * -32;
+    let filter = (msg) => msg.content.startsWith('move ') && msg.author.id == startPlayers[playerTurn].id && msg.content.length < 20;
     const collector = new messageCollector (client, startMessage.channel, filter, {time: 60000});
     collector.on ('collect', (msgReceived) => {
-        const notation = msgReceived.substring(4);
-        const coordinateX = sentence[sentence.length-2].charCodeAt(0)-97;
-        const coordinateY = parseFloat(sentence[sentence.length-1]) - 1;
-        if (holdingPiece.charCodeAt(0) > turnOffset + 66 && holdingPiece.charCodeAt(0) <= turnOffset + 91) {
-            chessErrors ('Stalling or Overlap', '', startMessage.channel, startPlayers[playerTurn].mention)
+        const notation = msgReceived.content.substring(4);
+        let notationObject = {}
+        const pieceNotation = ['R', 'N', 'B', 'Q', 'K']
+        if (!notation.startsWith('0-0')) {
+            for (let i = notation.length; i < 0; i--) {
+                if (!notationObject.y && notation[i].charCodeAt(0) >= 49 && notation[i].charCodeAt(0) <= 56) notationObject.y = parseFloat(notation[i])-1;
+                else if (!notationObject.x && notationObject.y) notationObject.x = notation[notation.length-2].charCodeAt(0)-97;
+                else if (pieceNotation.includes(notation[i])) notationObject.piece = notation[i];
+            }
+        }
+        else notationObject.piece = notation
+        if (notation[notationY][notationX].charCodeAt(0) > turnOffset + 97 && notation[notationY][notationX].charCodeAt(0) <= turnOffset + 122) {
+            chessErrors ('Stalling or Overlap', 'The destination square is already occupied by your piece.', startMessage.channel, startPlayers[playerTurn].mention)
             return msgReceived.delete();
         }
         let originCoordinates = [];
-        switch (notation.charAt(0)) {
-            case '': // pawns
-                break;
-            case 'R': // If in 2nd place, check 6 to the right, 2 to the left
+        switch (notationObject.piece) {
+            case 'R': {
                 let foundPiece, foundCoordinate;
-                foundPiece = foundCoordinate = false;
                 for (let i = 0; i < 16; i++) {
-                    let holdingPiece = (i <= 7) ? chessBoard[coordinateY][i] : chessBoard[i-8][coordinateX];
-                    if ((coordinateX == i && i <= 7) || (coordinateY == i - 8 && i > 7)) return foundCoordinate = true; // It landed on coordinate
-                    else if (holdingPiece.charCodeAt(0) == turnOffset + 99) { // It landed on valid piece
-                        if (foundCoordinate == false && foundPiece == true) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        if (foundCoordinate == true && foundPiece == true) return;
-                        originCoordinates.push (i, coordinateY);
+                    if (i == 0 || i == 8) foundPiece = foundCoordinate = false;
+                    let holdingPiece = i < 8 ? chessBoard[notationY][i] : chessBoard[i-8][notationX];
+                    if (!holdingPiece) return;
+                    if ((notationX == i && i <= 7) || (notationY == i - 8 && i > 7)) foundCoordinate = true;
+                    else if (holdingPiece.charCodeAt(0) == turnOffset + 99) {
+                        if (!foundCoordinate && foundPiece) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
+                        if (!foundCoordinate || !foundPiece) {
+                            originCoordinates.push (i < 8 ? i : notationX , i < 8 ? notationY : i - 8);
+                            foundPiece = true;
+                        }
                     }
-                    else if (holdingPiece.toUpperCase() == 'A') return; // It landed on a blank
-                    else { // It impacted with another piece
-                        if (foundCoordinate == false && foundPiece == true) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        else if (foundCoordinate == true && foundPiece == true)
+                    else if (holdingPiece.toUpperCase() != 'A' && !foundCoordinate && foundPiece) {
+                        originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
                         foundPiece = false;
                     }
                 }
-                break; // OAOBOOOXO
-            case 'N':
                 break;
-            case 'B': 
+            }
+            case 'N': {
+                const fromYArray = [-2,-1,-2,-1,2,1,2,1];
+                const fromXArray = [-1,-2,1,2,-1,-2,1,2];
+                for (let i = 0; i < 8; i++) {
+                    let holdingPiece = chessBoard[fromYArray[i] + notationY][fromXArray[i] + notationX]
+                    if (holdingPiece.charCodeAt(0) == turnOffset + 100) originCoordinates.push (fromXArray[i] + notationY, fromYArray[i] + notationX);
+                }
                 break;
-            case 'Q':
+            }
+            case 'B': {
+                let foundPiece, foundCoordinate;
+                const coordinateOffset = notationX + notationY;
+                for (let i = 0; i < 16; i++) {
+                    if (i == 0 || i == 8) foundPiece = foundCoordinate = false;
+                    let holdingPiece = i < 8 ? chessBoard[coordinateOffset-i][i] : chessBoard[coordinateOffset+i-16][i - 8];
+                    if (!holdingPiece) return;
+                    if ((notationX == i && i <= 7) || (notationX == i - 8 && i > 7)) return foundCoordinate = true;
+                    else if (holdingPiece.charCodeAt(0) == turnOffset + 101) {
+                        if (!foundCoordinate && foundPiece) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
+                        if (!foundCoordinate || !foundPiece) {
+                            originCoordinates.push (i < 8 ? coordinateOffset-i : coordinateOffset+i-16, i % 8);
+                            foundPiece = true;
+                        }
+                    }
+                    else if (holdingPiece.toUpperCase() != 'A' && !foundCoordinate && foundPiece) {
+                        originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
+                        foundPiece = false;
+                    }
+                }
                 break;
-            case 'K':
+            }
+            case 'Q': {
+                let foundPiece, foundCoordinate;
+                const coordinateOffset = notationX + notationY;
+                for (let i = 0; i < 32; i++) {
+                    if (i == 0 || i == 8 || i == 16 || i == 24) foundPiece = foundCoordinate = false;
+                    let fromX = i < 8 ? i : notationX;
+                    let fromY = i < 16 ? (i < 8 ? notationY : i-8) : (i < 24 ? coordinateOffset-i-16 : coordinateOffset+i-32);
+                    let holdingPiece = chessBoard[fromY][fromX];
+                    if (!holdingPiece) return;
+                    if ((notationX == i && i < 8) || (notationY == i - 8 && i < 16 && i >= 8) || (notationX == i && i < 24 && i >= 16) || (notationX == i && i >= 24)) return foundCoordinate = true;
+                    else if (holdingPiece.charCodeAt(0) == turnOffset + 102) {
+                        if (!foundCoordinate && foundPiece) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
+                        if (!foundCoordinate || !foundPiece) {
+                            originCoordinates.push (fromX, fromY);
+                            foundPiece = true;
+                        }
+                    }
+                    else if (holdingPiece.toUpperCase() != 'A' && !foundCoordinate && foundPiece) {
+                        originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
+                        foundPiece = false;
+                    }
+                }
                 break;
-            case '0':
+            }
+            case 'K': {
+                for (let i = 0; i < 8; i++) {
+                    let fromY = Math.round(Math.sin(i*Math.PI/4));
+                    let fromX = Math.round(Math.cos(i*Math.PI/4));
+                    let holdingPiece = chessBoard[fromY][fromX];
+                    if (holdingPiece.charCodeAt(0) == turnOffset + 103) originCoordinates.push (fromX, fromY)
+                }
                 break;
+            }
+            case '0': {
+                const yOffset = playerTurn * 14;
+                let checkStart, checkEnd;
+                if (chessBoard[yOffset][4].charCodeAt(0) != turnOffset + 103) return;
+                if (notation == '0-0') {
+                    if (chessBoard[yOffset][7].charCodeAt(0) == turnOffset + 99) originCoordinates = 'castleL';
+                    checkStart = 5;
+                    checkEnd = 6;
+                }
+                else if (notation == '0-0-0') {
+                    if (chessBoard[yOffset][0].charCodeAt(0) == turnOffset + 99) originCoordinates = 'castleR';
+                    checkStart = 1;
+                    checkEnd = 3
+                }
+                for (let i = checkStart; i < checkEnd + 1; i++) {
+                    if (holdingPiece.toUpperCase() != 'A') originCoordinates = [];
+                }
+                break;
+            }
+            case 'P': {
+                if (notation.length != 2 && (notation.length != 3 || notation[0] != 'x')) return;
+                const yOffset = playerTurn * 12 + 1;
+                if (notation[0] == 'x') {
+                    for (let i = -1; i < 2; i += 2) {
+                        if (chessBoard[playerTurn * 2 - 1 + notationY][notationX + i].charCodeAt(0) == turnOffset + 98)
+                        originCoordinates.push (notationX + i, playerTurn * 2 - 1 + notationY);
+                    }
+                }
+                else {
+                    if (chessBoard[notationY][notationX].toUpperCase() != 'A');
+                    else if (chessBoard[playerTurn * 2 - 1 + notationY][notationX].charCodeAt(0) == turnOffset + 98) originCoordinates.push (i, notationY);
+                    else if (holdingPiece.toUpperCase() != 'A' && yOffset == playerTurn * 4 - 2 + notationY && chessBoard[playerTurn * 4 - 2 + notationY][notationX].charCodeAt(0) == turnOffset + 98) originCoordinates.push (i, notationY);
+                }
+                break;
+            }
         }
+        if (originCoordinates.length > 2) chessErrors ('Stalling or Overlap', 'The destination square is already occupied by your piece.', startMessage, startPlayers[playerTurn].mention)
     })
     collector.on ('end', (collected, reason) => {
         if (reason == 'stopped') return;
     })
 }
 
-function chessErrors (reasonName, reasonValue, sendChannel, sendMention) {
+function chessErrors (reasonName, reasonValue, sendMessage, sendMention) {
+    sendMessage.delete();
     let embed = {
         title: 'Error - Chess',
-        description: 'The chess notation provided is an illegal move. Consult with an official chess notation website to inscribe the correct notation.',
+        description: 'The requested chess play provided is an illegal move. Consult with an official chess notation website to inscribe the correct notation.',
         color: randomColor ('orange'),
         timestamp: new Date().toISOString(),
         fields: [
             {name: reasonName, value: reasonValue, inline: false}
         ]
     }
-    sendChannel.createMessage ({content: sendMention + ',', embed: embedGame});
+    sendMessage.channel.createMessage ({content: sendMention + ',', embed: embed});
 }
 
 function lettersToChess (board) {
