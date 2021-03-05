@@ -522,20 +522,58 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
     const collector = new messageCollector (client, startMessage.channel, filter, {time: 60000});
     collector.on ('collect', (msgReceived) => {
         const notation = msgReceived.content.substring(4);
-        let notationObject = {}
+        const notationObject = {};
         const pieceNotation = ['R', 'N', 'B', 'Q', 'K']
-        if (!notation.startsWith('0-0')) {
-            for (let i = notation.length; i < 0; i--) {
-                if (!notationObject.y && notation[i].charCodeAt(0) >= 49 && notation[i].charCodeAt(0) <= 56) notationObject.y = parseFloat(notation[i])-1;
-                else if (!notationObject.x && notationObject.y) notationObject.x = notation[notation.length-2].charCodeAt(0)-97;
-                else if (pieceNotation.includes(notation[i])) notationObject.piece = notation[i];
+        for (let i = notation.length; i < 0; i--) {
+            if (!notationObject.y && notation[i].charCodeAt(0) >= 49 && notation[i].charCodeAt(0) <= 56 && notation[i + 1].charCodeAt(0) >= 97 && notation[i + 1].charCodeAt(0) <= 104) {
+                notationObject.y = parseFloat(notation[i])-1;
+                notationObject.x = notation[i+1].charCodeAt(0)-97;
+                let stringIndex = i;
+                if (notation[stringIndex] == '=' && pieceNotation.includes(notation[stringIndex + 1]) && !notation[stringIndex + 1] == 'K') {
+                    notationObject.promote = notation[stringIndex + 1];
+                    stringIndex += 2;
+                }
+                if (notation[stringIndex] == '#') {
+                    notationObject.threat = 'chessmate';
+                    stringIndex++;
+                }
+                else if (notation[stringIndex] == '+') {
+                    notationObject.threat = 'check';
+                    stringIndex++;
+                }
+                const annotation = notation.substring(stringIndex, notation.length);
+                const annotationList = {'!': 'a good move', '!!': 'a brilliant move', '!?': 'an interesting move', '?!': 'a dubious move', '??': 'a blunder', '?': 'a mistake'};
+                if (Object.keys(annotationList).includes(annotation)) notationObject.move = annotationList[annotation]
+                else if (!annotation) {
+                    notationObject.error = 'suffix'
+                    break;
+                }
+                stringIndex = i - 1;
+                if (notation[stringIndex] == 'x') {
+                    notationObject.capture = true;
+                    stringIndex -= 1;
+                }
+                if (notation[stringIndex].charCodeAt(0) >= 49 && notation[stringIndex].charCodeAt(0) <= 56) {
+                    notationObject.extraY = parseFloat(notation[i])-1;
+                    stringIndex -= 1; 
+                }
+                if (notation[stringIndex].charCodeAt(0) >= 97 && notation[stringIndex].charCodeAt(0) <= 104) {
+                    notationObject.extraX = notation[i+1].charCodeAt(0)-97;
+                    stringIndex -= 1; 
+                }
+                if (pieceNotation.includes(notation[stringIndex])) notationObject.piece = notation[stringIndex];
+                break;
             }
         }
-        else notationObject.piece = notation
-        if (notation[notationY][notationX].charCodeAt(0) > turnOffset + 97 && notation[notationY][notationX].charCodeAt(0) <= turnOffset + 122) {
-            chessErrors ('Stalling or Overlap', 'The destination square is already occupied by your piece.', startMessage.channel, startPlayers[playerTurn].mention)
-            return msgReceived.delete();
+        if (notationObject.error = 'suffix') return chessErrors ('Invalid Annotation', 'Your move had extra trailing notation marks that weren\'t accepted, you might be confused with: #, +, =R, =N, =B, =Q, !, !!, !?, ?!, ??, ?', startMessage.channel, startPlayers[playerTurn].mention);
+        else if (notationObject.piece == '0' && (!notationObject.x || !notationObject.y || !notationObject.piece)) {
+            let missingArray = [];
+            if (!notationObject.x) missingArray.push ('X Coordinate')
+            if (!notationObject.y) missingArray.push ('Y Coordinate')
+            if (!notationObject.piece) missingArray.push ('Moving Piece')
+            return chessErrors ('Missing values', 'Your notation did not include the following information: ' + missingArray.join(', '), startMessage.channel, startPlayers[playerTurn].mention);
         }
+        else if (notation[notationY][notationX].charCodeAt(0) > turnOffset + 97 && notation[notationY][notationX].charCodeAt(0) <= turnOffset + 122) return chessErrors ('Stalling or Overlap', 'The destination square is already occupied by another of your pieces', startMessage.channel, startPlayers[playerTurn].mention);
         let originCoordinates = [];
         switch (notationObject.piece) {
             case 'R': {
@@ -659,7 +697,7 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
                 break;
             }
         }
-        if (originCoordinates.length > 2) chessErrors ('Stalling or Overlap', 'The destination square is already occupied by your piece.', startMessage, startPlayers[playerTurn].mention)
+        if (originCoordinates.length > 2) chessErrors ('Rank or File not specified', 'The destination square is already occupied by your piece.', startMessage, startPlayers[playerTurn].mention)
     })
     collector.on ('end', (collected, reason) => {
         if (reason == 'stopped') return;

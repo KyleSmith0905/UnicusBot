@@ -10,7 +10,7 @@ client.on ('ready', async () => {
         memberCountArray.push (guild.memberCount);
         guildInfo.save()
     })
-    cron.schedule ('0 0 0 * * *', async () => {
+    cron.schedule ('0 0 * * * *', async () => {
         let weekday = new Date().getDay();
         console.log (weekday);
         switch (weekday) {

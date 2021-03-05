@@ -12,11 +12,11 @@ module.exports = {
         const guild = message.channel.guild;
         const userInfo = await getUserInfo (member, guild);
         const memberRoles = member.roles;
-        //const governorRole = guild.roles.find (ele => memberRoles.includes (ele.id) && ele.name.endsWith('Governor'));
-        //if (!governorRole) return errorLog (message, args, 'Governor', 'permission', [governorRole]);
-        //const state = governorRole.name.split(' ')[0];
-        //const stateConfig = config.places[state.toLowerCase()];
-        //const stateCategory = guild.channels.find (ele => ele.name == stateConfig.name.toLowerCase() && ele.type == 4);
+        const governorRole = guild.roles.find (ele => memberRoles.includes (ele.id) && ele.name.endsWith('Governor'));
+        if (!governorRole) return errorLog (message, args, 'Governor', 'permission', [governorRole]);
+        const state = governorRole.name.split(' ')[0];
+        const stateConfig = config.places[state.toLowerCase()];
+        const stateCategory = guild.channels.find (ele => ele.name == stateConfig.name.toLowerCase() && ele.type == 4);
         if (commandConfig.ban.includes (args[1])) {
             let errors = [];
             let targetID = args[2].match(/^<@!?(\d+)>$/) || args[2];
