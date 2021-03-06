@@ -241,7 +241,7 @@ client.on ('ready', async () => {
                 let leaning;
                 await fetch ('https://news.google.com/topstories', {method: 'get'})
                 .then (res => res.text())
-                .then (body => newsInfo = body.split ('>play_arrow</span><')[1].split ('</time></div><menu class="')[0]);
+                .then (body => newsInfo = body.split ('<div jsname="jVqMGc"')[1]);
                 let publication = newsInfo.split ('</a><time class="')[0].split ('">').slice(-1)[0];
                 try {
                     await fetch ('https://www.allsides.com/news-source/' + publication.toLowerCase().replace('the ', '').replace(' ', '-'), {method: 'get'})
