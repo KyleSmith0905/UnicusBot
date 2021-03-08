@@ -3,10 +3,10 @@ const discord = require ('eris');
 const cron = require('node-cron');
 const mongo = require ('mongoose');
 const canvas = require ('canvas');
-const fetch = require("node-fetch");
+const fetch = require('node-fetch');
 const config = require ('./config.json');
 const errorLog = require ('./external/error.js')
-const {ReactionCollector, MessageCollector} = require ("eris-collector");
+const {ReactionCollector, MessageCollector} = require ('eris-collector');
 require('dotenv').config();
 const {randomColor, getUserInfo} = require ('./external/functions');
 

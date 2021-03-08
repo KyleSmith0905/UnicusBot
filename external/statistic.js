@@ -1,18 +1,21 @@
-const {randomColor, currencyFormat, timeout} = require ('./functions');
+const {randomColor, currencyFormat} = require ('./functions');
 const guildInfoDB = require ('../database/guildinfo.js');
 
+let ifOpen = true;
+
 client.on ('ready', async () => {
-    let guild = client.guilds.find (ele => true)
+    let guild = client.guilds.find (ele => true);
     let channel = guild.channels.find (ele => ele.id == process.env.CHANNEL_STATISTICS);
     cron.schedule ('0 0 */6 * * *', async () => {
         let guildInfo = await getGuildInfo (guild);
         let memberCountArray = (!guildInfo.memberCount) ? [] : guildInfo.memberCount;
         memberCountArray.push (guild.memberCount);
-        guildInfo.save()
+        guildInfo.save();
     })
-    cron.schedule ('0 0 * * * *', async () => {
+    cron.schedule ('0 0 0 * * *', async () => {
+        if (ifOpen == false) return;
+        ifOpen = false;
         let weekday = new Date().getDay();
-        console.log (weekday);
         switch (weekday) {
             case 0: {
                 const startDate = Math.floor((Date.now() - 1123200000) / 1000)
@@ -237,24 +240,25 @@ client.on ('ready', async () => {
                 channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
             }
             case 6: {
-                let newsInfo;
-                let leaning;
+                let newsInfo, leaning;
                 await fetch ('https://news.google.com/topstories', {method: 'get'})
                 .then (res => res.text())
-                .then (body => newsInfo = body.split ('<div jsname="jVqMGc"')[1]);
+                .then (body => newsInfo = body.split ('<figure jscontroller="dAR81"')[1]);
                 let publication = newsInfo.split ('</a><time class="')[0].split ('">').slice(-1)[0];
                 try {
                     await fetch ('https://www.allsides.com/news-source/' + publication.toLowerCase().replace('the ', '').replace(' ', '-'), {method: 'get'})
                     .then (res => res.text())
-                    .then (body => leaning = body.split ('</a></strong></span>')[0].split ('">').slice (-1)[0]);
+                    .then (body => leaning = body.split ('AllSides Media Bias Rating: ')[1].split ('" title="')[0]);
                 }
                 catch {
                     await fetch ('https://www.allsides.com/news-source/' + publication.toLowerCase().replace('the ', '').replace(' ', '-') + '-media-bias', {method: 'get'})
                     .then (res => res.text())
-                    .then (body => leaning = body.split ('</a></strong></span>')[0].split ('">').slice (-1)[0]);
+                    .then (body => leaning = body.split ('AllSides Media Bias Rating: ')[1].split('" title="')[0]);
                 }
                 if (leaning.length > 16) leaning = null;
-                let chart = await mediaGraph (newsInfo.split ('srcset="')[1].split ('-h100-w100')[0], publication);
+                if (!leaning) leaning = 'Not available'
+                const imageIndex = newsInfo.indexOf('https://')
+                let chart = await mediaGraph (newsInfo.substring(imageIndex).split ('-h100-w100')[0], publication);
                 let newsTitle = newsInfo.split ('</a></h3>')[0].split ('" >').slice(-1)[0];
                 newsTitle = newsTitle.replace (/&#39;/g, '\'')
                 let embed = {
@@ -265,7 +269,7 @@ client.on ('ready', async () => {
                     fields: [
                         {name: 'Publication:', value: publication, inline: true},
                         {name: 'Age:', value: (newsInfo.split ('</time>')[0].split ('">').slice(-1)[0]), inline: true},
-                        {name: 'Leaning', value: ((leaning) ? leaning : 'Not available'), inline: true},
+                        {name: 'Leaning', value: leaning, inline: true},
                         {name: 'Title:', value: '[' + newsTitle + '](https://news.google.com/articles/' + (newsInfo.split ('<a href="./articles/')[1].split ('?hl=en-US')[0]) + ')', inline: false}
                     ]
                 }
@@ -274,6 +278,9 @@ client.on ('ready', async () => {
         }
     }, {
         timezone: 'America/New_York'
+    })
+    cron.schedule ('0 0 12 * * *', async () => {
+        ifOpen = true;
     })
 })
 
