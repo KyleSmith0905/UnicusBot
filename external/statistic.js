@@ -1,8 +1,6 @@
 const {randomColor, currencyFormat} = require ('./functions');
 const guildInfoDB = require ('../database/guildinfo.js');
 
-let ifOpen = true;
-
 client.on ('ready', async () => {
     let guild = client.guilds.find (ele => true);
     let channel = guild.channels.find (ele => ele.id == process.env.CHANNEL_STATISTICS);
@@ -13,8 +11,10 @@ client.on ('ready', async () => {
         guildInfo.save();
     })
     cron.schedule ('0 0 0 * * *', async () => {
-        if (ifOpen == false) return;
-        ifOpen = false;
+        let guildInfo = await getGuildInfo (guild);
+        if (!guildInfo.statisticOpen) return;
+        guildInfo.statisticOpen = false;
+        guildInfo.save();
         let weekday = new Date().getDay();
         switch (weekday) {
             case 0: {
@@ -279,7 +279,12 @@ client.on ('ready', async () => {
     }, {
         timezone: 'America/New_York'
     })
-    cron.schedule ('0 0 12 * * *', () => ifOpen = true)
+    cron.schedule ('0 0 12 * * *', async () => {
+        let guildInfo = await getGuildInfo (guild);
+        if (guildInfo.statisticOpen) return;
+        guildInfo.statisticOpen = true;
+        guildInfo.save();
+    })
 })
 
 function currencyGraph (prices) {
