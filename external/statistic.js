@@ -279,9 +279,7 @@ client.on ('ready', async () => {
     }, {
         timezone: 'America/New_York'
     })
-    cron.schedule ('0 0 12 * * *', async () => {
-        ifOpen = true;
-    })
+    cron.schedule ('0 0 12 * * *', () => ifOpen = true)
 })
 
 function currencyGraph (prices) {

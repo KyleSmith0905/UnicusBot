@@ -82,7 +82,7 @@ client.on ('guildMemberUpdate', async (guild, member, oldMember) => {
     if (oldMember.roles != member.roles) {
         let userInfo = await getUserInfo (member, guild);
         userInfo.roleID = member.roles;
-        await timeout (50);
+        await timeout (60);
         userInfo.save();
     }
     if (oldMember.nick == member.nick) return;
