@@ -11,10 +11,6 @@ client.on ('ready', async () => {
         guildInfo.save();
     })
     cron.schedule ('0 0 0 * * *', async () => {
-        let guildInfo = await getGuildInfo (guild);
-        if (!guildInfo.statisticOpen) return;
-        guildInfo.statisticOpen = false;
-        guildInfo.save();
         let weekday = new Date().getDay();
         switch (weekday) {
             case 0: {
@@ -278,12 +274,6 @@ client.on ('ready', async () => {
         }
     }, {
         timezone: 'America/New_York'
-    })
-    cron.schedule ('0 0 12 * * *', async () => {
-        let guildInfo = await getGuildInfo (guild);
-        if (guildInfo.statisticOpen) return;
-        guildInfo.statisticOpen = true;
-        guildInfo.save();
     })
 })
 
