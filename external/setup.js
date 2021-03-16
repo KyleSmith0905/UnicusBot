@@ -50,7 +50,7 @@ module.exports = {
                     title: 'Important Information',
                     description: 'If you can read this, it is highly probable that the Discord bot, Unicus, is sleeping.',
                     fields: [
-                        {name: 'Reasons:', value: '`1:` The bot is being updated and reloaded\n`2:` The server hosting the bot is down.\n`3:` The bot was malfunction when assigning roles.'},
+                        {name: 'Reasons:', value: '`1:` The bot is being updated and reloaded.\n`2:` The server hosting the bot is down.\n`3:` The bot was malfunction when assigning roles.'},
                     ]
                 }
                 message.channel.createMessage ({content: '@everyone,', embed: embed})

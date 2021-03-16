@@ -143,7 +143,7 @@ module.exports = {
             }
             message.channel.createMessage ({content: member.mention + ',', embed: embed});
         }
-        else if (commandConfig.chs.includes (args[1]) && process.env.CHANNEL_TRANSPORT == '716471682717712439') {
+        else if (commandConfig.chs.includes (args[1])) {
             let embedStart = {
                 title: 'Fun - Chess',
                 color: randomColor ('white'),
@@ -494,7 +494,8 @@ async function deceptionRound (startMessage, startPlayers, startEmbed, wager) {
 }
 
 async function chessStarter (startMessage, startPlayers) {
-    let board = ['cdefgedc', 'bbbbbbbb', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'BBBBBBBB', 'CDEFGEDC'];
+    let board = ['cdefgedc', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'CDEFGEDC'];
+    //let board = ['cdefgedc', 'bbbbbbbb', 'AaAaAaAa', 'aAaAaAaA', 'AaAaAaAa', 'aAaAaAaA', 'BBBBBBBB', 'CDEFGEDC'];
     let turn = Math.floor(Math.random() * 2);
     if (turn == 1) startPlayers = [startPlayers[1], startPlayers[0]];
     let playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
@@ -515,13 +516,14 @@ async function chessStarter (startMessage, startPlayers) {
     chessRound (message, startPlayers, board, 1)
 }
 
-function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
+function chessRound (startMessage, startPlayers, backupBoard, playerTurn) {
     let errorMessage = [];
     playerTurn = -playerTurn + 1;
     const turnOffset = playerTurn * -32;
     let filter = (msg) => msg.content.toLowerCase().startsWith('move ') && msg.author.id == startPlayers[playerTurn].id && msg.content.length < 20;
     const collector = new messageCollector (client, startMessage.channel, filter, {time: 120000});
     collector.on ('collect', async (msgReceived) => {
+        let chessBoard = [...backupBoard];
         const notation = msgReceived.content.substring(5);
         const notationObject = {};
         const pieceNotation = ['R', 'N', 'B', 'Q', 'K'];
@@ -573,7 +575,7 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
                     const annotationList = {'!': 'a good move', '!!': 'a brilliant move', '!?': 'an interesting move', '?!': 'a dubious move', '??': 'a blunder', '?': 'a mistake'};
                     if (Object.keys(annotationList).includes(annotation)) notationObject.move = annotationList[annotation]
                     else if (annotation) {
-                        notationObject.error = 'suffix'
+                        notationObject.error = 'suffix';
                         break;
                     }
                     stringIndex = i - 2;
@@ -590,13 +592,15 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
                         stringIndex -= 1;
                     }
                     if (pieceNotation.includes(notation[stringIndex])) notationObject.piece = notation[stringIndex];
+                    if (notation.substring(0, stringIndex - 1)) notationObject.error = 'prefix';
                     break;
                 }
             }
         }
         if (!notationObject.piece) notationObject.piece = 'P';
-        if (notationObject.error == 'suffix') return  errorMessage.push(await chessErrors ('Invalid Annotation', 'Your move had extra trailing notation marks that weren\'t accepted, you might be confused with: #, +, =R, =N, =B, =Q, !, !!, !?, ?!, ??, ?', msgReceived, startPlayers[playerTurn].mention));
-        else if (notationObject.piece[0] == '0' && (!notationObject.x || !notationObject.y || !notationObject.piece)) {
+        if (notationObject.error == 'suffix') return  errorMessage.push(await chessErrors ('Trailing Annotation', 'Your move had extra trailing notation marks that were not accepted, you might be confused with: #, +, =R, =N, =B, =Q, !, !!, !?, ?!, ??, ?', msgReceived, startPlayers[playerTurn].mention));
+        if (notationObject.error == 'prefix') return  errorMessage.push(await chessErrors ('Leading Annotation', 'Your move had extra leading notation marks that were not accepted.', msgReceived, startPlayers[playerTurn].mention));
+        if (notationObject.piece[0] != '0' && (isNaN(notationObject.x) || isNaN(notationObject.y))) {
             let missingArray = [];
             if (!notationObject.x) missingArray.push ('X Coordinate')
             if (!notationObject.y) missingArray.push ('Y Coordinate')
@@ -604,26 +608,18 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
             return  errorMessage.push(await chessErrors ('Missing values', 'Your notation did not include the following information: ' + missingArray.join(', '), msgReceived, startPlayers[playerTurn].mention));
         }
         else if (notationObject.piece[0] != '0' && chessBoard[notationObject.y][notationObject.x].charCodeAt(0) > turnOffset + 97 && chessBoard[notationObject.y][notationObject.x].charCodeAt(0) <= turnOffset + 122) return  errorMessage.push(await chessErrors ('Stalling or Overlap', 'The destination square is already occupied by another of your pieces', msgReceived, startPlayers[playerTurn].mention));
-        let originCoordinates = [];
-        console.log(notationObject)
+        let originArray = [];
         switch (notationObject.piece[0]) {
             case 'R': {
-                let foundPiece, foundCoordinate;
-                for (let i = 0; i < 16; i++) {
-                    if (i == 0 || i == 8) foundPiece = foundCoordinate = false;
-                    let holdingPiece = i < 8 ? chessBoard[notationObject.y][i] : chessBoard[i-8][notationObject.x];
-                    if (!holdingPiece) return;
-                    if ((notationObject.x == i && i <= 7) || (notationObject.y == i - 8 && i > 7)) foundCoordinate = true;
-                    else if (holdingPiece.charCodeAt(0) == turnOffset + 99) {
-                        if (!foundCoordinate && foundPiece) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        if (!foundCoordinate || !foundPiece) {
-                            originCoordinates.push (i < 8 ? i : notationObject.x , i < 8 ? notationObject.y : i - 8);
-                            foundPiece = true;
-                        }
-                    }
-                    else if (holdingPiece.toUpperCase() != 'A' && !foundCoordinate && foundPiece) {
-                        originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        foundPiece = false;
+                for (let index = 0; index < 4; index++) {
+                    const directionY = Math.round(Math.sin(index*Math.PI/2))
+                    const directionX = Math.round(Math.cos(index*Math.PI/2))
+                    for (let i = 1; i < 8; i++) {
+                        const holdingPiece = chessBoard[directionY*i + notationObject.y]?.[directionX*i + notationObject.x];
+                        if (!holdingPiece) break;
+                        else if (holdingPiece.toUpperCase() == 'A');
+                        else if (holdingPiece.charCodeAt(0) == turnOffset+99) originArray.push (directionX*i + notationObject.x, directionY*i + notationObject.y)
+                        else break;
                     }
                 }
                 break;
@@ -633,50 +629,34 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
                 const fromXArray = [-1,-2,1,2,-1,-2,1,2];
                 for (let i = 0; i < 8; i++) {
                     let holdingPiece = chessBoard[fromYArray[i] + notationObject.y]?.[fromXArray[i] + notationObject.x];
-                    if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 100) originCoordinates.push (fromXArray[i] + notationObject.x, fromYArray[i] + notationObject.y);
+                    if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 100) originArray.push (fromXArray[i] + notationObject.x, fromYArray[i] + notationObject.y);
                 }
                 break;
             }
             case 'B': {
-                let foundPiece, foundCoordinate;
-                for (let i = 0; i < 16; i++) {
-                    if (i == 0 || i == 8) foundPiece = foundCoordinate = false;
-                    let holdingPiece = i < 8 ? chessBoard[notationObject.x+notationObject.y-i]?.[i] : chessBoard[-notationObject.x+notationObject.y+i-8]?.[i-8];
-                    if (!holdingPiece);
-                    else if ((notationObject.x == i && i <= 7) || (notationObject.x == i - 8 && i > 7)) foundCoordinate = true;
-                    else if (holdingPiece.charCodeAt(0) == turnOffset + 101) {
-                        if (!foundCoordinate && foundPiece) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        if (!foundCoordinate || !foundPiece) {
-                            originCoordinates.push (i % 8, (i < 8 ? notationObject.x+notationObject.y-i : -notationObject.x+notationObject.y+i-8));
-                            foundPiece = true;
-                        }
-                    }
-                    else if (holdingPiece.toUpperCase() != 'A' && !foundCoordinate && foundPiece) {
-                        originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        foundPiece = false;
+                for (let index = 0; index < 4; index++) {
+                    const directionY = Math.round(Math.sin(index*Math.PI/2+Math.PI/4));
+                    const directionX = Math.round(Math.cos(index*Math.PI/2+Math.PI/4));
+                    for (let i = 1; i < 8; i++) {
+                        const holdingPiece = chessBoard[directionY*i + notationObject.y]?.[directionX*i + notationObject.x];
+                        if (!holdingPiece) break;
+                        else if (holdingPiece.toUpperCase() == 'A');
+                        else if (holdingPiece.charCodeAt(0) == turnOffset+101) originArray.push (directionX*i + notationObject.x, directionY*i + notationObject.y);
+                        else break;
                     }
                 }
                 break;
             }
             case 'Q': {
-                let foundPiece, foundCoordinate;
-                for (let i = 0; i < 32; i++) {
-                    if (i == 0 || i == 8 || i == 16 || i == 24) foundPiece = foundCoordinate = false;
-                    const fromX = (i < 8 || i >= 16) ? i % 8 : notationObject.x;
-                    const fromY = i < 16 ? (i < 8 ? notationObject.y : i-8) : (i < 24 ? notationObject.x+notationObject.y-i+16 : -notationObject.x+notationObject.y+i-24);
-                    const holdingPiece = chessBoard[fromY]?.[fromX];
-                    if (!holdingPiece);
-                    else if ((notationObject.x == i && i < 8) || (notationObject.y == i - 8 && i < 16 && i >= 8) || (notationObject.x == i && i < 24 && i >= 16) || (notationObject.x == i && i >= 24)) foundCoordinate = true;
-                    else if (holdingPiece.charCodeAt(0) == turnOffset + 102) {
-                        if (!foundCoordinate && foundPiece) originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        if (!foundCoordinate || !foundPiece) {
-                            originCoordinates.push (fromX, fromY);
-                            foundPiece = true;
-                        }
-                    }
-                    else if (holdingPiece.toUpperCase() != 'A' && !foundCoordinate && foundPiece) {
-                        originCoordinates = originCoordinates.slice(0, originCoordinates.length - 2);
-                        foundPiece = false;
+                for (let index = 0; index < 8; index++) {
+                    const directionY = Math.round(Math.sin(index*Math.PI/4));
+                    const directionX = Math.round(Math.cos(index*Math.PI/4));
+                    for (let i = 1; i < 8; i++) {
+                        const holdingPiece = chessBoard[directionY*i + notationObject.y]?.[directionX*i + notationObject.x];
+                        if (!holdingPiece) break;
+                        else if (holdingPiece.toUpperCase() == 'A');
+                        else if (holdingPiece.charCodeAt(0) == turnOffset+102) originArray.push (directionX*i + notationObject.x, directionY*i + notationObject.y);
+                        else break;
                     }
                 }
                 break;
@@ -686,70 +666,137 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
                     const fromY = Math.round(Math.sin(i*Math.PI/4)) + notationObject.y;
                     const fromX = Math.round(Math.cos(i*Math.PI/4)) + notationObject.x;
                     const holdingPiece = chessBoard[fromY]?.[fromX];
-                    if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 103) originCoordinates.push (fromX, fromY)
+                    if (holdingPiece?.charCodeAt(0) == turnOffset+103) originArray.push (fromX, fromY)
                 }
                 break;
             }
             case '0': {
                 const yOffset = playerTurn * 14;
-                let checkStart, checkEnd;
-                if (chessBoard[yOffset][4].charCodeAt(0) != turnOffset + 103) return;
+                let checkStart, checkEnd, attackChange;
+                if (chessBoard[yOffset][4].charCodeAt(0) != turnOffset + 103) break;
                 if (notationObject.piece == '0K') {
-                    if (chessBoard[yOffset][7].charCodeAt(0) == turnOffset + 99) originCoordinates = '0K';
-                    checkStart = 5; checkEnd = 6;
+                    if (chessBoard[yOffset][7].charCodeAt(0) == turnOffset + 99) originArray = '0K';
+                    checkStart = 5; checkEnd = 6; attackChange = 1;
                 }
                 else if (notationObject.piece == '0Q') {
-                    if (chessBoard[yOffset][0].charCodeAt(0) == turnOffset + 99) originCoordinates = '0Q';
-                    checkStart = 1; checkEnd = 3;
+                    if (chessBoard[yOffset][0].charCodeAt(0) == turnOffset + 99) originArray = '0Q';
+                    checkStart = 1; checkEnd = 3; attackChange -1;
                 }
                 for (let i = checkStart; i < checkEnd + 1; i++) {
-                    if (chessBoard[yOffset][i].toUpperCase() != 'A') originCoordinates = [];
+                    if (chessBoard[yOffset][i].toUpperCase() != 'A') originArray = [];
                 }
+                let attackStart = 4;
+                for (let i = 0; i < 3; i++) {
+                    if (chessAttacked (chessBoard, {x: attackStart, y: yOffset}, -playerTurn + 1)) originArray = '0Check';
+                    attackStart =+ attackChange;
+                }
+                if (originArray == '0Check') return errorMessage.push (await chessErrors ('Threatened King', 'You are not allowed to castle with the following conditions: The king is not in check, the king will not pass through check, and the king will not end in check.', msgReceived, startPlayers[playerTurn].mention));
                 break;
             }
             case 'P': {
                 if (chessBoard[notationObject.y + playerTurn * 2 - 1][notationObject.x].toUpperCase() == 'H' || chessBoard[notationObject.y][notationObject.x].toUpperCase() != 'A') {
                     for (let i = -1; i < 2; i += 2) {
-                        if (chessBoard[playerTurn * 2 - 1 + notationObject.y][notationObject.x + i].charCodeAt(0) == turnOffset + 98) {
-                            originCoordinates.push (notationObject.x + i, playerTurn * 2 - 1 + notationObject.y);
+                        if (chessBoard[playerTurn * 2 - 1 + notationObject.y]?.[notationObject.x + i]?.charCodeAt(0) == turnOffset + 98) {
+                            originArray.push (notationObject.x + i, playerTurn * 2 - 1 + notationObject.y);
                             if (chessBoard[notationObject.y + playerTurn * 2 - 1][notationObject.x].toUpperCase() == 'H') notationObject.enPassant = true;
                         }
                     }
                 }
                 else {
                     if (chessBoard[notationObject.y][notationObject.x].toUpperCase() != 'A');
-                    else if (chessBoard[playerTurn * 2 - 1 + notationObject.y][notationObject.x].charCodeAt(0) == turnOffset + 98) originCoordinates.push (notationObject.x, playerTurn * 2 - 1 + notationObject.y);
+                    else if (chessBoard[playerTurn * 2 - 1 + notationObject.y][notationObject.x].charCodeAt(0) == turnOffset + 98) originArray.push (notationObject.x, playerTurn * 2 - 1 + notationObject.y);
                     else if (chessBoard[playerTurn * 2 - 1 + notationObject.y][notationObject.x].toUpperCase() == 'A' && playerTurn + 3 == notationObject.y && chessBoard[playerTurn * 4 - 2 + notationObject.y][notationObject.x].charCodeAt(0) == turnOffset + 98) {
-                        originCoordinates.push (notationObject.x, playerTurn * 4 - 2 + notationObject.y);
+                        originArray.push (notationObject.x, playerTurn * 4 - 2 + notationObject.y);
                         notationObject.jump = true;
                     }
                 }
                 break;
             }
         }
-        if (originCoordinates.length > 2) {
-            for (let i = 0; i < originCoordinates.length; i += 2) {
-                if (notationObject.extraX && originCoordinates[i] != notationObject.extraX) originCoordinates = originCoordinates.splice(i,2)
-                else if (notationObject.extraX && originCoordinates[i+1] != notationObject.extraY) originCoordinates = originCoordinates.splice(i,2)
+        if (originArray.length > 2) {
+            for (let i = 0; i < originArray.length; i += 2) {
+                if (notationObject.extraX && originArray[i] != notationObject.extraX) originArray = originArray.splice(i,2)
+                else if (notationObject.extraX && originArray[i+1] != notationObject.extraY) originArray = originArray.splice(i,2)
             }
-            if (originCoordinates.length > 2) return  errorMessage.push(await chessErrors ('Rank or File Not Specified', 'There are multiple pieces that could travel to that location, specify what rank, file, or both you are trying to travel to.', msgReceived, startPlayers[playerTurn].mention));
+            if (originArray.length > 2) return  errorMessage.push(await chessErrors ('Rank or File Not Specified', 'There are multiple pieces that could travel to that location, specify what rank, file, or both you are trying to travel to.', msgReceived, startPlayers[playerTurn].mention));
         }
-        if (originCoordinates.length == 0) return  errorMessage.push(await chessErrors ('No Qualified Pieces', 'There are no pieces of the specified piece type that can reach the destination location.', msgReceived, startPlayers[playerTurn].mention));
-        if (originCoordinates[0] === '0') {
+        if (originArray.length == 0) return errorMessage.push (await chessErrors ('No Qualified Pieces', 'There are no pieces of the specified piece type that can reach the destination location.', msgReceived, startPlayers[playerTurn].mention));
+        if (originArray[0] === '0') {
             const yOffset = playerTurn * 14;
             const pattern = 'AaAaAa';
-            if (originCoordinates == '0Q') chessBoard[yOffset] = chessBoard[yOffset].slice (0, 3) + pattern.substring(playerTurn, playerTurn + 3)
-            else if (originCoordinates == '0K') chessBoard[yOffset] = pattern.substring(playerTurn, playerTurn + 4) + chessBoard[yOffset].slice (4, 8)
+            if (originArray == '0Q') chessBoard[yOffset] = chessBoard[yOffset].slice (0, 3) + pattern.substring(playerTurn, playerTurn + 3)
+            else if (originArray == '0K') chessBoard[yOffset] = pattern.substring(playerTurn, playerTurn + 4) + chessBoard[yOffset].slice (4, 8)
         }
         else {
-            const xFrom = originCoordinates[0];
-            const yFrom = originCoordinates[1];
-            const takeOverPiece = chessBoard[notationObject.y][notationObject.x];
-            chessBoard[notationObject.y] = chessBoard[notationObject.y].slice (0, notationObject.x) + (notationObject.jump ? String.fromCharCode(chessBoard[yFrom][xFrom].charCodeAt(0) + 6) : chessBoard[yFrom][xFrom]) + chessBoard[notationObject.y].slice (notationObject.x + 1, 8)
-            chessBoard[yFrom] = chessBoard[yFrom].slice(0, xFrom) + ((xFrom + yFrom) % 2 == 0 ? 'A' : 'a') + chessBoard[yFrom].slice(xFrom + 1, 8)
-            if (notationObject.enPassant) chessBoard[yFrom] = chessBoard[yFrom].slice(0, notationObject.x) + ((notationObject.x + yFrom) % 2 == 0 ? 'A' : 'a') + chessBoard[yFrom].slice(notationObject.x + 1, 8)
-            if (takeOverPiece.toUpperCase() == 'G') chessWin(startMessage.channel, 'King Captured', chessBoard, startPlayers, playerTurn)
+            const xFrom = originArray[0];
+            const yFrom = originArray[1];
+            chessBoard[notationObject.y] = (notationObject.x == 0 ? '' : chessBoard[notationObject.y].slice (0, notationObject.x)) + (notationObject.jump ? String.fromCharCode(chessBoard[yFrom][xFrom].charCodeAt(0) + 6) : chessBoard[yFrom][xFrom]) + chessBoard[notationObject.y].slice (notationObject.x + 1, 8);
+            chessBoard[yFrom] = (xFrom == 0 ? '' : chessBoard[yFrom].slice(0, xFrom)) + ((xFrom + yFrom) % 2 == 0 ? 'A' : 'a') + chessBoard[yFrom].slice(xFrom + 1, 8);
+            if (notationObject.enPassant) chessBoard[yFrom] = (xFrom == 0 ? '' : chessBoard[yFrom].slice(0, notationObject.x)) + ((notationObject.x + yFrom) % 2 == 0 ? 'A' : 'a') + chessBoard[yFrom].slice(notationObject.x + 1, 8)
         }
+        let defendKing, attackKing;
+        for (let i = 0; i < 8; i++) {
+            const defendKingX = chessBoard[i].indexOf(playerTurn == 0 ? 'g' : 'G');
+            const attackKingX = chessBoard[i].indexOf(playerTurn == 0 ? 'G' : 'g');
+            if (defendKingX != -1) defendKing = {x: defendKingX, y: i};
+            if (attackKingX != -1) attackKing = {x: attackKingX, y: i};
+        }
+        if (typeof attackKing != 'object') return chessWin(startMessage.channel, 'King Captured', chessBoard, startPlayers, playerTurn);
+        if (typeof defendKing != 'object') return chessWin(startMessage.channel, 'King Missing', chessBoard, startPlayers, -playerTurn + 1);
+        let defendingPosition = chessAttacked(chessBoard, defendKing, -playerTurn + 1)
+        let attackingPosition = chessAttacked(chessBoard, attackKing, playerTurn)
+        if (defendingPosition.length) return errorMessage.push (await chessErrors ('Threatened King', 'You are not allowed to put your own king in a check or a chessmate, either by moving a protecting piece or moving the king directly.', msgReceived, startPlayers[playerTurn].mention));
+        let safe = true;
+        if (attackingPosition.length) {
+            safe = false;
+            capture: { 
+                if (attackingPosition.length > 1) break capture;
+                let defendPosition = chessAttacked(chessBoard, attackingPosition, -playerTurn + 1);
+                if (!defendPosition.length) break capture;
+                for (let i = 0; i < defendPosition.length; i++) {
+                    if (defendPosition[i].piece == 'N') {safe = true; break};
+                    let direction = {x: Math.sign(defendPosition[i].x-attackKing.x), y: Math.sign(defendPosition[i].y-attackKing.y)}
+                    let pieceOffset = Math.abs(direction.x-direction.y) == 1 ? 99 : 101;
+                    for (let i = 0; i < 6; i++) {
+                        let holdingPiece = chessBoard[direction.x*i+defendPosition[i].x][direction.y*i+defendPosition[i].y];
+                        if (!holdingPiece) {safe = true; break capture}
+                        else if (holdingPiece.toUpperCase() == 'A');
+                        else if (holdingCode == turnOffset+102 || holdingPiece == turnOffset+pieceOffset) break;
+                        else {safe = true; break capture}
+                    }
+                }
+            }
+            blocking: {
+                if (attackingPosition.length > 1 || attackingPosition[0].piece == 'P' || attackingPosition[0].piece == 'N' || attackingPosition[0].piece == 'K' || safe == true) break blocking;
+                let kingDirection = {x: Math.sign(attackingPosition[0].x-attackKing.x), y: Math.sign(attackingPosition[0].y-attackKing.y)}
+                for (let index = 0; index < 6; index++) {
+                    let defendPosition = chessAttacked(chessBoard, {x: kingDirection.x*index-attackKing.x, y: kingDirection.y*index-attackKing.y}, playerTurn);
+                    for (let ind = 0; ind < defendPosition.length; ind++) {
+                        let defensiveDirection = {x: Math.sign(defendPosition[ind].x-attackKing.x), y: Math.sign(defendPosition[ind].y-attackKing.y)}
+                        let pieceOffset = Math.abs(defensiveDirection.x-defensiveDirection.y) == 1 ? 99 : 101;
+                        for (let i = 0; i < 6; i++) {
+                            let holdingPiece = chessBoard[defensiveDirection.x*i+defendPosition[i].x][defensiveDirection.y*i+defendPosition[i].y];
+                            if (!holdingPiece) {safe = true; break blocking}
+                            else if (holdingPiece.toUpperCase() == 'A');
+                            else if (holdingCode == turnOffset+102 || holdingPiece == turnOffset+pieceOffset) break;
+                            else {safe = true; break blocking}
+                        }
+                    }
+                }
+            }
+            escaping: {
+                if (safe == true) break escaping;
+                for (let i = 0; i < 8; i++) {
+                    const fromY = Math.round(Math.sin(i*Math.PI/4)) + attackKing.y;
+                    const fromX = Math.round(Math.cos(i*Math.PI/4)) + attackKing.x;
+                    if (chessBoard[fromY]?.[fromX]?.toUpperCase() == 'A') {
+                        let escapePosition = chessAttacked (chessBoard, {x: fromX, y: fromY}, -playerTurn + 1)
+                        if (escapePosition.length) {safe = true; break escaping}
+                    }
+                }
+            }
+        }
+        if (!safe) return chessWin(startMessage.channel, 'King Checkmated', chessBoard, startPlayers, playerTurn);
         if (!notationObject.move) notationObject.move = 'used'
         let embedGame = {
             title: 'Fun - Chess',
@@ -776,7 +823,7 @@ function chessRound (startMessage, startPlayers, chessBoard, playerTurn) {
         if (reason == 'stopped') return;
         chessWin(startMessage.channel, 'Time Constraint Reached', chessBoard, startPlayers, playerTurn * -1 + 1);
         for (let i = 0; i < errorMessage.length; i++) {
-            errorMessage[i].delete();
+            if (errorMessage[i].id) errorMessage[i].delete();
         }
     })
 }
@@ -816,16 +863,55 @@ async function chessWin (channel, winCondition, chessBoard, startPlayers, winner
 
 function lettersToChess (board, turn) {
     let newBoard = [...board];
+    if (turn == 0) for (let i = 0; i < 8; i++) newBoard[i] = newBoard[i].split('').reverse().join('');
     for (let i = 0; i < newBoard.length; i++) newBoard[i] = String.fromCharCode(i + 49) + newBoard[i];
     if (turn == 1) newBoard = newBoard.reverse();
     newBoard = newBoard.join ('\n');
-    let replace = [['a','◻️'],['A','◼️'],['b','🧑🏻‍🌾'],['B','🧑🏿‍🌾'],['c','👮🏻'],['C','👮🏿'],['d','🧑🏻‍✈️'],['D','🧑🏿‍✈️'],['e','🧙🏻'],['E','🧙🏿'],['f','🦸🏻'],['F','🦸🏿'],['g','🤵🏻'],['G','🤵🏿'],['h','🧑🏻‍🌾'],['H','🧑🏿‍🌾'],['1',':one:'],['2',':two:'],['3',':three:'],['4',':four:'],['5',':five:'],['6',':six:'],['7',':seven:'],['8',':eight:']]
+    let replace = [['a','◻️'],['A','◼️'],['b','🧑🏻‍🌾'],['B','🧑🏿‍🌾'],['c','👮🏻'],['C','👮🏿'],['d','🧑🏻‍✈️'],['D','🧑🏿‍✈️'],['e','🧙🏻'],['E','🧙🏿'],['f','🤵🏻'],['F','🤵🏿'],['g','🦸🏻'],['G','🦸🏿'],['h','🧑🏻‍🌾'],['H','🧑🏿‍🌾'],['1',':one:'],['2',':two:'],['3',':three:'],['4',':four:'],['5',':five:'],['6',':six:'],['7',':seven:'],['8',':eight:']]
     for (let i = 0; i < replace.length; i++) {
         let regexV = new RegExp(replace[i][0], 'g');
-    	newBoard = newBoard.replace(regexV, replace[i][1])
+    	newBoard = newBoard.replace(regexV, replace[i][1]);
     }
-    newBoard = newBoard + '\n:record_button::regional_indicator_a::regional_indicator_b::regional_indicator_c::regional_indicator_d::regional_indicator_e::regional_indicator_f::regional_indicator_g::regional_indicator_h:'
+    let letters = config.discordInfo.emoji.letters.slice(0, 8);
+    if (turn == 0) letters = letters.reverse();
+    newBoard = newBoard + '\n:record_button:' + letters.join('');
     return newBoard;
+}
+
+function chessAttacked (chessBoard, coordinate, attacker) {
+    if (coordinate.piece) coordinate.piece = null;
+    let attacked = [];
+    const turnOffset = attacker * -32;
+    const fromYArray = [-2,-1,-2,-1,2,1,2,1];
+    const fromXArray = [-1,-2,1,2,-1,-2,1,2];
+    for (let i = 0; i < 8; i++) {
+        let holdingPiece = chessBoard[fromYArray[i] + coordinate.y]?.[fromXArray[i] + coordinate.x];
+        if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 100) attacked.push ({x: fromXArray[i] + coordinate.x, y: fromYArray[i] + coordinate.y, piece: 'N'});
+    }
+    for (let index = 0; index < 8; index++) {
+        const directionY = Math.round(Math.sin(index*Math.PI/4))
+        const directionX = Math.round(Math.cos(index*Math.PI/4))
+        for (let i = 1; i < 8; i++) {
+            const holdingPiece = chessBoard[directionY*i + coordinate.y]?.[directionX*i + coordinate.x];
+            if (!holdingPiece) break;
+            const holdingCode = holdingPiece.charCodeAt(0);
+            let pieceType;
+            if (holdingPiece.toUpperCase() != 'A') {
+                if (i == 0 && holdingCode == turnOffset+103) pieceType = 'K';
+                else if (index%2 == 0 && holdingCode == turnOffset+102) pieceType = 'Q';
+                else if (index%2 == 1 && holdingCode == turnOffset+101) pieceType = 'B';
+                else if (holdingCode == turnOffset+99) pieceType = 'R';
+                if (pieceType) attacked.push ({x: directionY*i + coordinate.x, y: directionX*i + coordinate.y, piece: pieceType});
+                else break;
+            }
+        }
+    }
+    for (let i = -1; i < 2; i += 2) {
+        if (chessBoard[attacker * -2 + 1 + coordinate.y]?.[coordinate.x + i]?.charCodeAt(0) == turnOffset + 98) {
+            attacked.push ({x: coordinate.x + i, y: attacker * -2 + 1 + coordinate.y, piece: 'P'});
+        }
+    }
+    return attacked;
 }
 
 /*

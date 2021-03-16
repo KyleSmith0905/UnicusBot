@@ -47,7 +47,8 @@ client.on ('ready', async () => {
                     let difference = ((firstPrice.close - lastPrice.close) / lastPrice.close) * 100;
                     embed.fields.push ({name: 'Change:', value: difference.toFixed(2) + '%', inline: true})
                 }
-                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})        
+                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})
+                break;
             }
             case 1: {
                 const startDate = Math.floor((Date.now() - 1296000000) / 1000)
@@ -84,7 +85,8 @@ client.on ('ready', async () => {
                     embed.fields.push ({name: 'Change:', value: (difference).toFixed(2) + '%', inline: true})
                 }
                 else {embed.fields.push ({name: 'Capitalization:', value: currencyFormat (parseFloat(current.split ('"marketCap":{"raw":')[1].split (',')[0])), inline: true})}
-                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})    
+                channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})  
+                break;  
             }
             case 2: {
                 let randomValue = Math.floor(Math.random() * 10)
@@ -190,6 +192,7 @@ client.on ('ready', async () => {
                     embed.fields[1].value = (mapSize == 0) ? 'No voters' : mapSize + ((mapSize == 1) ? ' voter' : ' voters');
                     pollMessage.edit({embed: embed});
                 }, 900000)
+                break;
             }
             case 4: {
                 let guildDate = new Date (guild.createdAt)
@@ -212,6 +215,7 @@ client.on ('ready', async () => {
                     ]
                 }
                 channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
+                break;
             }
             case 5: {
                 let day = 1 + (new Date() - Date.UTC(2000, 0, 1)) / (3600 * 24 * 1000);
@@ -234,6 +238,7 @@ client.on ('ready', async () => {
                     ]
                 }
                 channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'});
+                break;
             }
             case 6: {
                 let newsInfo, leaning;
@@ -270,6 +275,7 @@ client.on ('ready', async () => {
                     ]
                 }
                 channel.createMessage ({embed: embed}, {file: chart.toBuffer(), name: 'image.png'})
+                break;
             }
         }
     }, {
