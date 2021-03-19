@@ -12,7 +12,13 @@ client.on ('ready', async () => {
 client.on ('inviteCreate', async (guild, invite) => guildInvites.set(guild.id, await guild.getInvites()));
 
 // Members
+let cooldownMembers = false;
 client.on ('guildMemberAdd', async (guild, member) => {
+    if (cooldownMembers) return;
+    cooldownMembers = true;
+    setTimeout(() => {
+        cooldownMembers = false;
+    }, 60000);
     const userInfo = await getUserInfo (member, guild);
     if (!userInfo || !userInfo.roleID || !userInfo.roleID.length) {
         let rolesID = [];
@@ -79,10 +85,15 @@ client.on ('guildMemberAdd', async (guild, member) => {
 })
 
 client.on ('guildMemberUpdate', async (guild, member, oldMember) => {
+    if (cooldownMembers) return;
+    cooldownMembers = true;
+    setTimeout(() => {
+        cooldownMembers = false;
+    }, 60000);
     if (oldMember.roles != member.roles) {
         let userInfo = await getUserInfo (member, guild);
         userInfo.roleID = member.roles;
-        await timeout (60);
+        await timeout (250);
         userInfo.save();
     }
     if (oldMember.nick == member.nick) return;
@@ -108,8 +119,13 @@ client.on ('guildMemberUpdate', async (guild, member, oldMember) => {
 })
 
 client.on ('guildMemberRemove', async (guild, member) => {
+    if (cooldownMembers) return;
+    cooldownMembers = true;
+    setTimeout(() => {
+        cooldownMembers = false;
+    }, 60000);
     const timestamp = new Date();
-    await timeout (1000);
+    await timeout (500);
     let audit = await getAudit (member.guild, member, 20, timestamp);
     if (!audit) audit = await getAudit (member.guild, member, 22, timestamp)
     let title; let descriptionMessage; let descriptionLog; let embedField;
@@ -167,6 +183,11 @@ client.on ('guildMemberRemove', async (guild, member) => {
 })
 
 client.on ('guildBanRemove', async (guild, user) => {
+    if (cooldownMembers) return;
+    cooldownMembers = true;
+    setTimeout(() => {
+        cooldownMembers = false;
+    }, 60000);
     const timestamp = new Date();
     let embed = createEmbed ('white', timestamp, 'Member - Unban', 'A user has been unbanned: **' + user.username + '**\n🧝 \`Target\`| 🕵️ \`Executor\`| ⚖️ \`Reason\`')
     const sentMessage = await logChannel.createMessage ({embed: embed});
@@ -200,8 +221,13 @@ client.on ('guildBanRemove', async (guild, user) => {
 })
 
 // Channels
+let cooldownChannels = false;
 client.on ('channelCreate', async channel => {
-    if (!channel.guild) return
+    if (!channel.guild || cooldownChannels) return
+    cooldownChannels = true;
+    setTimeout(() => {
+        cooldownChannels = false;
+    }, 15000);
     const timestamp = new Date();
     let channelName = channel.name.replace(/-/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
     if (channelName.length >= 32) channelName = channelName.substring(0, 31) + '...';
@@ -230,13 +256,12 @@ client.on ('channelCreate', async channel => {
     return collector.on('end', collected => sentMessage.removeReactions())
 })
 
-let cooldownChannelUpdate = false;
 client.on ('channelUpdate', async (channel, oldChannel) => {
-    if (!channel.guild || channel.position != oldChannel.position || channel.permissionoverwrites != oldChannel.permissionoverwrites || cooldownChannelUpdate == true) return;
-    cooldownChannelUpdate = true;
+    if (!channel.guild || channel.position != oldChannel.position || channel.permissionoverwrites != oldChannel.permissionoverwrites || cooldownChannels) return;
+    cooldownChannels = true;
     setTimeout(() => {
-        cooldownChannelUpdate = false;
-    }, 5000);
+        cooldownChannels = false;
+    }, 15000);
     const timestamp = new Date();
     let channelName = oldChannel.name.replace(/-/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
     if (channelName.length >= 32) channelName = channelName.substring(0, 31) + '...'
@@ -277,7 +302,11 @@ client.on ('channelUpdate', async (channel, oldChannel) => {
 })
 
 client.on ('channelDelete', async channel => {
-    if (!channel.guild) return
+    if (!channel.guild || cooldownChannels) return
+    cooldownChannels = true;
+    setTimeout(() => {
+        cooldownChannels = false;
+    }, 15000);
     const timestamp = new Date();
     let channelName = channel.name.replace(/-/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase())
     let embed = createEmbed ('orange', timestamp, 'Channel - Delete', 'A channel has been deleted: **' + channelName + '**\n📖 \`Channel\`| 🕵️ \`Executor\`|');
@@ -306,7 +335,13 @@ client.on ('channelDelete', async channel => {
 })
 
 // Messages
+let cooldownMessage = false;
 client.on ('messageUpdate', async (message, oldMessage) => {
+    if (cooldownMessage) return;
+    cooldownMessage = true;
+    setTimeout(() => {
+        cooldownMessage = false;
+    }, 60000);
     if (!message.channel.guild || (message.author && message.author.bot) || message.content == message.oldMessage) return;
     const timestamp = new Date();
     if (!message.content) {
@@ -360,6 +395,11 @@ client.on ('messageUpdate', async (message, oldMessage) => {
 })
 
 client.on ('messageDelete', async message => {
+    if (cooldownMessage) return;
+    cooldownMessage = true;
+    setTimeout(() => {
+        cooldownMessage = false;
+    }, 60000);
     if (!message.channel.guild || (message.author && message.author.bot)) return;
     const timestamp = new Date();
     if (!message.member) {
@@ -421,7 +461,13 @@ client.on ('messageDelete', async message => {
 })
 
 // Emojis
+let cooldownEmojis = false;
 client.on ('guildEmojisUpdate', async (guild, emojis, oldEmojis) => {
+    if (cooldownEmojis) return;
+    cooldownEmojis = true;
+    setTimeout(() => {
+        cooldownEmojis = false;
+    }, 10000);
     const timestamp = new Date();
     if (emojis.length != oldEmojis.length) {
         let action = (emojis.length > oldEmojis.length) ? 'Create' : 'Delete';
@@ -486,7 +532,13 @@ client.on ('guildEmojisUpdate', async (guild, emojis, oldEmojis) => {
 })
 
 // Guilds
+let cooldownGuilds = false;
 client.on ('guildUpdate', async (guild, oldGuild) => {
+    if (cooldownGuilds) return;
+    cooldownGuilds = true;
+    setTimeout(() => {
+        cooldownGuilds = false;
+    }, 5000);
     const timestamp = new Date();
     let attachment;
     let embed = createEmbed ('white', timestamp, 'Guild - Update', 'The guild has been updated: **' + (oldGuild.name.length >= 32) ? oldGuild.name.substring(0, 31) + '...' : oldGuild.name + '**\n🗃️ \`Guild\`| 🕵️ \`Executor\`| 📸 \`Changes\`|')
@@ -534,7 +586,13 @@ client.on ('guildUpdate', async (guild, oldGuild) => {
 })
 
 // Roles
+let cooldownRoles = false;
 client.on ('guildRoleCreate', async (guild, role) => {
+    if (cooldownRoles) return;
+    cooldownRoles = true;
+    setTimeout(() => {
+        cooldownRoles = false;
+    }, 20000);
     const timestamp = new Date();
     let embed = createEmbed ('blue', timestamp, 'Role - Create', 'A role has been created: **' + role.name + '**\n👑 \`Role\`| 🕵️ \`Executor\`|');
     const sentMessage = await logChannel.createMessage ({embed: embed});
@@ -563,6 +621,11 @@ client.on ('guildRoleCreate', async (guild, role) => {
 
 client.on ('guildRoleUpdate', async (guild, role, oldRole) => {
     if (role.name == oldRole.name && role.permissions.allow == oldRole.permissions.allow && role.color == oldRole.color && role.mentionable == oldRole.mentionable && role.hoist == oldRole.hoist) return;
+    if (cooldownRoles) return;
+    cooldownRoles = true;
+    setTimeout(() => {
+        cooldownRoles = false;
+    }, 20000);
     const timestamp = new Date();
     let embed = createEmbed ('white', timestamp, 'Role - Update', 'A role has been updated: **' + oldRole.name + '**\n👑 \`Role\`| 🕵️ \`Executor\`| 📸 \`Changes\`|');
     const sentMessage = await logChannel.createMessage ({embed: embed});
@@ -596,6 +659,11 @@ client.on ('guildRoleUpdate', async (guild, role, oldRole) => {
 })
 
 client.on ('guildRoleDelete', async (guild, role) => {
+    if (cooldownRoles) return;
+    cooldownRoles = true;
+    setTimeout(() => {
+        cooldownRoles = false;
+    }, 20000);
     const timestamp = new Date();
     let embed = createEmbed ('orange', timestamp, 'Role - Delete', 'A role has been deleted: **' + role.name + '**\n👑 \`Role\`| 🕵️ \`Executor\`|');
     const sentMessage = await logChannel.createMessage ({embed: embed});
@@ -623,6 +691,9 @@ client.on ('guildRoleDelete', async (guild, role) => {
 })
 
 // Misc
+let cooldownMessageState = true;
+let cooldownMessageMoney = true;
+let cooldownMessageLoss = true;
 const usersMap = new Map(); const statesMap = new Map();
 client.on ('messageCreate', async message => {
     if (!message.channel.guild || message.author.bot) return;
@@ -647,10 +718,14 @@ client.on ('messageCreate', async message => {
                 message.member.addRole(role.id);
                 let embed = createEmbed ('orange', new Date, 'Security - Spam', message.member.mention + ' is temporarily muted preemptively for spamming.');
                 let sentMessage = await message.channel.createMessage({embed: embed});
-                let userInfo = await getUserInfo (message.member, guild);
-                if (!userInfo) return
-                if (userInfo.money <= 5) userInfo.money -= 5;
-                else userInfo.money = 5
+                let userInfo = cooldownMessageLoss ? await getUserInfo (message.member, guild) : null;
+                cooldownMessageLoss = true;
+                setTimeout(() => {
+                    cooldownMessageLoss = false;
+                }, 2500);
+                if (!userInfo);
+                else if (userInfo.money <= 10) userInfo.money -= 5;
+                else if (userInfo.money <= 5) userInfo.money = 5;
                 userInfo.save();
                 setTimeout(() => {
                     message.member.removeRole(role.id);
@@ -665,11 +740,17 @@ client.on ('messageCreate', async message => {
         }
     }
     else {
-        if (!config.discordInfo.prefix.includes (message.content.charAt(0)) && !message.content.replace('!', '').startsWith(client.user.mention)) {
-            let userInfo = await getUserInfo (message.member, guild);
-            if (!userInfo || !userInfo.money) return;
-            userInfo.money = userInfo.money + 1;
-            userInfo.save();
+        if (!config.discordInfo.prefix.includes(message.content.charAt(0)) && !message.content.replace('!', '').startsWith(client.user.mention)) {
+            if (!cooldownMessageMoney) {;
+                cooldownMessageMoney = true;
+                setTimeout(() => {
+                    cooldownMessageMoney = false;
+                }, 5000);
+                let userInfo = await getUserInfo (message.member, guild);
+                if (!userInfo || !userInfo.money) return;
+                userInfo.money = userInfo.money + 1;
+                userInfo.save();
+            }
         }
         let fn = setTimeout(() => {
             usersMap.delete(message.author.id);
@@ -681,6 +762,11 @@ client.on ('messageCreate', async message => {
         });
     }
     if (message.channel.parent !== null && Object.keys(config.places).find (ele => config.places[ele].name.toLowerCase() == messageCategory.name) && (!config.discordInfo.prefix.includes (message.content.charAt(0)) && !message.content.replace('!', '').startsWith(client.user.mention))) {
+        if (cooldownMessageState) return;
+        cooldownMessageState = true;
+        setTimeout(() => {
+            cooldownMessageState = false;
+        }, 30000);
         let embed = {
             timestamp: new Date().toISOString(),
             color: randomColor ('all'),
@@ -745,7 +831,7 @@ client.on ('messageCreate', async message => {
         let stateInfo = await getStateInfo (guild, postalCode);
         if (stateInfo.welcomeMessage) {
             let governor = guild.members.find (ele => ele.id == stateInfo.governorID);
-            embed = {
+            let governorEmbed = {
                 title: 'Travel - Arrival',
                 description: stateInfo.welcomeMessage,
                 timestamp: new Date().toISOString(),
@@ -755,6 +841,9 @@ client.on ('messageCreate', async message => {
                     {name: 'Governor:', value: governor.mention, inline: true}
                 ]
             }
+            let stateParent = guild.channels.find(ele => ele.name.toLowerCase() == placesConfig[end].name.toLowerCase());
+            let stateChannel = guild.channels.find(ele => ele.parentID == stateParent.id && ele.name == '╙◖public-domain◗');
+            stateChannel.createMessage({content: member.mention + ',', embed: governorEmbed});
         }
     }
 })
@@ -865,12 +954,12 @@ function idToBinary (num) {
     let high = parseInt(num.slice(0, -10)) || 0;
     let low = parseInt(num.slice(-10));
     while (low > 0 || high > 0) {
-      bin = String(low & 1) + bin;
-      low = Math.floor(low / 2);
-      if (high > 0) {
+    bin = String(low & 1) + bin;
+    low = Math.floor(low / 2);
+    if (high > 0) {
         low += 5000000000 * (high % 2);
         high = Math.floor(high / 2);
-      }
+    }
     }
     return bin;
 }
@@ -1025,7 +1114,7 @@ function embedPushChannel (embed, channel) {
     let channelType = Object.keys(config.discordInfo.channelTypes).find (ele => config.discordInfo.channelTypes[ele] == channel.type);
     embed.fields.push (
         {name: 'Channel:', value: channel.mention, inline: true},
-        {name: 'Channel ID:', value: `[${channel.id}](https://discordapp.com/channels/${channel.guild.id}/${channel.id})`, inline: true},
+        {name: 'Channel ID:', value: '[' + channel.id + '](https://discordapp.com/channels/' + channel.guild.id + '/' + channel.id + ')', inline: true},
         {name: 'Channel Type:', value: channelType, inline: true}
     );
     return embed;
@@ -1036,7 +1125,7 @@ function embedPushExecutor (embed, executor, guild) {
         let highestRole = highestRoleCalc (guild, executor.id);
         embed.fields.push (
             {name: 'Executor:', value: executor.mention, inline: true},
-            {name: 'Executor ID:', value: `[${executor.id}](https://discordapp.com/users/${executor.id})`, inline: true},
+            {name: 'Executor ID:', value: '[' + executor.id + '](https://discordapp.com/users/' + executor.id + ')', inline: true},
             {name: 'Executor Role:', value: highestRole.mention, inline: true},
         );
     }
@@ -1047,7 +1136,7 @@ function embedPushExecutor (embed, executor, guild) {
 function embedPushTarget (embed, target, joinOrder) {
     embed.fields.push (
         {name: 'Target:', value: target.mention, inline: true},
-        {name: 'Target ID:', value: `[${target.id}](https://discordapp.com/users/${target.id})`, inline: true},
+        {name: 'Target ID:', value: '[' + target.id + '](https://discordapp.com/users/' + target.id + ')', inline: true},
         {name: 'Target Order:', value: joinOrder, inline: true}
     );
     return embed;
@@ -1063,7 +1152,7 @@ function embedPushInvite (embed, invite, timestamp) {
     const differenceTime = Date.parse(timestamp) - Date.parse(invite.createdAt);
     const differenceDay = differenceTime / 86400000;
     embed.fields.push (
-        {name: 'Invite:', value: `[${invite.code}](https://discord.gg/${invite.code})`, inline: true},
+        {name: 'Invite:', value: '[' + invite.code + '](https://discord.gg/' + invite.code + ')', inline: true},
         {name: 'Invite Age:', value: differenceDay.toFixed (2) + ' days', inline: true},
         {name: 'Invite Usage:', value: invite.uses, inline: true}
     );
@@ -1084,9 +1173,9 @@ function embedPushChanges (embed, audit) {
 
 function embedPushMessage (embed, message) {
     embed.fields.push (
-        {name: 'Message:', value: `[${message.id}](https://discordapp.com/channels/${message.guildID}/${message.channel.id}/${message.id})`, inline: true},
+        {name: 'Message:', value: '[' + message.id + '](https://discordapp.com/channels/' + message.guildID + '/' + message.channel.id + '/' + message.id + ')', inline: true},
         {name: 'Message Channel:', value: message.channel.mention, inline: true},
-        {name: 'Message Attachment:', value: (message.attachments.length > 0) ? `${message.attachments.length} attachment${(message.attachments.length == 1) ? '' : 's'}` : 'No attachments', inline: true}
+        {name: 'Message Attachment:', value: (message.attachments.length > 0) ? (message.attachments.length + 'attachment' + (message.attachments.length == 1) ? '' : 's') : 'No attachments', inline: true}
     )
     return embed;
 }
@@ -1100,9 +1189,9 @@ function embedPushContent (embed, content) {
 
 function embedPushEmoji (embed, emoji) {
     embed.fields.push (
-        {name: 'Emoji:', value: `<${(emoji.animated) ? 'a' : ''}:${emoji.name}:${emoji.id}>`, inline: true},
+        {name: 'Emoji:', value: '<' + (emoji.animated ? 'a' : '') + ':' + emoji.name + ':' + emoji.id + '>', inline: true},
         {name: 'Emoji Name:', value: emoji.name, inline: true},
-        {name: 'Emoji ID:', value: `[${emoji.id}](https://cdn.discordapp.com/emojis/${emoji.id}.png)`, inline: true}
+        {name: 'Emoji ID:', value: '[' + emoji.id + '](https://cdn.discordapp.com/emojis/' + emoji.id + '.png)', inline: true}
     )
     return embed;
 }
@@ -1110,7 +1199,7 @@ function embedPushEmoji (embed, emoji) {
 function embedPushGuild (embed, guild, oldGuild) {
     embed.fields.push (
         {name: 'Guild:', value: oldGuild.name || guild.name, inline: true},
-        {name: 'Guild ID:', value: `[${guild.id}](https://discord.com/channels/${guild.id})`, inline: true},
+        {name: 'Guild ID:', value: '[' + guild.id + '](https://discord.com/channels/' + guild.id + ')', inline: true},
         {name: 'Guild Population:', value: guild.memberCount, inline: true}
     )
     return embed;

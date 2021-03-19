@@ -794,8 +794,10 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
             if (notationObject.enPassant) chessBoard[yFrom] = (xFrom == 0 ? '' : chessBoard[yFrom].slice(0, notationObject.x)) + ((notationObject.x + yFrom) % 2 == 0 ? 'A' : 'a') + chessBoard[yFrom].slice(notationObject.x + 1, 8)
         }
         let defendKing, attackKing;
-        let defendObjective = (playerTurn && gameOption.extra.kingWhite) || (!playerTurn && gameOption.extra.kingBlack)
-        let attackObjective = (playerTurn && gameOption.extra.kingBlack) || (!playerTurn && gameOption.extra.kingWhite)
+        let defendObjective = (playerTurn && gameOption.extra.kingBlack) || (!playerTurn && gameOption.extra.kingWhite);
+        let attackObjective = (playerTurn && gameOption.extra.kingWhite) || (!playerTurn && gameOption.extra.kingBlack);
+        console.log (defendObjective)
+        console.log (attackObjective)
         for (let i = 0; i < 8; i++) {
             const defendKingX = chessBoard[i].indexOf(playerTurn == 0 ? 'g' : 'G');
             if (defendKingX != -1) defendKing = {x: defendKingX, y: i};
@@ -806,10 +808,10 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         if (typeof attackKing != 'object' && attackObjective) return chessWin(startMessage.channel, 'King Captured', chessBoard, startPlayers, playerTurn, gameOption);
         let defendingPosition = chessAttacked(chessBoard, defendKing, -playerTurn + 1);
         let attackingPosition = chessAttacked(chessBoard, attackKing, playerTurn);
-        if (defendingPosition.length && !defendObjective) return errorMessage.push (await chessErrors ('Threatened King', 'You are not allowed to put your own king in a check or a chessmate, either by moving a protecting piece or moving the king directly.', msgReceived, startPlayers[playerTurn].mention));
+        if (defendingPosition.length && defendObjective) return errorMessage.push (await chessErrors ('Threatened King', 'You are not allowed to put your own king in a check or a chessmate, either by moving a protecting piece or moving the king directly.', msgReceived, startPlayers[playerTurn].mention));
         let movement = false;
         let safe = true;
-        if (attackingPosition.length && !attackObjective) safe = false;
+        if (attackingPosition.length && attackObjective) safe = false;
         capture: { 
             if (attackingPosition.length > 1 || safe) break capture;
             let defendPosition = chessAttacked(chessBoard, attackingPosition, -playerTurn + 1);

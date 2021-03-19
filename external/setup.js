@@ -86,6 +86,7 @@ function embedCreation (message, args, channel) {
     })
     embed.timestamp = new Date().toISOString();
     if (embed.error) return errorLog (message, args, 'Setup', 'invalidUsage', ['embedSettings']);
+    if (!embed.color) embed.color = randomColor('all')
     try {channel.createMessage ({content: content || ' ', embed: embed})}
     catch {return errorLog (message, args, 'Setup', 'invalidUsage', ['embedSettings'])};
 }

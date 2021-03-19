@@ -4,9 +4,9 @@ module.exports = {
     name: 'help',
     summoner: config.commands.help.alias,
     execute (message, args) {
-        let command = (args[1]) ? Object.keys (config.commands).find (ele => config.commands[ele].alias.includes (args[1])) : null;
+        let command = (args[1] ? Object.keys(config.commands).find (ele => config.commands[ele]?.alias?.includes (args[1])) : null);
         let configCommand = config.commands[command];
-        let descriptionString = (configCommand) ? ('The **' + configCommand.name + ' Command** ' + configCommand.description) : ('Below is a list of commands. For further help, the command is `-help [command:string]`.');
+        let descriptionString = configCommand ? ('The **' + configCommand.name + ' Command** ' + configCommand.description) : ('Below is a list of commands. For further help, the command is `-help [command:string]`.');
         let embed = {
             timestamp: new Date().toISOString(),
             color: randomColor ((configCommand) ? 'blue' : 'white'),
@@ -28,9 +28,7 @@ module.exports = {
             })
         }
         else if (!args[1]) {
-            embed.fields.push (
-                {name: 'Commands:', value: '`' + config.commands.help.arguments.command.items.join('`| `') + '`', inline: false}
-            )
+            embed.fields.push ({name: 'Commands:', value: '`' + config.commands.help.arguments.command.items.join('`| `') + '`', inline: false})
         }
         else return errorLog (message, args, 'Help', 'invalidUsage', ['command'])
         return message.channel.createMessage ({content: message.member.mention + ',', embed: embed})

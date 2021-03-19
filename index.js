@@ -39,7 +39,7 @@ mongo.connect (uri, {
 
 const externalFiles = fs.readdirSync ('./external').filter (file => file.endsWith('.js'));
 for (const file of externalFiles) {
-    const external = require (`./external/${file}`);
+    const external = require ('./external/' + file);
     client.external.set (external.name, external);
 };
 
@@ -66,7 +66,7 @@ client.on ('ready', () => {
                 const stateInfo = await getStateInfo (guild, userInfo.state)
                 if (stateInfo.welcomeMessage) {
                     const governor = guild.members.find (ele => ele.id == stateInfo.governorID)
-                    embed = {
+                    let governorEmbed = {
                         title: 'Travel - Arrival',
                         description: stateInfo.welcomeMessage,
                         timestamp: new Date().toISOString(),
@@ -76,6 +76,9 @@ client.on ('ready', () => {
                             {name: 'Governor:', value: governor.mention, inline: true}
                         ]
                     }
+                    let stateParent = guild.channels.find(ele => ele.name.toLowerCase() == placesConfig[userInfo.state].name.toLowerCase());
+                    let stateChannel = guild.channels.find(ele => ele.parentID == stateParent.id && ele.name == '╙◖public-domain◗');
+                    stateChannel.createMessage({content: member.mention + ',', embed: governorEmbed});
                 }
             }
         })
@@ -136,8 +139,7 @@ client.on ('messageCreate', message => {
     let prefix;
     config.discordInfo.prefix.forEach (ele => {if (message.content.startsWith(ele)) prefix = ele})
     if (prefix == null) return;
-    const lowermessage = message.content.toLowerCase ();
-    let args = lowermessage.slice(prefix.length).split(/ +/);
+    let args = message.content.toLowerCase().slice(prefix.length).split(/ +/);
     if (args[0] == '') {
         message.mentions.shift();
         args.shift();
@@ -156,7 +158,7 @@ client.on ('messageCreate', message => {
             return errorLog (message, args, configCommand.name, 'cooldown', [timeLeft.toFixed(1)]);
         }
     }
-    if (!configCommand.channels.some(ele => ele == 'all' || (ele == 'bot' && message.channel.id == process.env.CHANNEL_BOT) || (ele == 'spam' && message.channel.id == process.env.CHANNEL_SPAM) || (ele == 'store' && message.channel.id == process.env.CHANNEL_STORE) || (ele == 'transport' && message.channel.parentID == process.env.CHANNEL_STORE))) {
+    if (!configCommand.channels.some(ele => ele == 'all' || (ele == 'bot' && message.channel.id == process.env.CHANNEL_BOT) || (ele == 'spam' && message.channel.id == process.env.CHANNEL_SPAM) || (ele == 'store' && message.channel.id == process.env.CHANNEL_STORE) || (ele == 'transport' && message.channel.parentID == process.env.CHANNEL_TRANSPORT))) {
         breaker: {
             let breaker;
             if (configCommand.channels.includes ('state')) {

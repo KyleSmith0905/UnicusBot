@@ -1,7 +1,7 @@
 const travelConfig = config.commands.travel;
 const placesConfig = config.places;
 const methodConfig = travelConfig.arguments.method.inputs;
-const {randomColor} = require ('./functions');
+const {randomColor, getUserInfo} = require ('./functions');
 const userInfoDB = require ('../database/userinfo.js');
 const stateInfoDB = require ('../database/stateinfo.js');
 
@@ -11,11 +11,18 @@ module.exports = {
     async execute (message, args) {
         const guild = message.channel.guild;
         const member = message.member;
-        const method = Object.keys(methodConfig).find (key => methodConfig[key].alias.includes (args[1]))
-        let end = Object.keys (placesConfig).find (key => placesConfig[key].alias.includes (args.slice(2).join('')));
+        const method = Object.keys(methodConfig).find (key => methodConfig[key].alias.includes(args[1]))
+        let end = Object.keys(placesConfig).find (key => placesConfig[key].alias.includes(args.slice(2).join('')));
         const userInfo = await getUserInfo (member, guild);
         if (userInfo.money == null) userInfo.money = 0;
-        const start = userInfo.state;
+        if (!userInfo.state) {
+            userInfo.state = Object.keys(placesConfig).filter (key => {
+                let stateRole = guild.roles.find (ele => ele.name == placesConfig[key].name)
+                if (stateRole?.id?.includes(member.roles)) return true;
+            })
+            if (!userInfo.state) return whatState (message.channel, member, end);
+        }
+        let start = userInfo.state;
         if (end && placesConfig[end].state == false) end = notLocation (end, method, start);
         if (userInfo.arrival && userInfo.arrival.timestamp >= Date.now()) return endTravelPrompt (userInfo, message, method, guild, member, start)
         errors = (method == null) ? ['method'] : []
@@ -35,7 +42,7 @@ module.exports = {
         let sendChannel = (methodConfig[method].channel !== message.channel.id) ? guild.channels.find (ele => ele.id == methodConfig[method].channel) : message.channel
         let mapImage = await getMap ('./images/worldMap.png', start, end);
         let embed = {
-            title: `Travel - ${methodConfig[method].name}`,
+            title: 'Travel - ' + methodConfig[method].name,
             color: randomColor ('white'),
             timestamp: new Date().toISOString(),
             image: {url: 'attachment://image.png'},
@@ -68,8 +75,8 @@ module.exports = {
             travelMessage.edit ({embed: embed});
             let stateInfo = await getStateInfo (guild, end)
             if (stateInfo.welcomeMessage) {
-                let governor = guild.members.find (ele => ele.id == stateInfo.governorID)
-                embed = {
+                let governor = guild.members.find (ele => ele.id == stateInfo.governorID);
+                let governorEmbed = {
                     title: 'Travel - Arrival',
                     description: stateInfo.welcomeMessage,
                     timestamp: new Date().toISOString(),
@@ -79,30 +86,12 @@ module.exports = {
                         {name: 'Governor:', value: governor.mention, inline: true}
                     ]
                 }
+                let stateParent = guild.channels.find(ele => ele.name.toLowerCase() == placesConfig[end].name.toLowerCase());
+                let stateChannel = guild.channels.find(ele => ele.parentID == stateParent.id && ele.name == '╙◖public-domain◗');
+                stateChannel.createMessage({content: member.mention + ',', embed: governorEmbed});
             }
         }, waitingTime * 60000);
     }
-}
-
-async function getUserInfo (member, guild) {
-    let userInfo = await userInfoDB.findOne ({
-        userID: member.id,
-        guildID: guild.id
-    })
-    if (userInfo && !userInfo.state){
-        userInfo.state = ''
-    }
-    else if (!userInfo) {
-        const newUserInfo = await new userInfoDB ({
-            userID: member.id,
-            guildID: guild.id,
-            money: 0,
-            state: 'ny'
-        });
-        newUserInfo.save();
-        userInfo = newUserInfo
-    }
-    return userInfo;
 }
 
 async function getStateInfo (guild, state) {
@@ -251,5 +240,47 @@ async function endTravelPrompt (userInfo, message, method, guild, member, destin
         embed.fields = [{name: 'Travel', value: 'You are still heading towards ' + placesConfig[destination].name + ', the cancellation request had failed.'}];
         embed.color = randomColor ('orange');
         sentMessage.edit ({embed: embed});
+    })
+}
+
+async function whatState (channel, member, travelTo) {
+    let embed = {
+        title: 'Travel - Starting',
+        color: randomColor ('white'),
+        timestamp: new Date().toISOString(),
+        description: 'It appears the state you currently are presiding in does not exist.',
+        fields: [
+            {name: 'Travel:', value: 'You can specify any state to be your starting state. Type `' + (travelTo ?? 'EX') + '` or `' + (placesConfig[travelTo]?.name ?? 'Example') + '` to start in that state.', inline: false},
+            {name: 'Username:', value: member.mention, inline: true},
+            {name: 'Departure:', value: 'Null', inline: true},
+            {name: 'Arrival:', value: 'Undecided', inline: true},
+            {name: 'Distance:', value: 'Infinitesimal', inline: true},
+            {name: 'Time:', value: 'Instantaneous', inline: true},
+            {name: 'Cost:', value: 'Free', inline: true}
+        ]
+    }
+    let messageSend = await channel.createMessage ({content: member.mention + ',', embed: embed});
+    const filter = (msg) => msg.author.id == member.id;
+    const collector = new messageCollector (client, channel, filter, {time: 1800000});
+    collector.on ('collect', async (message) => {
+        const stateAlias = message.content.toLowerCase().replace(/ /g,'');
+        const stateKey = Object.keys(placesConfig).find (key => placesConfig[key].alias.includes(stateAlias));
+        const stateRole = channel.guild.roles.find (ele => ele.name == placesConfig[stateKey]?.name);
+        if (!stateRole) return;
+        let userInfo = await getUserInfo(member, channel.guild)
+        userInfo.state = stateKey;
+        userInfo.save();
+        member.addRole (stateRole.id, 'Automated');
+        embed.fields[0].value = 'You are now in the state of ' + placesConfig[stateKey].name + '. Enjoy your stay. 👋';
+        embed.fields[3].value = placesConfig[stateKey].name;
+        embed.color = randomColor ('blue');
+        messageSend.edit ({content: member.mention + ',', embed: embed});
+        collector.stop ('stopped');
+    })
+    collector.on ('end', async (collected, reason) => {
+        if (reason == 'stopped') return;
+        embed.fields[0].value = 'This message has became inactive. Type `-travel [method] [location]` to receive this prompt again.';
+        embed.color = randomColor ('orange');
+        messageSend.edit ({content: member.mention + ',', embed: embed});
     })
 }
