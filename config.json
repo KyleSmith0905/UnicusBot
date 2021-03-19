@@ -651,7 +651,7 @@
 		"help": {
 			"name": "Help",
 			"short": "?",
-			"alias": ["help", "helps", "?", "how"],
+			"alias": ["help", "helps", "?"],
 			"description": "instructs the user how to use specific commands and arguments by showing a variety of information about it.",
 			"usage": "-help [command:string]",
 			"channels": ["bot", "spam"],
@@ -665,7 +665,7 @@
 		"travel": {
 			"name": "Travel",
 			"short": "t",
-			"alias": ["t", "trv", "travel", "transport", "move", "transportation"],
+			"alias": ["t", "trv", "travel", "transport"],
 			"description": "allows the user to travel to one state to another through various modes of transportation each with respective advantages.",
 			"usage": "-travel <method:string> <location:string>",
 			"channels": ["transport", "bot", "spam"],
@@ -819,7 +819,7 @@
 		"money": {
 			"name": "Money",
 			"short": "$",
-			"alias": ["money", "currency", "economy", "$", "cash", "mny"],
+			"alias": ["money", "currency", "$", "cash", "mny"],
 			"description": "provides multiple financial services exclusively involving money and transactions.",
 			"usage": "-money <command:string> ...",
 			"channels": ["store", "bot", "spam"],
@@ -862,7 +862,7 @@
 		"election": {
 			"name": "Election",
 			"short": "e",
-			"alias": ["election", "elect", "elected", "elections", "e", "vote"],
+			"alias": ["election", "elect", "elections", "e", "vote"],
 			"description": "provides the commands to handle community election services such as application and voting.",
 			"usage": "-election <command:string> ...",
 			"channels": ["state", "bot", "spam"],
@@ -922,7 +922,7 @@
 		"governor": {
 			"name": "Governor",
 			"short": "g",
-			"alias": ["g", "governor", "governors", "gov", "guv"],
+			"alias": ["g", "governor", "gov"],
 			"description": "allows governors to control their state with multiple commands.",
 			"usage": "-governor <command:string> ...",
 			"channels": ["state", "bot", "spam"],
@@ -1006,7 +1006,7 @@
 		"security": {
 			"name": "Security",
 			"short": "s",
-			"alias": ["security", "sec", "mod", "protect", "s"],
+			"alias": ["security", "sec", "mod", "s"],
 			"description": "streamlines the user's process of reporting and moderating exclusively used by moderators.",
 			"usage": "-security <accusation:string> ...",
 			"channels": ["all"],
@@ -1125,7 +1125,7 @@
 		"job": {
 			"name": "Job",
 			"short": "j",
-			"alias": ["job", "employ", "j", "work", "jobs"],
+			"alias": ["job", "j", "jobs"],
 			"description": "offers the tools to start employment or find employment.",
 			"usage": "-job <command:string> ...",
 			"channels": ["bot", "spam"],
@@ -1178,7 +1178,7 @@
 		"company": {
 			"name": "Company",
 			"short": "c",
-			"alias": ["company", "c", "corporation", "business"],
+			"alias": ["company", "c", "corporation"],
 			"description": "enables you to establish a corporation and customize it.",
 			"usage": "-company <command:string> ...",
 			"channels": ["bot", "spam"],
@@ -1213,7 +1213,7 @@
 		"purchase": {
 			"name": "Purchase",
 			"short": "p",
-			"alias": ["purchase", "p", "buy", "pay", "spend"],
+			"alias": ["purchase", "p", "buy"],
 			"description": "permits the ability to buy things from an official store.",
 			"usage": "-purchase <item:string> ...",
 			"channels": ["store", "bot", "spam"],
@@ -1284,14 +1284,14 @@
 		"fun": {
 			"name": "Fun",
 			"short": "f",
-			"alias": ["f", "fun", "funny", "game", "games"],
+			"alias": ["f", "fun", "game", "games"],
 			"description": "maintains control over commands that designed for user enjoyment.",
 			"usage": "-fun <game:string> ...",
 			"channels": ["bot", "spam", "state"],
 			"arguments": {
 				"game": {
 					"name": "Game",
-					"items": "Either: `WYR`| Riddle: `RDL`| Pictionary: `PIC`| Deception: `DEC`| Gamble: `GAM`",
+					"items": "Either: `WYR`| Riddle: `RDL`| Pictionary: `PIC`| Deception: `DEC`| Gamble: `GAM`| Chess: `CHS`",
 					"inputs": {
 						"wyr": ["wyr", "either", "dilemma", "wouldyourather"],
 						"rdl": ["rdl", "riddle", "riddles"],
@@ -1309,7 +1309,41 @@
 					"name": "Deception Settings",
 					"items": "**[RICH TEXT]** Wager: `WGR`",
 					"inputs": {
-						"wgr": ["wager", "bet", "wgr"]
+						"wgr": ["wgr", "wager", "bet"]
+					}
+				},
+				"chessSettings": {
+					"name": "Chess Settings",
+					"items": "**[RICH TEXT]** Wager: `WGR`| Style: `STY`| Layout: `LYT`",
+					"inputs": {
+						"wgr": ["wgr", "wager", "bet"],
+						"sty": ["sty", "style", "pieces"],
+						"lyt": ["lyt", "layout", "board"]
+					}
+				},
+				"chessStyle": {
+					"name": "Style",
+					"items": "Normal: `NRM`| Gender: `SEX`| Plants: `PLA`| Human Versus Animals: `HVA`| Buildings: `BLD`| Unicode: `UNI`| Letters: `LTR`| All White: `WHT`| Blind: `BLI`",
+					"inputs": {
+						"Normal": ["nrm", "normal", "people"],
+						"Gender": ["sex", "gender", "genders"],
+						"Plants": ["pla", "plant", "plants"],
+						"Humans Versus Animals": ["hva"],
+						"Buildings": ["bld", "buildings", "building"],
+						"Unicode": ["uni", "unicode", "ascii"],
+						"Letter": ["ltr", "letter", "letters"],
+						"All White": ["wht", "white", "same"],
+						"Blind": ["bli", "blind", "fog"]
+					}
+				},
+				"chessLayout": {
+					"name": "Layout",
+					"items": "Normal: `NRM`| Chess960: `960`| Upside-Down: `USD`| Horde: `HRD`",
+					"inputs": {
+						"Normal": ["nrm", "normal", "standard"],
+						"Chess960": ["960", "chess960"],
+						"Upside-Down": ["usd", "upsidedown", "flip"],
+						"Horde": ["hrd", "horde", "horde chess"]
 					}
 				},
 				"currency": {
