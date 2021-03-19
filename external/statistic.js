@@ -2,7 +2,7 @@ const {randomColor, currencyFormat} = require ('./functions');
 const guildInfoDB = require ('../database/guildinfo.js');
 
 client.on ('ready', () => {
-    let guild = client.guilds[0]
+    let guild = client.guilds.find (ele => true);
     let channel = guild.channels.find (ele => ele.id == process.env.CHANNEL_STATISTICS);
     cron.schedule ('0 0 */6 * * *', async () => {
         let guildInfo = await getGuildInfo (guild);
