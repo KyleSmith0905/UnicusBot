@@ -29,16 +29,14 @@ module.exports = {
         if (end == null) errors.push ('location')
         if (errors.length) return errorLog (message, args, 'Travel', 'invalidUsage', errors);
         const distance = calDistance (start, end);
-        if (distance > methodConfig[method].distance) return errorLog (message, args, 'Travel', 'movement', [start, end, await forEachTwice (method, start), await forEachTwice (method, end)])
+        if (distance > methodConfig[method].distance) return errorLog (message, args, 'Travel', 'movement', [start, end, await forEachTwice (method, start), await forEachTwice (method, end)]);
         const startArray = Object.keys (methodConfig[method].connections).filter (con => methodConfig[method].connections[con].includes (start));
         const endArray = Object.keys (methodConfig[method].connections).filter (con => methodConfig[method].connections[con].includes (end));
         const intersectGroups = startArray.filter (ele => endArray.includes (ele));
-        if (!intersectGroups.length || start == end) {
-            return errorLog (message, args, 'travel', 'movement', [start, end, await forEachTwice (method, start), await forEachTwice (method, end)])
-        }
+        if (!intersectGroups.length || start == end) return errorLog (message, args, 'travel', 'movement', [start, end, await forEachTwice (method, start), await forEachTwice (method, end)]);
         const waitingTime = calTime (distance, method, userInfo);
         const cost = calCost (distance, method, userInfo)
-        if (cost.toFixed(0) > userInfo.money.toFixed(0)) return errorLog (message, args, 'Travel', 'money', ['Travel', cost, userInfo.money])
+        if (cost > userInfo.money) return errorLog (message, args, 'Travel', 'money', ['Travel', cost, userInfo.money])
         let channelID = '';
         switch (method) {
             case 'sal': channelID = process.env.CHANNEL_WATER; break;
@@ -67,9 +65,7 @@ module.exports = {
         let travelMessage = await sendChannel.createMessage ({content: member.mention + ',', embed: embed}, {file: mapImage.toBuffer(), name: 'image.png'})
         let fromState = guild.roles.filter (ele => member.roles.includes (ele.id) && Object.keys(placesConfig).find (ele2 => ele.name == placesConfig[ele2].name));
         let travelRole = guild.roles.find (ele => ele.id == process.env.ROLE_TRAVELING)
-        fromState.forEach (ele => {
-            member.removeRole (ele.id, 'Automated');
-        });
+        fromState.forEach (ele => member.removeRole (ele.id, 'Automated'));
         member.addRole (travelRole.id, 'Automated');
         setUserInfo (userInfo, {arrival: {from: start, timestamp: Date.now() + (waitingTime * 60000), cost: cost}, state: end, money: (userInfo.money || 0) - cost});
         setTimeout (async function () {
