@@ -30,7 +30,6 @@ module.exports = {
                 ]
             };
             let attachment;
-            workInfo.work = 'inspect'
             if (workInfo.work == 'math') {
                 const mathSigns = ['*', '/', '+', '-'];
                 let equation = mathSigns [Math.floor(Math.random() * 4)]
