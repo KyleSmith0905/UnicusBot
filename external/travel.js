@@ -39,7 +39,15 @@ module.exports = {
         const waitingTime = calTime (distance, method, userInfo);
         const cost = calCost (distance, method, userInfo)
         if (cost.toFixed(0) > userInfo.money.toFixed(0)) return errorLog (message, args, 'Travel', 'money', ['Travel', cost, userInfo.money])
-        let sendChannel = (methodConfig[method].channel !== message.channel.id) ? guild.channels.find (ele => ele.id == methodConfig[method].channel) : message.channel
+        let channelID = '';
+        switch (method) {
+            case 'sal': channelID = process.env.CHANNEL_WATER; break;
+            case 'drv':
+            case 'rde': channelID = process.env.CHANNEL_LAND; break;
+            case 'fly': channelID = process.env.CHANNEL_AIR; break;
+            case 'lch': channelID = process.env.CHANNEL_SPACE; break;
+        }
+        let sendChannel = (channelID != message.channel.id) ? guild.channels.find (ele => ele.id == channelID) : message.channel;
         let mapImage = await getMap ('./images/worldMap.png', start, end);
         let embed = {
             title: 'Travel - ' + methodConfig[method].name,
