@@ -174,7 +174,6 @@ module.exports = {
             gameOption.layout = Object.keys(funConfig.arguments.chessLayout.inputs).find(ele => funConfig.arguments.chessLayout.inputs[ele].includes(gameOption.layout));
             if (!gameOption.layout) return errorLog (message, args, 'Fun', 'invalidUsage', ['chessLayout']);
             if (!gameOption.wager) gameOption.wager = 0;
-            if (gameOption.layout == 'Horde') gameOption.extra.kingWhite = false;
             let embedStart = {
                 title: 'Fun - Chess',
                 color: randomColor ('white'),
@@ -225,7 +224,7 @@ async function gameLobby (sentMessage, sentEmbed, gameName, host, minPlayers, ma
                 }
                 gameFunction (sentMessage, messageReaction, gameOption);
             })
-        }, 30000);
+        }, 3000);
     })
     collector.on ('end', (collected, reason) => {
         if (reason == 'started') return;
@@ -530,25 +529,77 @@ async function deceptionRound (startMessage, startPlayers, startEmbed, gameOptio
 
 async function chessStarter (startMessage, startPlayers, gameOption) {
     let board;
-    switch (gameOption.layout) {
-        case 'Normal': board = ['cdefgedc','bbbbbbbb','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','BBBBBBBB','CDEFGEDC']; break;
-        case 'Chess960': {
-            let chessLayout = [];
-            let chessPieces = ['c','c','d','d','e','e','f','g'];
-            for (let i = 8; i > 0; i--) {
-                let pieceNumber = Math.floor(Math.random() * i);
-                chessLayout.push(chessPieces[pieceNumber]);
-                chessPieces.splice(pieceNumber, 1);
-            }
-            board = [chessLayout.join(''),'bbbbbbbb','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','BBBBBBBB',chessLayout.join('').toUpperCase()]
-            break;
-        }
-        case 'Upside-Down': board = ['CDEFGEDC','BBBBBBBB','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','bbbbbbbb','cdefgedc']; break;
-        case 'Horde': board = ['bbbbbbbb', 'bbbbbbbb', 'bbbbbbbb', 'bbbbbbbb','AbbaAbba','aAaAaAaA','BBBBBBBB','CDEFGEDC']; break;
-    }
     let turn = Math.floor(Math.random() * 2);
     if (turn == 1) startPlayers = [startPlayers[1], startPlayers[0]];
     let playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
+    switch (gameOption.layout) {
+        case 'Normal': board = ['ecdfgdce','bbbbbbbb','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','BBBBBBBB','ECDFGDCE']; break;
+        case 'Chess960': {
+            let chessLayout = '';
+            let chessPieces = ['c','c','d','d','e','e','f','g'];
+            for (let i = 8; i > 0; i--) {
+                let pieceNumber = Math.floor(Math.random() * i);
+                chessLayout = chessLayout + chessPieces[pieceNumber];
+                chessPieces.splice(pieceNumber, 1);
+            }
+            board = [chessLayout,'bbbbbbbb','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','BBBBBBBB',chessLayout.toUpperCase()]
+            break;
+        }
+        case 'Transcendental': {
+            let chessLayout = ['',''];
+            for (let index = 0; index < 2; index++) {
+                let chessPieces = ['c','c','d','d','e','e','f','g'];
+                for (let i = 8; i > 0; i--) {
+                    let pieceNumber = Math.floor(Math.random() * i);
+                    chessLayout[index] = chessLayout[index] + chessPieces[pieceNumber];
+                    chessPieces.splice(pieceNumber, 1);
+                }
+            }
+            board = [chessLayout[0],'bbbbbbbb','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','BBBBBBBB',chessLayout[1].toUpperCase()]
+            break;
+        }
+        case 'Really Bad Chess': {
+            let chessLayout = ['','','',''];
+            let chessPieces = ['b','c','d','e','f'];
+            for (let index = 0; index < 4; index++) {
+                for (let i = 0; i < 8; i++) {
+                    if ((index == 0 || index == 3) && i == 4) chessLayout[index] = chessLayout[index] + 'g';
+                    else chessLayout[index] = chessLayout[index] + chessPieces[Math.floor(Math.random() * 5)];
+                }
+            }
+            board = [chessLayout[0],chessLayout[1],'AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA',chessLayout[2].toUpperCase(),chessLayout[3].toUpperCase()]
+            break;
+        }
+        case 'Pre-Chess': {
+            if (gameOption.extra?.board) {
+                board = gameOption.extra.board;
+                gameOption.extra.board = null;
+                gameOption.extra.placePieces = null;
+            }
+            else {
+                let chessBoard = ['HhHhHhHh','bbbbbbbb','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','BBBBBBBB','hHhHhHhH'];
+                let embedGame = {
+                    title: 'Fun - Chess',
+                    color: randomColor ('blue'),
+                    timestamp: new Date().toISOString(),
+                    fields: [
+                        {name: 'What to Do:', value: 'In the pre-chess variant both players take turns placing their pieces behind pawns before fighting. Use `place <piece><x>` (like: `place Qa`) to place a piece. You must use 2 rooks, 2 bishops, 2 knights, a queen and a king. ' + startPlayers[1].mention + ' will go first as white.', inline: false},
+                        {name: 'Chess Board:', value: lettersToChess(chessBoard, 1, gameOption), inline: false},
+                    ]
+                }
+                gameOption.extra.placePieces = ['KQRRBBNN','KQRRBBNN'];
+                let message = await startMessage.channel.createMessage ({content: playerMentions + ',', embed: embedGame});
+                return chessSelect(message,chessBoard,1,startPlayers,gameOption);
+            }
+            break;
+        }
+        case 'Upside-Down': board = ['ECDFGDCE','BBBBBBBB','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','bbbbbbbb','ecdfgdce']; break;
+        case 'Horde': {
+            board = ['bbbbbbbb', 'bbbbbbbb', 'bbbbbbbb', 'bbbbbbbb','AbbaAbba','aAaAaAaA','BBBBBBBB','ECDFGDCE'];
+            gameOption.extra.kingWhite = false;
+            break;
+        }
+    }
     let embedGame = {
         title: 'Fun - Chess',
         color: randomColor ('blue'),
@@ -559,10 +610,18 @@ async function chessStarter (startMessage, startPlayers, gameOption) {
             {name: '\u200b', value: '[Notation Cheat Sheet](https://cheatography.com/davechild/cheat-sheets/chess-algebraic-notation/)', inline: true},
             {name: '\u200b', value: '[Notation Trainer](https://mattjliu.github.io/Notation-Trainer/#/practice)', inline: true},
             {name: 'Turn:', value: 'It is ' + startPlayers[0].mention + '\'s turn to move. Use `move <notation>` to move as white.', inline: false},
-            {name: 'Chess Board:', value: lettersToChess(board, 1, gameOption), inline: false},
         ]
     }
-    let message = await startMessage.channel.createMessage ({content: playerMentions + ', ⚪', embed: embedGame});
+    let message;
+    if (gameOption.style == 'Image') {
+        const image = await chessImage (board, 0);
+        embedGame.image = {url: 'attachment://image.png'};
+        message = await startMessage.channel.createMessage ({content: playerMentions + ',', embed: embedGame}, {file: image.toBuffer(), name: 'image.png'});
+    }
+    else {
+        embedGame.fields.push({name: 'Chess Board:', value: lettersToChess(board, 1, gameOption), inline: false}),
+        message = await startMessage.channel.createMessage ({content: playerMentions + ',', embed: embedGame});
+    }
     chessRound (message, startPlayers, board, 1, gameOption)
 }
 
@@ -576,7 +635,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         let chessBoard = [...backupBoard];
         const notation = msgReceived.content.substring(5);
         const notationObject = {};
-        const pieceNotation = ['R', 'N', 'B', 'Q', 'K'];
+        const pieceNotation = ['N','B','R','Q','K'];
         if (notation.substring (0,3) == '0-0'){
             let stringIndex;
             if (notation.startsWith ('0-0-0')) {
@@ -653,9 +712,9 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
             let missingArray = [];
             if (!notationObject.x) missingArray.push ('X Coordinate')
             if (!notationObject.y) missingArray.push ('Y Coordinate')
-            return  errorMessage.push(await chessErrors ('Missing values', 'Your notation did not include the following information: ' + missingArray.join(', '), msgReceived, startPlayers[playerTurn].mention));
+            return  errorMessage.push(await chessErrors ('Missing Values', 'Your notation did not include the following information: ' + missingArray.join(', '), msgReceived, startPlayers[playerTurn].mention));
         }
-        else if (notationObject.piece[0] != '0' && chessBoard[notationObject.y][notationObject.x].charCodeAt(0) > turnOffset + 97 && chessBoard[notationObject.y][notationObject.x].charCodeAt(0) <= turnOffset + 122) return  errorMessage.push(await chessErrors ('Stalling or Overlap', 'The destination square is already occupied by another of your pieces', msgReceived, startPlayers[playerTurn].mention));
+        else if (notationObject.piece[0] != '0' && chessBoard[notationObject.y][notationObject.x].charCodeAt(0) > turnOffset + 97 && chessBoard[notationObject.y][notationObject.x].charCodeAt(0) <= turnOffset + 122) return errorMessage.push(await chessErrors ('Stalling or Overlap', 'The destination square is already occupied by another of your pieces', msgReceived, startPlayers[playerTurn].mention));
         let originArray = [];
         switch (notationObject.piece[0]) {
             case 'R': {
@@ -666,7 +725,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                         const holdingPiece = chessBoard[directionY*i + notationObject.y]?.[directionX*i + notationObject.x];
                         if (!holdingPiece) break;
                         else if (holdingPiece.toUpperCase() == 'A');
-                        else if (holdingPiece.charCodeAt(0) == turnOffset+99) originArray.push (directionX*i + notationObject.x, directionY*i + notationObject.y)
+                        else if (holdingPiece.charCodeAt(0) == turnOffset+101) originArray.push (directionX*i + notationObject.x, directionY*i + notationObject.y)
                         else break;
                     }
                 }
@@ -677,7 +736,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                 const fromXArray = [-1,-2,1,2,-1,-2,1,2];
                 for (let i = 0; i < 8; i++) {
                     let holdingPiece = chessBoard[fromYArray[i] + notationObject.y]?.[fromXArray[i] + notationObject.x];
-                    if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 100) originArray.push (fromXArray[i] + notationObject.x, fromYArray[i] + notationObject.y);
+                    if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 99) originArray.push (fromXArray[i] + notationObject.x, fromYArray[i] + notationObject.y);
                 }
                 break;
             }
@@ -689,7 +748,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                         const holdingPiece = chessBoard[directionY*i + notationObject.y]?.[directionX*i + notationObject.x];
                         if (!holdingPiece) break;
                         else if (holdingPiece.toUpperCase() == 'A');
-                        else if (holdingPiece.charCodeAt(0) == turnOffset+101) originArray.push (directionX*i + notationObject.x, directionY*i + notationObject.y);
+                        else if (holdingPiece.charCodeAt(0) == turnOffset+100) originArray.push (directionX*i + notationObject.x, directionY*i + notationObject.y);
                         else break;
                     }
                 }
@@ -723,11 +782,11 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                 let checkStart, checkEnd, attackChange;
                 if (chessBoard[yOffset][4].charCodeAt(0) != turnOffset + 103) break;
                 if (notationObject.piece == '0K') {
-                    if (chessBoard[yOffset][7].charCodeAt(0) == turnOffset + 99) originArray = '0K';
+                    if (chessBoard[yOffset][7].charCodeAt(0) == turnOffset + 101) originArray = '0K';
                     checkStart = 5; checkEnd = 6; attackChange = 1;
                 }
                 else if (notationObject.piece == '0Q') {
-                    if (chessBoard[yOffset][0].charCodeAt(0) == turnOffset + 99) originArray = '0Q';
+                    if (chessBoard[yOffset][0].charCodeAt(0) == turnOffset + 101) originArray = '0Q';
                     checkStart = 1; checkEnd = 3; attackChange -1;
                 }
                 for (let i = checkStart; i < checkEnd + 1; i++) {
@@ -742,11 +801,11 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                 break;
             }
             case 'P': {
-                if (chessBoard[notationObject.y + playerTurn * 2 - 1][notationObject.x].toUpperCase() == 'H' || chessBoard[notationObject.y][notationObject.x].toUpperCase() != 'A') {
+                if (chessBoard[notationObject.y + playerTurn * 2 - 1][notationObject.x].toUpperCase() == 'I' || chessBoard[notationObject.y][notationObject.x].toUpperCase() != 'A') {
                     for (let i = -1; i < 2; i += 2) {
                         if (chessBoard[playerTurn * 2 - 1 + notationObject.y]?.[notationObject.x + i]?.charCodeAt(0) == turnOffset + 98) {
                             originArray.push (notationObject.x + i, playerTurn * 2 - 1 + notationObject.y);
-                            if (chessBoard[notationObject.y + playerTurn * 2 - 1][notationObject.x].toUpperCase() == 'H') notationObject.enPassant = true;
+                            if (chessBoard[notationObject.y + playerTurn * 2 - 1][notationObject.x].toUpperCase() == 'I') notationObject.enPassant = true;
                         }
                     }
                 }
@@ -773,8 +832,8 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         if (originArray[0] === '0') {
             const yOffset = playerTurn * 7;
             const pattern = 'AaAaAa';
-            if (originArray == '0Q') chessBoard[yOffset] = chessBoard[yOffset].slice (0, 3) + pattern.substring(playerTurn+1, playerTurn+2) + String.fromCharCode(turnOffset+99) + String.fromCharCode(turnOffset+103) + pattern.substring(playerTurn, playerTurn+2)
-            else if (originArray == '0K') chessBoard[yOffset] = pattern.substring(playerTurn, playerTurn+1) + String.fromCharCode(turnOffset+103) + String.fromCharCode(turnOffset+99) + pattern.substring(playerTurn+1, playerTurn+3) + chessBoard[yOffset].slice (5, 8)
+            if (originArray == '0Q') chessBoard[yOffset] = chessBoard[yOffset].slice (0, 3) + pattern.substring(playerTurn+1, playerTurn+2) + String.fromCharCode(turnOffset+101) + String.fromCharCode(turnOffset+103) + pattern.substring(playerTurn, playerTurn+2)
+            else if (originArray == '0K') chessBoard[yOffset] = pattern.substring(playerTurn, playerTurn+1) + String.fromCharCode(turnOffset+103) + String.fromCharCode(turnOffset+101) + pattern.substring(playerTurn+1, playerTurn+3) + chessBoard[yOffset].slice (5, 8)
         }
         else {
             const xFrom = originArray[0];
@@ -783,11 +842,11 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
             if (notationObject.piece != 'P') piecesReplace = chessBoard[yFrom][xFrom];
             else if (notationObject.promote) {
                 if (notationObject.promote == 'Q') piecesReplace = String.fromCharCode(102 + turnOffset);
-                else if (notationObject.promote == 'N') piecesReplace = String.fromCharCode(100 + turnOffset);
-                else if (notationObject.promote == 'R') piecesReplace = String.fromCharCode(99 + turnOffset);
-                else if (notationObject.promote == 'B') piecesReplace = String.fromCharCode(101 + turnOffset);
+                else if (notationObject.promote == 'N') piecesReplace = String.fromCharCode(99 + turnOffset);
+                else if (notationObject.promote == 'R') piecesReplace = String.fromCharCode(101 + turnOffset);
+                else if (notationObject.promote == 'B') piecesReplace = String.fromCharCode(100 + turnOffset);
             }
-            else if (notationObject.jump) piecesReplace = String.fromCharCode(chessBoard[yFrom][xFrom].charCodeAt(0) + 6);
+            else if (notationObject.jump) piecesReplace = String.fromCharCode(chessBoard[yFrom][xFrom].charCodeAt(0) + 8);
             else piecesReplace = chessBoard[yFrom][xFrom]
             chessBoard[notationObject.y] = (notationObject.x == 0 ? '' : chessBoard[notationObject.y].slice (0, notationObject.x)) + piecesReplace + chessBoard[notationObject.y].slice (notationObject.x + 1, 8);
             chessBoard[yFrom] = (xFrom == 0 ? '' : chessBoard[yFrom].slice(0, xFrom)) + ((xFrom + yFrom) % 2 == 0 ? 'A' : 'a') + chessBoard[yFrom].slice(xFrom + 1, 8);
@@ -796,8 +855,6 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         let defendKing, attackKing;
         let defendObjective = (playerTurn && gameOption.extra.kingBlack) || (!playerTurn && gameOption.extra.kingWhite);
         let attackObjective = (playerTurn && gameOption.extra.kingWhite) || (!playerTurn && gameOption.extra.kingBlack);
-        console.log (defendObjective)
-        console.log (attackObjective)
         for (let i = 0; i < 8; i++) {
             const defendKingX = chessBoard[i].indexOf(playerTurn == 0 ? 'g' : 'G');
             if (defendKingX != -1) defendKing = {x: defendKingX, y: i};
@@ -808,18 +865,18 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         if (typeof attackKing != 'object' && attackObjective) return chessWin(startMessage.channel, 'King Captured', chessBoard, startPlayers, playerTurn, gameOption);
         let defendingPosition = chessAttacked(chessBoard, defendKing, -playerTurn + 1);
         let attackingPosition = chessAttacked(chessBoard, attackKing, playerTurn);
-        if (defendingPosition.length && defendObjective) return errorMessage.push (await chessErrors ('Threatened King', 'You are not allowed to put your own king in a check or a chessmate, either by moving a protecting piece or moving the king directly.', msgReceived, startPlayers[playerTurn].mention));
+        if (defendingPosition?.length && defendObjective) return errorMessage.push (await chessErrors ('Threatened King', 'You are not allowed to put your own king in a check or a chessmate, either by moving a protecting piece or moving the king directly.', msgReceived, startPlayers[playerTurn].mention));
         let movement = false;
         let safe = true;
-        if (attackingPosition.length && attackObjective) safe = false;
+        if (attackingPosition?.length && attackObjective) safe = false;
         capture: { 
-            if (attackingPosition.length > 1 || safe) break capture;
+            if (attackingPosition?.length > 1 || safe) break capture;
             let defendPosition = chessAttacked(chessBoard, attackingPosition, -playerTurn + 1);
             if (!defendPosition.length) break capture;
             for (let i = 0; i < defendPosition.length; i++) {
                 if (defendPosition[i].piece == 'N') {safe = movement = true; break};
                 let direction = {x: Math.sign(defendPosition[i].x-attackKing.x), y: Math.sign(defendPosition[i].y-attackKing.y)};
-                let pieceOffset = Math.abs(direction.x-direction.y) == 1 ? 99 : 101;
+                let pieceOffset = Math.abs(direction.x-direction.y) == 1 ? 101 : 100;
                 for (let i = 0; i < 6; i++) {
                     let holdingPiece = chessBoard[direction.x*i+defendPosition[i].x][direction.y*i+defendPosition[i].y];
                     if (!holdingPiece) {safe = movement = true; break capture}
@@ -830,14 +887,14 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
             }
         }
         blocking: {
-            if (attackingPosition.length > 1 || safe || !attackPosition[0] || attackingPosition[0].piece == 'P' || attackingPosition[0].piece == 'N' || attackingPosition[0].piece == 'K') break blocking;
+            if (attackingPosition?.length > 1 || safe || !attackPosition[0] || attackingPosition[0].piece == 'P' || attackingPosition[0].piece == 'N' || attackingPosition[0].piece == 'K') break blocking;
             if (attackingPosition[0].piece == 'P' || attackingPosition[0].piece == 'N' || attackingPosition[0].piece == 'K') break blocking
             let kingDirection = {x: Math.sign(attackingPosition[0].x-attackKing.x), y: Math.sign(attackingPosition[0].y-attackKing.y)}
             for (let index = 0; index < 6; index++) {
                 let defendPosition = chessAttacked(chessBoard, {x: kingDirection.x*index+attackKing.x, y: kingDirection.y*index+attackKing.y}, playerTurn);
                 for (let ind = 0; ind < defendPosition.length; ind++) {
                     let defensiveDirection = {x: Math.sign(defendPosition[ind].x-attackKing.x), y: Math.sign(defendPosition[ind].y-attackKing.y)}
-                    let pieceOffset = Math.abs(defensiveDirection.x-defensiveDirection.y) == 1 ? 99 : 101;
+                    let pieceOffset = Math.abs(defensiveDirection.x-defensiveDirection.y) == 1 ? 101 : 100;
                     for (let i = 0; i < 6; i++) {
                         let holdingPiece = chessBoard[defensiveDirection.x*i+defendPosition[ind].x]?.[defensiveDirection.y*i+defendPosition[ind].y];
                         let holdingCode = holdingPiece?.charCodeAt(0);
@@ -850,7 +907,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
             }
         }
         escaping: {
-            if (safe && movement) break escaping;
+            if ((safe && movement) || !attackKing) break escaping;
             for (let i = 0; i < 8; i++) {
                 const fromX = Math.round(Math.cos(i*Math.PI/4)) + attackKing.x;
                 const fromY = Math.round(Math.sin(i*Math.PI/4)) + attackKing.y;
@@ -871,8 +928,8 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                 else if ((holdingCode >= 91 && playerTurn == 0) || (holdingCode < 91 && playerTurn == 1));
                 else {
                     let pieceMove = false;
-                    switch (holdingCode - turnOffset - 65) {
-                        case 1: { 
+                    switch (holdingCode - playerTurn * 32 - 65) {
+                        case 1: {
                             if (chessBoard[playerTurn * 2 - 1 + y][x].toUpperCase() == 'A') {pieceMove = true; break}
                             else if (chessBoard[playerTurn * 4 - 2 + y]?.[x]?.toUpperCase() == 'A') {pieceMove = true; break}
                             else for (let i = -1; i < 2; i += 2) {
@@ -921,13 +978,13 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                     }
                     if (pieceMove) {
                         let duplicateBoard = (x == 0 ? '' : chessBoard[y].slice(0, x)) + ((x + y) % 2 == 0 ? 'A' : 'a') + chessBoard[y].slice(x + 1, 8);
-                        if (!chessAttacked (duplicateBoard, attackKing, playerTurn).length) {movement = true; break moving};
+                        if (!chessAttacked (duplicateBoard, attackKing, playerTurn)?.length || attackObjective) {movement = true; break moving};
                     }
                 }
             }
         }
         if (!safe) return chessWin(startMessage.channel, 'King Checkmated', chessBoard, startPlayers, playerTurn, gameOption);
-        if (!movement) return chessWin(startMessage.channel, 'King Stalemated', chessBoard, startPlayers, {action: 's', turn: playerTurn}, gameOption)
+        if (!movement && !attackObjective) return chessWin(startMessage.channel, 'King Stalemated', chessBoard, startPlayers, {action: 's', turn: playerTurn}, gameOption)
         if (!notationObject.move) notationObject.move = 'used'
         let embedGame = {
             title: 'Fun - Chess',
@@ -939,7 +996,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                 {name: 'Chess Board:', value: lettersToChess(chessBoard, playerTurn, gameOption), inline: false},
             ]
         }
-        startMessage.edit ({content: startPlayers[playerTurn * -1 + 1].mention + ', ' + (playerTurn == 0 ? '⚪' : '⚫'), embed: embedGame});
+        startMessage.edit ({content: startPlayers[playerTurn * -1 + 1].mention + ',', embed: embedGame});
         for (let i = 0; i < 8; i++) chessBoard[i] = chessBoard[i].replace(String.fromCharCode(72 + playerTurn * 32), String.fromCharCode(66 + playerTurn * 32));
         for (let i = 0; i < errorMessage.length; i++) errorMessage[i].delete();
         msgReceived.delete();
@@ -959,7 +1016,7 @@ async function chessErrors (reasonName, reasonValue, sendMessage, sendMention) {
     sendMessage.delete();
     let embed = {
         title: 'Error - Chess',
-        description: 'The notation used, `' + sendMessage.content.substring(5) +  '`, resulted in an error. Consult with an official chess notation website to learn the correct notation.',
+        description: 'The notation used, `' + (sendMessage.content.toLowerCase().startsWith('move') ? sendMessage.content.substring(5) : sendMessage.content.substring(6)) +  '`, resulted in an error. Consult with an official chess notation website to learn the correct notation.',
         color: randomColor ('orange'),
         timestamp: new Date().toISOString(),
         fields: [
@@ -1001,47 +1058,63 @@ async function chessWin (channel, winCondition, chessBoard, startPlayers, winner
 }
 
 function lettersToChess (board, turn, gameOption) {
-    let style;
+    let style, number, letter, corner;
     switch (gameOption.style) {
-        case 'Normal': style = ['◻️','◼️','🧑🏻‍🌾','🧑🏿‍🌾','👮🏻','👮🏿','🧑🏻‍✈️','🧑🏿‍✈️','🧙🏻','🧙🏿','🦸🏻','🦸🏿','🤵🏻','🤵🏿']; break;
-        case 'Gender': style = ['🟦','🟪','👨‍🌾','👩‍🌾','👮‍♂️','👮‍♀️','👨‍✈️','👩‍✈️','🧙‍♂️','🧙‍♀️','🦸‍♂️','🦸‍♀️','🤵‍♂️','🤵‍♀️']; break;
-        case 'Plants': style = ['🟩','🟫','🪴','🌿','🌾','🌳','🍄','🪵','🌹','🌴','🌼','🌲','🌻','🎄']; break;
-        case 'Humans Versus Animals': style = ['◻️','◼️','🧑‍🌾','🐧','👮','🦬','🥷','🦜','🕵️','🐅','🦸','🦖','🤵','🦚']; break;
-        case 'Buildings': style = ['🌫️','⬛','⛺','🏠','⛪','🏭','🛖','🏪','🛕','🏥','🏯','🏟️','🏰','🏛️']; break;
-        case 'Unicode': style = [' □ ​',' ■ ​',' ♙ ​',' ♟︎ ​',' ♖ ​',' ♜ ​',' ♘ ​',' ♞ ​',' ♗ ​',' ♝ ​',' ♕ ​',' ♛ ​',' ♔ ​',' ♚ ​']; break;
-        case 'Letter': style = ['`  `​','`##`​','`WP`​','`BP`​','`WR`​','`BR`​','`WN`​','`BN`​','`WB`​','`BB`​','`WQ`​','`BQ`​','`WK`​','`BK`​']; break;
-        case 'All White': style = ['⬜','◽','🧑🏻‍🌾','🧑🏻‍🌾','👮🏻','👮🏻','🧑🏻‍✈️','🧑🏻‍✈️','🧙🏻','🧙🏻','🦸🏻','🦸🏻','🤵🏻','🤵🏻']; break;
-        case 'Blind': style = ['🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️']; break;
+        case 'Normal': style = ['◻️','◼️','🧑🏻‍🌾','🧑🏿‍🌾','🧑🏻‍✈️','🧑🏿‍✈️','🧙🏻','🧙🏿','👮🏻','👮🏿','🦸🏻','🦸🏿','🤵🏻','🤵🏿']; break;
+        case 'Gender': style = ['🟦','🟪','👨‍🌾','👩‍🌾','👨‍✈️','👩‍✈️','🧙‍♂️','🧙‍♀️','🦸‍♂️','🦸‍♀️','👮‍♂️','👮‍♀️','🤵‍♂️','🤵‍♀️']; break;
+        case 'Plants': style = ['🟩','🟫','🪴','🌿','🌾','🌳','🍄','🪵','🌹','🌴','🌾','🌳','🌼','🌲','🌻','🎄']; break;
+        case 'Humans Versus Animals': style = ['◻️','◼️','🧑‍🌾','🐧','🥷','🦜','🕵️','🐅','👮','🦬','🦸','🦖','🤵','🦚']; break;
+        case 'Buildings': style = ['🌫️','⬛','⛺','🏠','🛖','🏪','🛕','🏥','⛪','🏭','🏯','🏟️','🏰','🏛️']; break;
+        case 'Unicode': {
+            style = [' □ ​',' ■ ​',' ♙ ​',' ♟︎ ​',' ♘ ​',' ♞ ​',' ♗ ​',' ♝ ​',' ♖ ​',' ♜ ​',' ♕ ​',' ♛ ​',' ♔ ​',' ♚ ​']; 
+            number = ['​ 1 ​',' 2 ​',' 3 ​',' 4 ​',' 5 ​',' 6 ​',' 7 ​','​ 8 ​',];
+            letter = [' A ​',' B ​',' C ​',' D ​',' E ​',' F ​',' G ​',' H ​'];
+            corner = '​ ╚ ​'
+            break;
+        }
+        case 'Letter': {
+            style = ['`  `​','`##`​','`WP`​','`BP`​','`WN`​','`BN`​','`WB`​','`BB`​','`WR`​','`BR`​','`WQ`​','`BQ`​','`WK`​','`BK`​'];
+            number = ['`1.`​','`2.`​','`3.`​','`4.`​','`5.`​','`6.`​','`7.`​','`8.`​'];
+            letter = ['`A.`​','`B.`​','`C.`​','`D.`​','`E.`​','`F.`​','`G.`​','`H.`​'];
+            corner = '`[]`​';
+            break;
+        }
+        case 'Color Blind': style = ['◻️','◻️','🧑‍🌾','🧑‍🌾','🧑‍✈️','🧑‍✈️','🧙','🧙','👮','👮','🦸','🦸','🤵','🤵']; break;
+        case 'Piece Blind': style = ['◼️','◻️','👮🏻','👮🏿','👮🏻','👮🏿','👮🏻','👮🏿','👮🏻','👮🏿','👮🏻','👮🏿','👮🏻','👮🏿']; break;
+        case 'Board Blind': style = ['🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️','🌫️']; break;
     }
+    if (!number) number = config.discordInfo.emoji.numbers.slice(1,9);
+    if (!letter) letter = config.discordInfo.emoji.letters.slice(0, 8);
+    if (!corner) corner = ':record_button:';
     let newBoard = [...board];
     if (turn == 0) for (let i = 0; i < 8; i++) newBoard[i] = newBoard[i].split('').reverse().join('');
     for (let i = 0; i < 8; i++) newBoard[i] = String.fromCharCode(i+49) + newBoard[i];
     if (turn == 1) newBoard = newBoard.reverse();
     for (let i = 0; i < 6; i++) newBoard[i+1] = newBoard[i+1] + String.fromCharCode(i+59);
     newBoard = newBoard.join ('\n');
-    const replaceFrom = 'aAbBcCdDeEfFgGhHiI12345678';
-    const replaceTo = [...style, ...style.slice(2,6), ...config.discordInfo.emoji.numbers.slice(1,9)];
-    const replaceWhat = ['The Pawn', 'The Rook', 'The Knight', 'The Bishop', 'The Queen', 'The King']
+    const replaceFrom = 'aAbBcCdDeEfFgGhHiIjJ12345678';
+    const replaceTo = [...style, ...style.slice(0,6), ...number];
+    const replaceWhat = ['The Pawn', 'The Knight', 'The Bishop', 'The Rook', 'The Queen', 'The King']
     for (let i = 0; i < replaceFrom.length; i++) {
         let regexV = new RegExp(replaceFrom[i], 'g');
     	newBoard = newBoard.replace(regexV, replaceTo[i]);
     }
     for (let i = 0; i < 6; i++) newBoard = newBoard.replace(String.fromCharCode(i+59), ' ｜ ' + style[turn+i*2+2] + style[-turn+1+i*2+2] + ' — ' + replaceWhat[i])
-    let letters = config.discordInfo.emoji.letters.slice(0, 8);
-    if (turn == 0) letters = letters.reverse();
-    newBoard = newBoard + '\n:record_button:' + letters.join('');
+    if (turn == 0) letter = letter.reverse();
+    newBoard = newBoard + '\n' + corner + letter.join('');
     return newBoard;
 }
 
 function chessAttacked (chessBoard, coordinate, attacker) {
-    if (coordinate.piece) coordinate.piece = null;
+    if (!coordinate) return;
+    if (!coordinate.piece) coordinate.piece = null;
     let attacked = [];
     const turnOffset = attacker * -32;
     const fromYArray = [-2,-1,-2,-1,2,1,2,1];
     const fromXArray = [-1,-2,1,2,-1,-2,1,2];
     for (let i = 0; i < 8; i++) {
         let holdingPiece = chessBoard[fromYArray[i] + coordinate.y]?.[fromXArray[i] + coordinate.x];
-        if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 100) attacked.push ({x: fromXArray[i] + coordinate.x, y: fromYArray[i] + coordinate.y, piece: 'N'});
+        if (holdingPiece && holdingPiece.charCodeAt(0) == turnOffset + 99) attacked.push ({x: fromXArray[i] + coordinate.x, y: fromYArray[i] + coordinate.y, piece: 'N'});
     }
     for (let index = 0; index < 8; index++) {
         const directionY = Math.round(Math.sin(index*Math.PI/4))
@@ -1054,8 +1127,8 @@ function chessAttacked (chessBoard, coordinate, attacker) {
             if (holdingPiece.toUpperCase() != 'A') {
                 if (i == 0 && holdingCode == turnOffset+103) pieceType = 'K';
                 else if (holdingCode == turnOffset+102) pieceType = 'Q';
-                else if (index%2 == 1 && holdingCode == turnOffset+101) pieceType = 'B';
-                else if (index%2 == 0 && holdingCode == turnOffset+99) pieceType = 'R';
+                else if (index%2 == 1 && holdingCode == turnOffset+100) pieceType = 'B';
+                else if (index%2 == 0 && holdingCode == turnOffset+101) pieceType = 'R';
                 if (pieceType) attacked.push ({x: directionX*i + coordinate.x, y: directionY*i + coordinate.y, piece: pieceType});
                 break;
             }
@@ -1067,6 +1140,142 @@ function chessAttacked (chessBoard, coordinate, attacker) {
         }
     }
     return attacked;
+}
+
+async function chessSelect (message, chessBoard, time, startPlayers, gameOption) {
+    if (time >= 17) {
+        gameOption.extra.board = chessBoard
+        return chessStarter (message, startPlayers, gameOption)
+    }
+    const turn = time % 2;
+    const y = turn * -7 + 7;
+    let errorMessage = [];
+    const pieceNotation = ['R','N','B','Q','K'];
+    const pieceNames = ['Rook','Night','Bishop','Queen','King'];
+    const pieceReplace = ['c','d','e','f','g'];
+    let filter = (msg) => msg.content.toLowerCase().startsWith('place ') && msg.author.id == startPlayers[turn].id && msg.content.length < 20;
+    const collector = new messageCollector (client, message.channel, filter, {time: 120000});
+    collector.on ('collect', async (msgReceived) => {
+        let piecePlace = msgReceived.content[6];
+        const x = msgReceived.content[7]?.charCodeAt(0)-97;
+        if (!pieceNotation.includes(piecePlace) || isNaN(x) || x < 0 || x > 7) {
+            let missingArray = [];
+            if (!pieceNotation.includes(piecePlace)) missingArray.push ('Pieces')
+            if (!x || x < 0 || x > 7) missingArray.push ('X Coordinate')
+            return errorMessage.push(await chessErrors('Missing Values', 'Your notation did not include the following information: ' + missingArray.join(', '), msgReceived, startPlayers[turn].mention));
+        }
+        else if (chessBoard[y][x].toUpperCase() != 'H') return errorMessage.push(await chessErrors('Overlap', 'The destination square is already occupied by another of your pieces', msgReceived, startPlayers[turn].mention));
+        else if (msgReceived.content.length > 8) return errorMessage.push(await chessErrors('Suffix', 'The notation includes extra letters not included in pre-chess mode.', msgReceived, startPlayers[turn].mention));
+        else if (!gameOption.extra.placePieces[turn].includes(piecePlace)) return errorMessage.push(await chessErrors('Piece Unavailable', 'You have no ' + pieceNames[pieceNotation.findIndex(ele => ele == piecePlace)].toLowerCase() + 's left to place. However, you can place any of the following: ' + gameOption.extra.placePieces[turn] + '.', msgReceived, startPlayers[turn].mention));
+        const pieceIndex = pieceNotation.findIndex(ele => ele == piecePlace)
+        let piece = pieceReplace[pieceIndex];
+        if (turn == 0) piece = piece.toUpperCase();
+        chessBoard[y] = (x == 0 ? '' : chessBoard[y].slice (0, x)) + piece + chessBoard[y].slice(x + 1, 8);
+        const extraIndex = gameOption.extra.placePieces[turn].indexOf(piecePlace);
+        gameOption.extra.placePieces[turn] = (extraIndex == 0 ? '' : gameOption.extra.placePieces[turn].slice (0, extraIndex)) + gameOption.extra.placePieces[turn].slice(extraIndex + 1, 8);
+        for (let i = 0; i < errorMessage.length; i++) errorMessage[i].delete();
+        msgReceived.delete();
+        let embedGame = {
+            title: 'Fun - Chess',
+            color: randomColor ('white'),
+            timestamp: new Date().toISOString(),
+            fields: [
+                {name: 'What to Do:', value: 'In the pre-chess variant both players take turns placing their pieces behind pawns before fighting. Use `place <piece><x>` (like: `place Qa`) to place a piece.', inline: false},
+                {name: 'Chess Board:', value: lettersToChess(chessBoard, -turn + 1, gameOption), inline: false},
+            ]
+        }
+        message = await message.edit ({content: startPlayers[-turn + 1].mention + ',', embed: embedGame});
+        time = time + 1
+        chessSelect (message, chessBoard, time, startPlayers, gameOption)
+        collector.stop ('stopped')
+    })
+    collector.on ('end', (collected, reason) => {
+        if (reason == 'stopped') return;
+        chessWin(message.channel, 'Time Constraint Reached', chessBoard, startPlayers, turn * -1 + 1, gameOption);
+        for (let i = 0; i < errorMessage.length; i++) if (errorMessage[i].id) errorMessage[i].delete();
+    })
+}
+
+async function chessImage (chessBoard, reverse) {
+    const messageImage = canvas.createCanvas(900, 300);
+    const ctx = messageImage.getContext('2d');
+    let grd = ctx.createLinearGradient(300, 400, 600, -100);
+    grd.addColorStop(0, '#a6a6a6');
+    grd.addColorStop(1, '#808080');
+    ctx.fillStyle = grd;
+    ctx.fillRect (0, 0, 900, 300);
+    ctx.font = 'bold 20px Verdana';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#e68a2e';
+    ctx.fillRect (28, 0, 272, 272);
+    ctx.fillStyle = '#cc7014';
+    for (let i = 0; i < 64; i++) {
+        const y = i % 8;
+        const x = Math.floor(i / 8)
+        if ((y + x) % 2 == -reverse + 1) ctx.fillRect (x*34 + 28, y*34, 34, 34);
+    }
+    ctx.fillStyle = '#000000';
+    for (let i = 1; i < 9; i++) {
+        const text = (reverse ? -i + 8 : i)
+        ctx.fillText(text, 14, i * 34 - 17);
+    }
+    for (let i = 0; i < 8; i++) {
+        const text = String.fromCharCode(65 + i)
+        ctx.fillText(text, i * 34 + 47, 286);
+    }
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 64; i++) {
+        const y = i % 8;
+        const x = Math.floor(i / 8);
+        const cy = y * 34;
+        const cx = x * 34 + 28;
+        const p = chessBoard[y][x];
+        if (p.charCodeAt(0)>91) {ctx.fillStyle = '#292929'; ctx.strokeStyle = '#0a0a0a'}
+        else {ctx.fillStyle = '#d6d6d6'; ctx.strokeStyle = '#383838'}
+        ctx.beginPath();
+        switch (p.toUpperCase()) { // 4 pixel buffer flat, 4 pixel buffer round, 3 pixel buffer line.
+            case 'B': {
+                ctx.moveTo(cx+6,cy+30);
+                ctx.lineTo(cx+28,cy+30);
+                ctx.quadraticCurveTo(cx+29,cy+22,cx+23,cy+20);
+                ctx.quadraticCurveTo(cx+26,cy+16,cx+22,cy+9);
+                ctx.arc(cx+17,cy+9,5,0,Math.PI,true);
+                ctx.quadraticCurveTo(cx+8,cy+16,cx+11,cy+20);
+                ctx.quadraticCurveTo(cx+5,cy+22,cx+6,cy+30);
+                ctx.lineTo(cx+17,cy+30);
+                ctx.fill();
+                ctx.stroke();
+                break;
+            }
+            case 'C': { // Night
+                ctx.moveTo(cx+13,cy+30);
+                ctx.lineTo(cx+29,cy+30);
+                ctx.quadraticCurveTo(cx+28,cy+3,cx+13,cy+6);
+                ctx.quadraticCurveTo(cx+8,cy+13,cx+6,cy+17);
+                ctx.lineTo(cx+8,cy+18)
+                ctx.quadraticCurveTo(cx+9,cy+19,cx+17,cy+19);
+                ctx.quadraticCurveTo(cx+16,cy+27,cx+13,cy+30);
+                ctx.lineTo(cx+13,cy+30);
+                ctx.fill();
+                ctx.stroke();
+                break;
+            }
+            case 'D': {
+                break;
+            }
+            case 'E': {
+                break;
+            }
+            case 'F': {
+                break;
+            }
+            case 'G': {
+                break;
+            }
+        }
+    }
+    return messageImage;
 }
 
 /*
@@ -1084,8 +1293,10 @@ White queen = f
 Black queen = F
 White king = g
 Black king = G
-White pawn passant = h
-Black pawn passant = H
-White rook unmoved = i
-Black rook unmoved = I
+White space Unused = h (pre-chess)
+Black space Unused = H
+White pawn passant = i
+Black pawn passant = I
+White rook unmoved = j
+Black rook unmoved = J
 */

@@ -5,7 +5,7 @@ const stateInfoDB = require ('../database/stateinfo.js');
 
 client.on ('ready', async () => {
     let guild = client.guilds.find (ele => true)
-    cron.schedule ('0 0 0 * * *', async () => {
+    let schedule = cron.schedule ('0 0 0 * * *', async () => {
         let timeline = [0, 3, 6];
         timeline.forEach (async ele => {
             let dayState = stateDay (Date.now(), ele);
@@ -124,6 +124,9 @@ client.on ('ready', async () => {
             }
         })
     })
+    setTimeout (() => {
+        schedule.stop()
+    }, 86400000)
 })
 
 module.exports = {

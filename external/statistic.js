@@ -4,13 +4,19 @@ const guildInfoDB = require ('../database/guildinfo.js');
 client.on ('ready', () => {
     let guild = client.guilds.find (ele => true);
     let channel = guild.channels.find (ele => ele.id == process.env.CHANNEL_STATISTICS);
+    let memberCountLength;
     cron.schedule ('0 0 */6 * * *', async () => {
         let guildInfo = await getGuildInfo (guild);
-        let memberCountArray = (!guildInfo.memberCount) ? [] : guildInfo.memberCount;
+        if (memberCountLength && memberCountLength < guildInfo.memberCount.length) return;
+        let memberCountArray = !guildInfo.memberCount ? [] : guildInfo.memberCount;
         memberCountArray.push (guild.memberCount);
+        memberCountLength = memberCountArray.length;
         guildInfo.save();
     })
-    cron.schedule ('0 0 0 * * *', async () => {
+    let schedule = cron.schedule ('0 0 0 * * *', async () => {
+        let messageArray = await channel.getMessages(3);
+        messageArray = messageArray.filter (ele => ele.timestamp > Date.now() - 10000 && ele.author.id == client.user.id);
+        if (message.length) return;
         let weekday = new Date().getDay();
         switch (weekday) {
             case 0: {
@@ -281,6 +287,9 @@ client.on ('ready', () => {
     }, {
         timezone: 'America/New_York'
     })
+    setTimeout (() => {
+        schedule.stop()
+    }, 86400000)
 })
 
 function currencyGraph (prices) {

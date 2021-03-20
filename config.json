@@ -1323,26 +1323,31 @@
 				},
 				"chessStyle": {
 					"name": "Style",
-					"items": "Normal: `NRM`| Gender: `SEX`| Plants: `PLA`| Human Versus Animals: `HVA`| Buildings: `BLD`| Unicode: `UNI`| Letters: `LTR`| All White: `WHT`| Blind: `BLI`",
+					"items": "Normal: `NRM`| Gender: `SEX`| Plants: `PLA`| Human Versus Animals: `HVA`| Buildings: `BLD`| Unicode: `UNI`| Letters: `LTR`| Color Blind: `CLR`| Piece Blind: `PEC`| Board Blind: `BRD`| Image: `IMG`",
 					"inputs": {
 						"Normal": ["nrm", "normal", "people"],
 						"Gender": ["sex", "gender", "genders"],
 						"Plants": ["pla", "plant", "plants"],
-						"Humans Versus Animals": ["hva"],
+						"Humans Versus Animals": ["hva", "human versus animals"],
 						"Buildings": ["bld", "buildings", "building"],
 						"Unicode": ["uni", "unicode", "ascii"],
 						"Letter": ["ltr", "letter", "letters"],
-						"All White": ["wht", "white", "same"],
-						"Blind": ["bli", "blind", "fog"]
+						"Color Blind": ["clr", "color", "color blind"],
+						"Piece Blind": ["pec", "piece", "piece blind"],
+						"Board Blind": ["brd", "blind", "board blind"],
+						"Image": ["img", "png", "image"]
 					}
 				},
 				"chessLayout": {
 					"name": "Layout",
-					"items": "Normal: `NRM`| Chess960: `960`| Upside-Down: `USD`| Horde: `HRD`",
+					"items": "Standard Chess: `NRM`| Chess960: `960`| Transcendental Chess: `TRN`| Really Bad Chess: `RBC`| Pre-Chess: `PRE`| Upside-Down Chess: `USD`| Horde Chess: `HRD`",
 					"inputs": {
 						"Normal": ["nrm", "normal", "standard"],
 						"Chess960": ["960", "chess960"],
-						"Upside-Down": ["usd", "upsidedown", "flip"],
+						"Transcendental": ["trn", "transcendental", "random"],
+						"Really Bad Chess": ["rbc", "really bad chess", "bad"],
+						"Pre-Chess": ["pre", "prechess", "pre-chess"],
+						"Upside-Down": ["usd", "upside-down"],
 						"Horde": ["hrd", "horde", "horde chess"]
 					}
 				},

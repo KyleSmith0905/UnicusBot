@@ -9,7 +9,7 @@ module.exports = {
         let descriptionString = configCommand ? ('The **' + configCommand.name + ' Command** ' + configCommand.description) : ('Below is a list of commands. For further help, the command is `-help [command:string]`.');
         let embed = {
             timestamp: new Date().toISOString(),
-            color: randomColor ((configCommand) ? 'blue' : 'white'),
+            color: randomColor (configCommand ? 'blue' : 'white'),
             title: 'Help' + ((configCommand) ? ' - ' + configCommand.name : ''),
             description: descriptionString,
             fields: []
