@@ -149,6 +149,12 @@ module.exports = {
                 extra: {
                     kingWhite: true,
                     kingBlack: true
+                },
+                castle: {
+                    whiteK: true,
+                    whiteQ: true,
+                    blackK: true,
+                    blackQ: true,
                 }
             }; 
             if (args[2]) {
@@ -158,7 +164,7 @@ module.exports = {
                 const settingsConfig = funConfig.arguments.chessSettings.inputs;
                 for (let i = 0; i < settingsSplit.length; i++) {
                     let eleSplit = settingsSplit[i].split(/: ?`/);
-                    let backTickNumber = (eleSplit[1].split('`').length - 1);
+                    let backTickNumber = (eleSplit[1]?.split('`')?.length - 1);
                     if (!eleSplit [1] || eleSplit[2] || 1 == backTickNumber % 2);
                     else if (settingsConfig.wgr.includes (eleSplit[0]) && Boolean(eleSplit[1].match(/^\d+$/g))) gameOption.wager = parseFloat(eleSplit[1]);
                     else if (settingsConfig.sty.includes (eleSplit[0])) gameOption.style = eleSplit[1];
@@ -167,7 +173,7 @@ module.exports = {
                 }
             }
             if (gameOption.error) return errorLog (message, args, 'Fun', 'invalidUsage', ['chessSettings']);
-            if (!gameOption.style) gameOption.style = 'nrm';
+            if (!gameOption.style) gameOption.style = 'img';
             gameOption.style = Object.keys(funConfig.arguments.chessStyle.inputs).find(ele => funConfig.arguments.chessStyle.inputs[ele].includes(gameOption.style));
             if (!gameOption.style) return errorLog (message, args, 'Fun', 'invalidUsage', ['chessStyle']);
             if (!gameOption.layout) gameOption.layout = 'nrm';
@@ -532,6 +538,7 @@ async function chessStarter (startMessage, startPlayers, gameOption) {
     let turn = Math.floor(Math.random() * 2);
     if (turn == 1) startPlayers = [startPlayers[1], startPlayers[0]];
     let playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
+    gameOption.extra.start = Date.now();
     switch (gameOption.layout) {
         case 'Normal': board = ['ecdfgdce','bbbbbbbb','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','BBBBBBBB','ECDFGDCE']; break;
         case 'Chess960': {
@@ -600,6 +607,7 @@ async function chessStarter (startMessage, startPlayers, gameOption) {
             break;
         }
     }
+    board = ['eaAagaAe','aAaAaAaA','AaAaAaAa','aAaAaAaA','AaAaAaAa','aAaAaAaA','AaAaAaAa','EAaAGAaE'];
     let embedGame = {
         title: 'Fun - Chess',
         color: randomColor ('blue'),
@@ -614,7 +622,8 @@ async function chessStarter (startMessage, startPlayers, gameOption) {
     }
     let message;
     if (gameOption.style == 'Image') {
-        const image = await chessImage (board, 0);
+        gameOption.extra.moves = 0;
+        const image = chessImage (board, 1, gameOption, '-');
         embedGame.image = {url: 'attachment://image.png'};
         message = await startMessage.channel.createMessage ({content: playerMentions + ',', embed: embedGame}, {file: image.toBuffer(), name: 'image.png'});
     }
@@ -629,6 +638,8 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
     let errorMessage = [];
     playerTurn = -playerTurn + 1;
     const turnOffset = playerTurn * -32;
+    gameOption.extra.moves++
+    let timeStart = Date.now();
     let filter = (msg) => msg.content.toLowerCase().startsWith('move ') && msg.author.id == startPlayers[playerTurn].id && msg.content.length < 20;
     const collector = new messageCollector (client, startMessage.channel, filter, {time: 120000});
     collector.on ('collect', async (msgReceived) => {
@@ -636,7 +647,31 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         const notation = msgReceived.content.substring(5);
         const notationObject = {};
         const pieceNotation = ['N','B','R','Q','K'];
-        if (notation.substring (0,3) == '0-0'){
+        if (notation.match(/(^1\/2$)|(^1\/2 ?- ?1\/2$)/g) || notation == '(=)') {
+            const embedDraw = {
+                title: 'Fun - Chess',
+                color: randomColor ('white'),
+                timestamp: new Date().toISOString(),
+                description: 'The player ' + startPlayers[playerTurn].mention + ' asked for a draw by agreement.',
+                fields: [{name: 'How to Accept the Draw:', value: 'For ' + startPlayers[-playerTurn + 1].mention + ' to accept the draw by agreement, they must type `move 1/2` before the current turn is finished.', inline: false}]    
+            }
+            let messageDraw = await startMessage.channel.createMessage ({content: startPlayers[-playerTurn + 1].mention + ',', embed: embedDraw});
+            let filter = (msg) => msg.content.toLowerCase().startsWith('move ') && msg.author.id == startPlayers[-playerTurn+1].id && msg.content.substring(5).match(/(^1\/2$)|(^1\/2 ?- ?1\/2$)/g);
+            const collectorDraw = new messageCollector (client, startMessage.channel, filter, {time: timeStart - Date.now() + 120000});
+            return collectorDraw.on ('collect', async (msgReceived) => {
+                embedDraw.description = 'The player ' + startPlayers[-playerTurn + 1].mention + ' accepted ' + startPlayers[playerTurn].mention + '\'s draw by agreement request.',
+                messageDraw.edit ({content: startPlayers[-playerTurn + 1].mention + ',', embed: embedDraw});
+                chessWin (startMessage.channel, 'Draw by Agreement', chessBoard, startPlayers, {action: 's', turn: -playerTurn + 1}, gameOption);
+                collectorDraw.stop();
+                collector.stop('stopped');
+            })  
+        }
+        else if (notation.match(new RegExp(playerTurn.toString() + ' ?- ?' + (-playerTurn+1).toString(),'g'))) {
+            chessWin(startMessage.channel, 'Player Resign', chessBoard, startPlayers, -playerTurn+1, gameOption);
+            return collector.stop('stopped');
+        }
+        else if (notation.substring (0,3) == '0-0')
+        {
             let stringIndex;
             if (notation.startsWith ('0-0-0')) {
                 notationObject.piece = '0Q';
@@ -682,7 +717,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                     const annotation = notation.substring(stringIndex + 1, notation.length);
                     const annotationList = {'!': 'a good move', '!!': 'a brilliant move', '!?': 'an interesting move', '?!': 'a dubious move', '??': 'a blunder', '?': 'a mistake'};
                     if (Object.keys(annotationList).includes(annotation)) notationObject.move = annotationList[annotation]
-                    else if (annotation) {
+                    else if (stringIndex - notation.length) {
                         notationObject.error = 'suffix';
                         break;
                     }
@@ -700,14 +735,15 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                         stringIndex -= 1;
                     }
                     if (pieceNotation.includes(notation[stringIndex])) notationObject.piece = notation[stringIndex];
-                    if (notation.substring(0, stringIndex - 1)) notationObject.error = 'prefix';
+                    else stringIndex++;
+                    if (stringIndex) notationObject.error = 'prefix';
                     break;
                 }
             }
         }
         if (!notationObject.piece) notationObject.piece = 'P';
-        if (notationObject.error == 'suffix') return  errorMessage.push(await chessErrors ('Trailing Annotation', 'Your move had extra trailing notation marks that were not accepted, you might be confused with: #, +, =R, =N, =B, =Q, !, !!, !?, ?!, ??, ?', msgReceived, startPlayers[playerTurn].mention));
-        if (notationObject.error == 'prefix') return  errorMessage.push(await chessErrors ('Leading Annotation', 'Your move had extra leading notation marks that were not accepted.', msgReceived, startPlayers[playerTurn].mention));
+        if (notationObject.error == 'suffix') return errorMessage.push(await chessErrors ('Trailing Annotation', 'Your move had extra trailing notation marks that were not accepted, you might be confused with: #, +, =R, =N, =B, =Q, !, !!, !?, ?!, ??, ?', msgReceived, startPlayers[playerTurn].mention));
+        if (notationObject.error == 'prefix') return errorMessage.push(await chessErrors ('Leading Annotation', 'Your move had extra leading notation marks that were not accepted.', msgReceived, startPlayers[playerTurn].mention));
         if (notationObject.piece[0] != '0' && (isNaN(notationObject.x) || isNaN(notationObject.y))) {
             let missingArray = [];
             if (!notationObject.x) missingArray.push ('X Coordinate')
@@ -781,12 +817,12 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                 const yOffset = playerTurn * 7;
                 let checkStart, checkEnd, attackChange;
                 if (chessBoard[yOffset][4].charCodeAt(0) != turnOffset + 103) break;
-                if (notationObject.piece == '0K') {
-                    if (chessBoard[yOffset][7].charCodeAt(0) == turnOffset + 101) originArray = '0K';
+                else if (notationObject.piece == '0K' && chessBoard[yOffset][7].charCodeAt(0) == turnOffset + 101) {
+                    if ((!playerTurn && gameOption.castle.whiteK) || (playerTurn && gameOption.castle.blackK)) originArray = '0K'
                     checkStart = 5; checkEnd = 6; attackChange = 1;
                 }
-                else if (notationObject.piece == '0Q') {
-                    if (chessBoard[yOffset][0].charCodeAt(0) == turnOffset + 101) originArray = '0Q';
+                else if (notationObject.piece == '0Q' && chessBoard[yOffset][0].charCodeAt(0) == turnOffset + 101) {
+                    if ((!playerTurn && gameOption.castle.whiteQ) || (playerTurn && gameOption.castle.blackQ)) originArray = '0Q';
                     checkStart = 1; checkEnd = 3; attackChange -1;
                 }
                 for (let i = checkStart; i < checkEnd + 1; i++) {
@@ -831,9 +867,9 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         if (originArray.length == 0) return errorMessage.push (await chessErrors ('No Qualified Pieces', 'There are no pieces of the specified piece type that can reach the destination location.', msgReceived, startPlayers[playerTurn].mention));
         if (originArray[0] === '0') {
             const yOffset = playerTurn * 7;
-            const pattern = 'AaAaAa';
-            if (originArray == '0Q') chessBoard[yOffset] = chessBoard[yOffset].slice (0, 3) + pattern.substring(playerTurn+1, playerTurn+2) + String.fromCharCode(turnOffset+101) + String.fromCharCode(turnOffset+103) + pattern.substring(playerTurn, playerTurn+2)
-            else if (originArray == '0K') chessBoard[yOffset] = pattern.substring(playerTurn, playerTurn+1) + String.fromCharCode(turnOffset+103) + String.fromCharCode(turnOffset+101) + pattern.substring(playerTurn+1, playerTurn+3) + chessBoard[yOffset].slice (5, 8)
+            const pattern = 'AaA';
+            if (originArray == '0K') chessBoard[yOffset] = chessBoard[yOffset].slice (0, 4) + pattern.substring(playerTurn, playerTurn+1) + String.fromCharCode(turnOffset+101) + String.fromCharCode(turnOffset+103) + pattern.substring(playerTurn+1, playerTurn+2)
+            else if (originArray == '0Q') chessBoard[yOffset] = pattern.substring(playerTurn, playerTurn+2) + String.fromCharCode(turnOffset+103) + String.fromCharCode(turnOffset+101) + pattern.substring(playerTurn, playerTurn+1) + chessBoard[yOffset].slice (5, 8)
         }
         else {
             const xFrom = originArray[0];
@@ -846,7 +882,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
                 else if (notationObject.promote == 'R') piecesReplace = String.fromCharCode(101 + turnOffset);
                 else if (notationObject.promote == 'B') piecesReplace = String.fromCharCode(100 + turnOffset);
             }
-            else if (notationObject.jump) piecesReplace = String.fromCharCode(chessBoard[yFrom][xFrom].charCodeAt(0) + 8);
+            else if (notationObject.jump) piecesReplace = String.fromCharCode(chessBoard[yFrom][xFrom].charCodeAt(0) + 7);
             else piecesReplace = chessBoard[yFrom][xFrom]
             chessBoard[notationObject.y] = (notationObject.x == 0 ? '' : chessBoard[notationObject.y].slice (0, notationObject.x)) + piecesReplace + chessBoard[notationObject.y].slice (notationObject.x + 1, 8);
             chessBoard[yFrom] = (xFrom == 0 ? '' : chessBoard[yFrom].slice(0, xFrom)) + ((xFrom + yFrom) % 2 == 0 ? 'A' : 'a') + chessBoard[yFrom].slice(xFrom + 1, 8);
@@ -887,7 +923,7 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
             }
         }
         blocking: {
-            if (attackingPosition?.length > 1 || safe || !attackPosition[0] || attackingPosition[0].piece == 'P' || attackingPosition[0].piece == 'N' || attackingPosition[0].piece == 'K') break blocking;
+            if (attackingPosition?.length > 1 || safe || !attackingPosition?.[0] || attackingPosition[0].piece == 'P' || attackingPosition[0].piece == 'N' || attackingPosition[0].piece == 'K') break blocking;
             if (attackingPosition[0].piece == 'P' || attackingPosition[0].piece == 'N' || attackingPosition[0].piece == 'K') break blocking
             let kingDirection = {x: Math.sign(attackingPosition[0].x-attackKing.x), y: Math.sign(attackingPosition[0].y-attackKing.y)}
             for (let index = 0; index < 6; index++) {
@@ -985,7 +1021,19 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
         }
         if (!safe) return chessWin(startMessage.channel, 'King Checkmated', chessBoard, startPlayers, playerTurn, gameOption);
         if (!movement && !attackObjective) return chessWin(startMessage.channel, 'King Stalemated', chessBoard, startPlayers, {action: 's', turn: playerTurn}, gameOption)
-        if (!notationObject.move) notationObject.move = 'used'
+        else if (!notationObject.move) notationObject.move = 'used';
+        if (originArray[0] == '0') {
+            if (originArray == '0K' && !playerTurn) gameOption.castle.whiteK = false;
+            else if (originArray == '0Q' && !playerTurn) gameOption.castle.whiteQ = false;
+            else if (originArray == '0K' && playerTurn) gameOption.castle.blackK = false;
+            else if (originArray == '0Q' && playerTurn) gameOption.castle.blackQ = false;
+        }
+        if (notationObject.piece == 'R') {
+            if (originArray[0] == 7 && originArray[1] == 0 && !playerTurn) gameOption.castle.whiteK = false;
+            else if (originArray[0] == 0 && originArray[1] == 0 && !playerTurn) gameOption.castle.whiteQ = false;
+            else if (originArray[0] == 7 && originArray[1] == 7 && playerTurn) gameOption.castle.blackK = false;
+            else if (originArray[0] == 0 && originArray[1] == 7 && playerTurn) gameOption.castle.blackQ = false;
+        }
         let embedGame = {
             title: 'Fun - Chess',
             color: randomColor ('white'),
@@ -993,10 +1041,18 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
             description: 'The notation `' + notation + '` was ' + notationObject.move + ' by ' + startPlayers[playerTurn].mention + '.',
             fields: [
                 {name: 'How to Move:', value: 'Use algebraic notation to interact with the chess board. Type `move <notation>` to move. It\'s ' + (playerTurn == 0 ? 'white' : 'black') + '\'s turn to move.', inline: false},
-                {name: 'Chess Board:', value: lettersToChess(chessBoard, playerTurn, gameOption), inline: false},
             ]
         }
-        startMessage.edit ({content: startPlayers[playerTurn * -1 + 1].mention + ',', embed: embedGame});
+        if (gameOption.style == 'Image') {
+            const image = chessImage (chessBoard, playerTurn, gameOption, notation);
+            embedGame.image = {url: 'attachment://image.png'};
+            startMessage.delete();
+            startMessage = await startMessage.channel.createMessage ({content: startPlayers[playerTurn * -1 + 1].mention + ',', embed: embedGame}, {file: image.toBuffer(), name: 'image.png'});
+        }
+        else {
+            embedGame.fields.push ({name: 'Final Chess Board:', value: lettersToChess(chessBoard, playerTurn, gameOption), inline: false})
+            startMessage.edit ({content: startPlayers[playerTurn * -1 + 1].mention + ',', embed: embedGame});
+        }
         for (let i = 0; i < 8; i++) chessBoard[i] = chessBoard[i].replace(String.fromCharCode(72 + playerTurn * 32), String.fromCharCode(66 + playerTurn * 32));
         for (let i = 0; i < errorMessage.length; i++) errorMessage[i].delete();
         msgReceived.delete();
@@ -1005,10 +1061,9 @@ function chessRound (startMessage, startPlayers, backupBoard, playerTurn, gameOp
     })
     collector.on ('end', (collected, reason) => {
         if (reason == 'stopped') return;
+        gameOption.extra.moves--
         chessWin(startMessage.channel, 'Time Constraint Reached', backupBoard, startPlayers, playerTurn * -1 + 1, gameOption);
-        for (let i = 0; i < errorMessage.length; i++) {
-            if (errorMessage[i].id) errorMessage[i].delete();
-        }
+        for (let i = 0; i < errorMessage.length; i++) errorMessage[i].delete();
     })
 }
 
@@ -1027,7 +1082,8 @@ async function chessErrors (reasonName, reasonValue, sendMessage, sendMention) {
 }
 
 async function chessWin (channel, winCondition, chessBoard, startPlayers, winner, gameOption) {
-    let playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
+    const playerMentions = startPlayers[0].mention + ' ' + startPlayers[1].mention;
+    const timeDifference = Date.now() - gameOption.extra.start;
     let embedEnd = {
         title: 'Fun - Chess',
         color: randomColor ('orange'),
@@ -1037,11 +1093,22 @@ async function chessWin (channel, winCondition, chessBoard, startPlayers, winner
             {name: 'Win Condition:', value: winCondition, inline: true},
             (winner.action == 's' ? {name: 'Stalemating:', value: startPlayers[winner.turn].mention, inline: true} : {name: 'Winner:', value: startPlayers[winner].mention, inline: true}),
             (winner.action == 's' ? {name: 'Stalemated:', value: startPlayers[-winner.turn + 1].mention, inline: true} : {name: 'Loser:', value: startPlayers[winner * -1 + 1].mention, inline: true}),
-            {name: 'Final Chess Board:', value: lettersToChess(chessBoard, 0, gameOption), inline: false},
+            {name: 'Total Time:', value: Math.floor(timeDifference/60000) + ' : ' + Math.floor((timeDifference/1000)%60), inline: true},
+            {name: 'Total Moves:', value: gameOption.extra.moves || '-', inline: true},
+            {name: 'Outcome:', value: (winner.action == 's' ? '1/2-1/2' : (winner ? '0-1' : '1-0')), inline: true},
             {name: 'Rematch:', value: 'React to this message to earn the chance to play chess.' + (gameOption.wager > 0 ? '\n**ATTENTION:** This game is a wager match, it will cost $' + gameOption.wager + ' to enter.' : ''), inline: false}
         ]
     }
-    let message = await channel.createMessage ({content: playerMentions + ',', embed: embedEnd});
+    let message;
+    if (gameOption.style == 'Image') {
+        const image = chessImage (chessBoard, 0, gameOption, (winner.action == 's' ? '1/2-1/2' : (winner ? '0-1' : '1-0')));
+        embedEnd.image = {url: 'attachment://image.png'};
+        message = await channel.createMessage ({content: playerMentions + ',', embed: embedEnd}, {file: image.toBuffer(), name: 'image.png'});
+    }
+    else {
+        embedEnd.fields.splice(6, 0, {name: 'Final Chess Board:', value: lettersToChess(chessBoard, 0, gameOption), inline: false})
+        message = await channel.createMessage ({content: playerMentions + ',', embed: embedEnd});
+    }
     if (gameOption.wager > 0 && winner.action == 's') {
         for (let i = 0; i < 2; i++) {
             let userInfo = await getUserInfo(startPlayers[i].id, startMessage.channel.guild.id);
@@ -1087,9 +1154,9 @@ function lettersToChess (board, turn, gameOption) {
     if (!letter) letter = config.discordInfo.emoji.letters.slice(0, 8);
     if (!corner) corner = ':record_button:';
     let newBoard = [...board];
-    if (turn == 0) for (let i = 0; i < 8; i++) newBoard[i] = newBoard[i].split('').reverse().join('');
+    if (!turn) for (let i = 0; i < 8; i++) newBoard[i] = newBoard[i].split('').reverse().join('');
     for (let i = 0; i < 8; i++) newBoard[i] = String.fromCharCode(i+49) + newBoard[i];
-    if (turn == 1) newBoard = newBoard.reverse();
+    if (turn) newBoard = newBoard.reverse();
     for (let i = 0; i < 6; i++) newBoard[i+1] = newBoard[i+1] + String.fromCharCode(i+59);
     newBoard = newBoard.join ('\n');
     const replaceFrom = 'aAbBcCdDeEfFgGhHiIjJ12345678';
@@ -1100,7 +1167,7 @@ function lettersToChess (board, turn, gameOption) {
     	newBoard = newBoard.replace(regexV, replaceTo[i]);
     }
     for (let i = 0; i < 6; i++) newBoard = newBoard.replace(String.fromCharCode(i+59), ' ｜ ' + style[turn+i*2+2] + style[-turn+1+i*2+2] + ' — ' + replaceWhat[i])
-    if (turn == 0) letter = letter.reverse();
+    if (!turn) letter = letter.reverse();
     newBoard = newBoard + '\n' + corner + letter.join('');
     return newBoard;
 }
@@ -1184,7 +1251,16 @@ async function chessSelect (message, chessBoard, time, startPlayers, gameOption)
                 {name: 'Chess Board:', value: lettersToChess(chessBoard, -turn + 1, gameOption), inline: false},
             ]
         }
-        message = await message.edit ({content: startPlayers[-turn + 1].mention + ',', embed: embedGame});
+        if (gameOption.style == 'Image') {
+            const image = chessImage (chessBoard, playerTurn, gameOption, piecePlace + x);
+            embedGame.image = {url: 'attachment://image.png'};
+            message.delete();
+            message = await message.channel.createMessage ({content: startPlayers[playerTurn * -1 + 1].mention + ',', embed: embedGame}, {file: image.toBuffer(), name: 'image.png'});
+        }
+        else {
+            embedGame.fields.push ({name: 'Final Chess Board:', value: lettersToChess(chessBoard, -turn + 1, gameOption), inline: false})
+            startMessage.edit ({content: startPlayers[playerTurn * -1 + 1].mention + ',', embed: embedGame});
+        }
         time = time + 1
         chessSelect (message, chessBoard, time, startPlayers, gameOption)
         collector.stop ('stopped')
@@ -1196,7 +1272,7 @@ async function chessSelect (message, chessBoard, time, startPlayers, gameOption)
     })
 }
 
-async function chessImage (chessBoard, reverse) {
+function chessImage (chessBoard, reverse = 0, gameOption, lastNotation) {
     const messageImage = canvas.createCanvas(900, 300);
     const ctx = messageImage.getContext('2d');
     let grd = ctx.createLinearGradient(300, 400, 600, -100);
@@ -1204,77 +1280,177 @@ async function chessImage (chessBoard, reverse) {
     grd.addColorStop(1, '#808080');
     ctx.fillStyle = grd;
     ctx.fillRect (0, 0, 900, 300);
-    ctx.font = 'bold 20px Verdana';
+    ctx.font = '25px Verdana';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#e68a2e';
+    ctx.fillStyle = '#cc853d';
+    ctx.shadowBlur = 272;
+    ctx.shadowColor = '#000000';
     ctx.fillRect (28, 0, 272, 272);
-    ctx.fillStyle = '#cc7014';
+    ctx.fillStyle = '#b36b24';
+    ctx.shadowBlur = 0;
     for (let i = 0; i < 64; i++) {
         const y = i % 8;
         const x = Math.floor(i / 8)
-        if ((y + x) % 2 == -reverse + 1) ctx.fillRect (x*34 + 28, y*34, 34, 34);
+        if ((y + x) % 2 == reverse) ctx.fillRect (x*34 + 28, y*34, 34, 34);
     }
     ctx.fillStyle = '#000000';
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = '#593612';
+    ctx.lineWidth = 1;
     for (let i = 1; i < 9; i++) {
-        const text = (reverse ? -i + 8 : i)
-        ctx.fillText(text, 14, i * 34 - 17);
+        const text = (reverse ? -i + 9 : i)
+        ctx.fillText(text, 14, i * 34 - 18);
+        ctx.moveTo(27.5+i*34, 0);
+        ctx.lineTo(27.5+i*34, 271.5);
     }
     for (let i = 0; i < 8; i++) {
-        const text = String.fromCharCode(65 + i)
-        ctx.fillText(text, i * 34 + 47, 286);
+        const text = String.fromCharCode(65 + (reverse ? i : -i + 7))
+        ctx.fillText(text, i * 34 + 44, 286);
+        ctx.moveTo(27.5, i*34-0.5);
+        ctx.lineTo(299.5, i*34-0.5);
     }
-    ctx.lineWidth = 3;
+    ctx.moveTo(27.5, 271.5)
+    ctx.lineTo(299.5, 271.5);
+    ctx.moveTo(27.5, 0)
+    ctx.lineTo(27.5, 271.5)
+    ctx.stroke();
+    ctx.lineWidth = 2.5;
+    ctx.shadowBlur = 0;
+    let newBoard = [...chessBoard];
+    if (reverse) newBoard = newBoard.reverse();
+    if (!reverse) for (let i = 0; i < 8; i++) newBoard[i] = newBoard[i].split('').reverse().join('');
     for (let i = 0; i < 64; i++) {
         const y = i % 8;
         const x = Math.floor(i / 8);
         const cy = y * 34;
         const cx = x * 34 + 28;
-        const p = chessBoard[y][x];
-        if (p.charCodeAt(0)>91) {ctx.fillStyle = '#292929'; ctx.strokeStyle = '#0a0a0a'}
-        else {ctx.fillStyle = '#d6d6d6'; ctx.strokeStyle = '#383838'}
+        const p = newBoard[y][x];
+        if (p.charCodeAt(0)>91) {ctx.fillStyle = '#bfbfbf'; ctx.strokeStyle = '#404040'}
+        else {ctx.fillStyle = '#404040'; ctx.strokeStyle = '#000000'}
         ctx.beginPath();
-        switch (p.toUpperCase()) { // 4 pixel buffer flat, 4 pixel buffer round, 3 pixel buffer line.
+        switch (p.toUpperCase()) {
+            case 'I':
             case 'B': {
-                ctx.moveTo(cx+6,cy+30);
-                ctx.lineTo(cx+28,cy+30);
+                ctx.moveTo(cx+17,cy+30);
+                ctx.lineTo(cx+27,cy+30);
                 ctx.quadraticCurveTo(cx+29,cy+22,cx+23,cy+20);
-                ctx.quadraticCurveTo(cx+26,cy+16,cx+22,cy+9);
-                ctx.arc(cx+17,cy+9,5,0,Math.PI,true);
+                ctx.quadraticCurveTo(cx+26,cy+16,cx+21.0450849719,cy+12.4389262615);
+                ctx.arc(cx+17,cy+9,5,0.2*Math.PI,Math.PI*0.8,true);
                 ctx.quadraticCurveTo(cx+8,cy+16,cx+11,cy+20);
-                ctx.quadraticCurveTo(cx+5,cy+22,cx+6,cy+30);
+                ctx.quadraticCurveTo(cx+5,cy+22,cx+7,cy+30);
                 ctx.lineTo(cx+17,cy+30);
                 ctx.fill();
                 ctx.stroke();
                 break;
             }
-            case 'C': { // Night
-                ctx.moveTo(cx+13,cy+30);
+            case 'C': {
+                ctx.moveTo(cx+17,cy+30);
                 ctx.lineTo(cx+29,cy+30);
                 ctx.quadraticCurveTo(cx+28,cy+3,cx+13,cy+6);
                 ctx.quadraticCurveTo(cx+8,cy+13,cx+6,cy+17);
-                ctx.lineTo(cx+8,cy+18)
-                ctx.quadraticCurveTo(cx+9,cy+19,cx+17,cy+19);
+                ctx.lineTo(cx+9,cy+21);
+                ctx.quadraticCurveTo(cx+15,cy+19,cx+17,cy+19);
                 ctx.quadraticCurveTo(cx+16,cy+27,cx+13,cy+30);
-                ctx.lineTo(cx+13,cy+30);
+                ctx.lineTo(cx+17,cy+30);
                 ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx+12,cy+15)
+                ctx.lineTo(cx+16,cy+10)
                 ctx.stroke();
                 break;
             }
             case 'D': {
+                ctx.moveTo(cx+17,cy+30);
+                ctx.lineTo(cx+26,cy+30);
+                ctx.quadraticCurveTo(cx+30,cy+19,cx+21,cy+12);
+                ctx.arc(cx+17,cy+8,5,0.25*Math.PI,0.75*Math.PI,true);
+                ctx.lineTo(cx+13,cy+12);
+                ctx.quadraticCurveTo(cx+4,cy+19,cx+8,cy+30);
+                ctx.lineTo(cx+17,cy+30);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx+21,cy+12)
+                ctx.quadraticCurveTo(cx+15,cy+14,cx+13,cy+25);
+                ctx.stroke();
                 break;
             }
             case 'E': {
+                ctx.moveTo(cx+17,cy+30);
+                ctx.lineTo(cx+26,cy+30);
+                ctx.lineTo(cx+26,cy+25);
+                ctx.quadraticCurveTo(cx+24,cy+25,cx+24,cy+4);
+                ctx.lineTo(cx+20,cy+4);
+                ctx.lineTo(cx+20,cy+7);
+                ctx.lineTo(cx+14,cy+7);
+                ctx.lineTo(cx+14,cy+4);
+                ctx.lineTo(cx+10,cy+4);
+                ctx.quadraticCurveTo(cx+10,cy+25,cx+8,cy+25);
+                ctx.lineTo(cx+8,cy+30);
+                ctx.lineTo(cx+17,cy+30);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx+9,cy+14);
+                ctx.lineTo(cx+25,cy+14);
+                ctx.stroke();
                 break;
             }
             case 'F': {
+                ctx.moveTo(cx+17,cy+30);
+                ctx.lineTo(cx+27,cy+30);
+                ctx.lineTo(cx+25,cy+22);
+                ctx.arc(cx+26,cy+12,4,0.4*Math.PI,0.9*Math.PI,true);
+                ctx.lineTo(cx+21,cy+19)
+                ctx.lineTo(cx+20,cy+19)
+                ctx.arc(cx+17,cy+8,4,0.25*Math.PI,0.75*Math.PI,true);
+                ctx.lineTo(cx+14,cy+19)
+                ctx.lineTo(cx+13,cy+19)
+                ctx.arc(cx+8,cy+12,4,0.1*Math.PI,0.6*Math.PI,true);
+                ctx.lineTo(cx+9,cy+22);
+                ctx.lineTo(cx+7,cy+30);
+                ctx.lineTo(cx+17,cy+30);
+                ctx.fill();
+                ctx.stroke();
                 break;
             }
             case 'G': {
+                ctx.moveTo(cx+17,cy+30);
+                ctx.lineTo(cx+23,cy+30);
+                ctx.quadraticCurveTo(cx+30,cy+28,cx+30,cy+20)
+                ctx.quadraticCurveTo(cx+29,cy+13,cx+23,cy+13)
+                ctx.quadraticCurveTo(cx+19,cy+14,cx+17,cy+19)
+                ctx.quadraticCurveTo(cx+15,cy+14,cx+11,cy+13)
+                ctx.quadraticCurveTo(cx+5,cy+13,cx+4,cy+20)
+                ctx.quadraticCurveTo(cx+4,cy+28,cx+11,cy+30)
+                ctx.lineTo(cx+17,cy+30);
+                ctx.fill();
+                ctx.stroke();
+                ctx.moveTo(cx+17,cy+22);
+                ctx.lineTo(cx+17,cy+4);
+                ctx.moveTo(cx+12,cy+9);
+                ctx.lineTo(cx+22,cy+9);
+                ctx.stroke();
                 break;
             }
         }
     }
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#1c1c1c';
+    ctx.font = 'bold 50px Verdana';
+    ctx.textAlign = 'left';
+    ctx.fillText('Total Time:', 340, 75);
+    ctx.fillText('Total Moves:', 340, 150);
+    ctx.fillText('Last Move:', 340, 225);
+    ctx.textAlign = 'right';
+    ctx.font = '60px Verdana';
+    const timeDifference = Date.now() - gameOption.extra.start;
+    if (lastNotation == '-') ctx.fillText('-', 860, 75);
+    else ctx.fillText(Math.floor(timeDifference/60000) + ':' + Math.floor((timeDifference/1000)%60), 860, 75);
+    ctx.fillText(gameOption.extra.moves || '-', 860, 150);
+    ctx.fillText(lastNotation, 860, 225);
     return messageImage;
 }
 
@@ -1283,12 +1459,12 @@ White space = a
 Black space = A
 White pawn = b
 Black pawn = B
-White rook = c
-Black rook = C
-White knight = d
+White knight = c
 Black knight = D
-White bishop = e
-Black bishop = E
+White bishop = d
+Black bishop = D
+White rook = e
+Black rook = E
 White queen = f
 Black queen = F
 White king = g
@@ -1297,6 +1473,4 @@ White space Unused = h (pre-chess)
 Black space Unused = H
 White pawn passant = i
 Black pawn passant = I
-White rook unmoved = j
-Black rook unmoved = J
 */

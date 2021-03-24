@@ -6,28 +6,28 @@ const stateInfoDB = require ('../database/stateinfo.js');
 client.on ('ready', async () => {
     let guild = client.guilds.find (ele => true)
     let schedule = cron.schedule ('0 0 0 * * *', async () => {
-        let timeline = [0, 3, 6];
-        timeline.forEach (async ele => {
-            let dayState = stateDay (Date.now(), ele);
-            let shortHand = Object.keys(config.places)[dayState];
-            let stateConfig = config.places[shortHand];
-            let stateInfo = await getStateInfo (guild, stateConfig.postalCode);
-            let stateRole = guild.roles.find (ele => ele.name.toLowerCase() == stateConfig.name.toLowerCase());
-            let people = guild.members.filter (ele => ele.roles.includes(stateRole.id)).length;
+        for (let index = 0; index < 9; index += 3) {
+            const stateConfig = config.places[Object.keys(config.places)[stateDay (Date.now(), index)]];
+            const stateCategory = guild.channels.find (ele => ele.name == stateConfig.name.toLowerCase() && ele.type == 4);
+            const stateChannel = stateCategory.channels.find (ele => ele.name.startsWith('╙'));
+            let messageArray = await stateChannel.getMessages(3);
+            messageArray = messageArray.filter (ele => ele.timestamp > Date.now() - 1000000 && ele.author.id == client.user.id);
+            if (messageArray.length) return;
+            messageArray = null;
+            const stateInfo = await getStateInfo (guild, stateConfig.postalCode);
+            const stateRole = guild.roles.find (ele => ele.name.toLowerCase() == stateConfig.name.toLowerCase());
+            const people = guild.members.filter (ele => ele.roles.includes(stateRole.id)).length;
             let votingProcess;
-            if (ele == 0 && 5 > people) votingProcess = 'cancelled';
-            else if (ele == 0) votingProcess = 'application';
-            else if (ele == 3 && stateInfo.votingProcess == 'application' && stateInfo.candidates.length) votingProcess = 'voting';
-            else if (ele == 3 && stateInfo.votingProcess == 'application') votingProcess = 'cancelled';
-            else if (ele == 6 && stateInfo.votingProcess == 'voting') votingProcess = 'result';
-            else if (ele == 6 && stateInfo.votingProcess == 'cancelled') votingProcess = 'empty';
+            if (index == 0 && 5 > people) votingProcess = 'cancelled';
+            else if (index == 0) votingProcess = 'application';
+            else if (index == 3 && stateInfo.votingProcess == 'application' && stateInfo.candidates.length) votingProcess = 'voting';
+            else if (index == 3 && stateInfo.votingProcess == 'application') votingProcess = 'cancelled';
+            else if (index == 6 && stateInfo.votingProcess == 'voting') votingProcess = 'result';
+            else if (index == 6 && stateInfo.votingProcess == 'cancelled') votingProcess = 'empty';
             else return;
-            let candidates = stateInfo.candidates; let governorID = stateInfo.governorID; let welcomeMessage = stateInfo.welcomeMessage;
-            let stateCategory = guild.channels.find (ele => ele.name == stateConfig.name.toLowerCase() && ele.type == 4);
-            let stateChannel = stateCategory.channels.find (ele => ele.name.startsWith('╙'));
-            let governorRole = guild.roles.find (ele => ele.name.toLowerCase() == ((stateConfig.postalCode.toUpperCase() + ' Governor').toLowerCase()));
-            let governor = (governorRole) ? guild.members.find (ele => ele.roles.includes(governorRole.id)) : null;
-            let processConfig = electionConfig.event[votingProcess];
+            const governorRole = guild.roles.find (ele => ele.name.toLowerCase() == ((stateConfig.postalCode.toUpperCase() + ' Governor').toLowerCase()));
+            const governor = guild.members.find (ele => ele.roles.includes(governorRole?.id))
+            const processConfig = electionConfig.event[votingProcess];
             if (governorRole) governorRole.delete ()
             let statesChannelArray = guild.channels.find (ele => ele.parentID == stateCategory.id && !ele.name.startsWith('╙')) || [];
             statesChannelArray.forEach (ele => ele.delete);
@@ -39,7 +39,7 @@ client.on ('ready', async () => {
                 fields: [
                     {name: 'State:', value: stateConfig.name, inline: true},
                     {name: 'Population:', value: people, inline: true},
-                    {name: 'Governor:', value: (governor) ? governor.mention : 'No current governor of ' + stateConfig.name, inline: true}
+                    {name: 'Governor:', value: governor?.mention ?? 'No current governor of ' + stateConfig.name, inline: true}
                 ]
             }
             if (votingProcess == 'cancelled') {
@@ -60,7 +60,7 @@ client.on ('ready', async () => {
                 )
             }
             else if (votingProcess == 'result') {
-                let totalVotes = 0; candidates = [];
+                let totalVotes = 0; stateInfo.candidates = [];
                 stateInfo.candidates.forEach ((ele) => {
                     if (ele.votes == null) ele.votes = 0;
                     totalVotes += ele.votes;
@@ -70,7 +70,7 @@ client.on ('ready', async () => {
                 let array = ['First', 'Second', 'Third']
                 array.forEach ((ele, index) => {
                     let candidateInfo = stateInfo.candidates[index]
-                    if (index == 0) governorID = candidateInfo.candidateID
+                    if (index == 0) stateInfo.governorID = candidateInfo.candidateID
                     if (candidateInfo == null) return embed.fields.push ({name: ele + ':', value: 'Nobody', inline: true})
                     let memberObject = guild.members.find (ele2 => ele2.id == candidateInfo.candidateID);
                     if (ele.votes == null) ele.votes = 0;
@@ -86,7 +86,7 @@ client.on ('ready', async () => {
                 let newGovernorRole = await guild.createRole ({name: stateConfig.postalCode.toUpperCase() + ' Governor', color: 16711680});
                 stateCategory.editPermission (newGovernorRole.id, 603454785, 0, 'role');
                 newGovernorRole.editPosition (citizenRole.position);
-                let newGovernorMember = guild.members.find (ele => ele.id = candidates[0].candidateID);
+                let newGovernorMember = guild.members.find (ele => ele.id = stateInfo.candidates[0].candidateID);
                 newGovernorMember.addRole(newGovernorRole.id);
                 let userInfo = getUserInfo(newGovernorMember, guild);
                 userInfo.experience += 1.5;
@@ -104,12 +104,12 @@ client.on ('ready', async () => {
                 if (governorRole) governorRole.delete ()
                 let statesChannelArray = stateCategory.channels.filter (ele => ele.parentID == stateCategory.id && !ele.name.startsWith('╙')) || [];
                 statesChannelArray.forEach (ele => ele.delete);
-                governorID = '';
-                welcomeMessage = '';
+                stateInfo.governorID = '';
+                stateInfo.welcomeMessage = '';
             }
-            else if (votingProcess == 'application') candidates = [];
-            await timeout ((333 * ele) + 1000);
-            setStateInfo (stateInfo, {votingProcess: votingProcess, candidates: candidates, governorID: governorID, welcomeMessage: welcomeMessage});
+            else if (votingProcess == 'application') stateInfo.candidates = [];
+            await timeout ((333 * index) + 1000);
+            setStateInfo (stateInfo, {votingProcess: votingProcess, candidates: stateInfo.candidates, governorID: stateInfo.governorID, welcomeMessage: stateInfo.welcomeMessage});
             if (votingProcess) {
                 stateChannel.createMessage ({content: stateRole.mention + ',', embed: embed})
                 let bannedArray = stateCategory.permissionOverwrites.filter (ele => ele.type == 'member' && ele.deny == '1024');
@@ -122,11 +122,11 @@ client.on ('ready', async () => {
                     bannedChannel.createMessage({content: stateRole.mention + ',', embed: embed})
                 })
             }
-        })
+        }
     })
     setTimeout (() => {
         schedule.stop()
-    }, 86400000)
+    }, 82800000)
 })
 
 module.exports = {

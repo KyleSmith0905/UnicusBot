@@ -15,8 +15,8 @@ client.on ('ready', () => {
     })
     let schedule = cron.schedule ('0 0 0 * * *', async () => {
         let messageArray = await channel.getMessages(3);
-        messageArray = messageArray.filter (ele => ele.timestamp > Date.now() - 10000 && ele.author.id == client.user.id);
-        if (message.length) return;
+        messageArray = messageArray.filter (ele => ele.timestamp > Date.now() - 1000000 && ele.author.id == client.user.id);
+        if (messageArray.length) return;
         let weekday = new Date().getDay();
         switch (weekday) {
             case 0: {
@@ -289,7 +289,7 @@ client.on ('ready', () => {
     })
     setTimeout (() => {
         schedule.stop()
-    }, 86400000)
+    }, 82800000)
 })
 
 function currencyGraph (prices) {

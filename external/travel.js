@@ -35,8 +35,8 @@ module.exports = {
         const intersectGroups = startArray.filter (ele => endArray.includes (ele));
         if (!intersectGroups.length || start == end) return errorLog (message, args, 'travel', 'movement', [start, end, await forEachTwice (method, start), await forEachTwice (method, end)]);
         const waitingTime = calTime (distance, method, userInfo);
-        const cost = calCost (distance, method, userInfo)
-        if (cost > userInfo.money) return errorLog (message, args, 'Travel', 'money', ['Travel', cost, userInfo.money])
+        const cost = calCost (distance, method, userInfo);
+        if (cost > userInfo.money) return errorLog (message, args, 'Travel', 'money', ['Travel', cost, userInfo.money]);
         let channelID = '';
         switch (method) {
             case 'sal': channelID = process.env.CHANNEL_WATER; break;
