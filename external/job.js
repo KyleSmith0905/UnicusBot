@@ -323,7 +323,7 @@ module.exports = {
             if (!args[2] || !operation) errors.push ('operation');
             if (!args[3] || !jobName || jobName.length > 16) errors.push ('title');
             if (errors.length) return errorLog (message, args, 'job', 'invalidUsage', errors);
-            let companyInfo = await getCompanyInfoWithName (member.id, "800012084787544124")//member.id, guild.id);
+            let companyInfo = await getCompanyInfoWithName (member.id, member.id, guild.id);
             if (!companyInfo) return errorLog (message, args, 'job', 'employment', []);
             let embed = {
                 title: 'Job - Create',

@@ -1,5 +1,5 @@
 {
-  "name": "amebot1782590",
+  "name": "unicusbot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,14 +7,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FiNSFlexin/AmeBot1782590.git"
+    "url": "git+https://github.com/KyleSmith0905/UnicusBot"
   },
   "author": "FiNS Flexin",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/FiNSFlexin/AmeBot1782590/issues"
-  },
-  "homepage": "https://github.com/FiNSFlexin/AmeBot1782590#readme",
+  "homepage": "https://github.com/KyleSmith0905/UnicusBot#readme",
   "description": "The Discord bot for Domicile, the Discord server.",
   "dependencies": {
     "canvas": "^2.6.1",

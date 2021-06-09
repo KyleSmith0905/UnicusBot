@@ -1,2 +1,5 @@
-.env
+# General
 node_modules
+
+# Personal Information
+.env

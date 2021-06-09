@@ -1453,24 +1453,3 @@ function chessImage (chessBoard, reverse = 0, gameOption, lastNotation) {
     ctx.fillText(lastNotation, 860, 225);
     return messageImage;
 }
-
-/*
-White space = a
-Black space = A
-White pawn = b
-Black pawn = B
-White knight = c
-Black knight = D
-White bishop = d
-Black bishop = D
-White rook = e
-Black rook = E
-White queen = f
-Black queen = F
-White king = g
-Black king = G
-White space Unused = h (pre-chess)
-Black space Unused = H
-White pawn passant = i
-Black pawn passant = I
-*/
