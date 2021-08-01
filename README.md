@@ -1,3 +1,6 @@
+# Be Aware:
+This was my first time ever using Git and one of my first time programming. Please ignore the bad commit messages, bad file management, and other bad code. Take a look at my newer projects!
+
 # Unicus Bot
 Unicus is a Discord bot for Domicile, the Discord server. Link to the Discord Server: https://discord.gg/rZaSGqRQ4C. This server has aspects of economy and roleplaying but can also serve as entertainment with amazing Discord bot games.
 
